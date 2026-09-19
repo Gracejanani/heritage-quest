@@ -40,9 +40,11 @@ export default function QuizGame() {
   const toast = useToast();
   const { player, saveProgress, getProgress } = usePlayer();
   const [restored, setRestored] = useState(false);
+  const [progressReady, setProgressReady] = useState(false);
 
   useEffect(() => {
     let active = true;
+    setProgressReady(false);
     setLoading(true);
     setError("");
     const saved = getProgress(`quiz:${chapterSlug}`, null);
@@ -56,6 +58,7 @@ export default function QuizGame() {
     setXp(saved?.xp || 0);
     setCoins(saved?.coins ?? 50);
     setRestored(Boolean(saved));
+    setProgressReady(true);
     api(`/chapters/${chapterSlug}/questions`)
       .then((data) => {
         if (active) setQuestions(data.questions || []);
@@ -73,6 +76,7 @@ export default function QuizGame() {
   }, [chapterSlug, getProgress]);
 
   useEffect(() => {
+    if (!progressReady) return;
     saveProgress(`quiz:${chapterSlug}`, {
       index,
       score,
@@ -81,7 +85,17 @@ export default function QuizGame() {
       finished,
       answers,
     });
-  }, [chapterSlug, index, score, xp, coins, finished, answers, saveProgress]);
+  }, [
+    chapterSlug,
+    index,
+    score,
+    xp,
+    coins,
+    finished,
+    answers,
+    saveProgress,
+    progressReady,
+  ]);
 
   const q = questions[index];
   const progress = useMemo(
