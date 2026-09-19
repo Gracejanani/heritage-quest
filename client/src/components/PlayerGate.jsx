@@ -58,7 +58,7 @@ export default function PlayerGate({ children }) {
                   autoComplete="name"
                   autoFocus
                   maxLength={40}
-                  placeholder="e.g. Grace Kumar"
+                  placeholder="e.g. Nikshan..."
                   className="focus-ring h-12 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 text-base font-semibold text-slate-900 outline-none placeholder:text-slate-400"
                 />
               </div>
