@@ -9,9 +9,11 @@ import {
   Trophy,
   UserRound,
   Award,
+  LogOut,
 } from "lucide-react";
 import Logo from "./Logo";
 import { SearchBar } from "./ui";
+import { usePlayer } from "../context/PlayerContext";
 const links = [
   ["Home", "/"],
   ["Games", "/games"],
@@ -24,6 +26,7 @@ export function Navbar() {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
+  const { player, switchPlayer } = usePlayer();
   useEffect(() => setOpen(false), [location.pathname]);
   const submit = (e) => {
     e.preventDefault();
@@ -68,8 +71,17 @@ export function Navbar() {
           to="/profile"
           className="focus-ring hidden rounded-2xl bg-heritage-green px-4 py-2.5 text-sm font-bold text-white shadow-soft hover:bg-emerald-700 sm:inline-flex"
         >
-          Explorer Profile
+          {player?.name || "Explorer Profile"}
         </Link>
+        <button
+          type="button"
+          onClick={switchPlayer}
+          className="focus-ring hidden rounded-xl p-2 text-slate-500 hover:bg-white hover:text-heritage-saffron sm:block"
+          aria-label="Switch explorer"
+          title="Switch explorer"
+        >
+          <LogOut className="h-5 w-5" />
+        </button>
         <button
           className="focus-ring ml-auto rounded-xl p-2 lg:hidden"
           onClick={() => setOpen((v) => !v)}
@@ -109,8 +121,15 @@ export function Navbar() {
                 to="/profile"
                 className="rounded-xl px-4 py-3 font-bold text-heritage-green hover:bg-emerald-50"
               >
-                Explorer Profile
+                {player?.name || "Explorer Profile"}
               </NavLink>
+              <button
+                type="button"
+                onClick={switchPlayer}
+                className="rounded-xl px-4 py-3 text-left font-bold text-slate-700 hover:bg-orange-50 hover:text-heritage-saffron"
+              >
+                Switch Explorer
+              </button>
             </div>
           </div>
         </div>
