@@ -12,10 +12,14 @@ import {
   Trophy,
   Coins,
   Flame,
+  LogOut,
 } from "lucide-react";
 import { Button, ProgressBar } from "../components/ui";
+import { usePlayer } from "../context/PlayerContext";
 
 export default function Profile() {
+  const { player, switchPlayer, getSummary } = usePlayer();
+  const summary = getSummary();
   const rows = [
     ["My Achievements", Award, "/achievements"],
     ["Game History", Gamepad2, "/games"],
@@ -23,6 +27,7 @@ export default function Profile() {
     ["Settings", Settings, "#"],
     ["Help & Support", CircleHelp, "#"],
   ];
+
   return (
     <div className="container-app py-12 sm:py-16">
       <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
@@ -34,32 +39,40 @@ export default function Profile() {
               className="h-full w-full object-cover object-top"
             />
           </div>
-          <h1 className="mt-5 font-display text-3xl font-extrabold">Oviya</h1>
+          <h1 className="mt-5 font-display text-3xl font-extrabold">{player?.name}</h1>
           <p className="mt-1 text-sm font-semibold text-slate-500">
             Proud to Explore India’s Heritage 🇮🇳
           </p>
           <div className="mt-6 grid grid-cols-3 gap-2">
-            <Stat n="12" l="Levels" />
-            <Stat n="5" l="Badges" />
-            <Stat n="1,620" l="XP" />
+            <Stat n={summary.completed} l="Chapters" />
+            <Stat n={summary.badges} l="Badges" />
+            <Stat n={summary.xp.toLocaleString()} l="XP" />
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <Mini icon={Coins} n="1,250" l="Coins" />
-            <Mini icon={Flame} n="4 days" l="Streak" />
+            <Mini icon={Coins} n={summary.coins.toLocaleString()} l="Coins" />
+            <Mini icon={Flame} n={summary.completed ? "Active" : "New"} l="Journey" />
           </div>
           <ProgressBar
-            value={68}
+            value={summary.overallProgress}
             label="Overall learning progress"
             className="mt-7 text-left"
           />
           <Button
             as={Link}
-            to="/play/quiz/ancient-india"
+            to={`/play/quiz/${summary.latestChapter}`}
             className="mt-6 w-full"
           >
-            Continue Learning <ChevronRight className="h-4 w-4" />
+            {summary.completed ? "Continue Learning" : "Start Learning"} <ChevronRight className="h-4 w-4" />
           </Button>
+          <button
+            type="button"
+            onClick={switchPlayer}
+            className="focus-ring mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-extrabold text-slate-500 hover:bg-orange-50 hover:text-heritage-saffron"
+          >
+            <LogOut className="h-4 w-4" /> Switch Explorer
+          </button>
         </aside>
+
         <section className="space-y-6">
           <div className="rounded-[2rem] bg-heritage-forest p-7 text-white sm:p-9">
             <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
@@ -68,30 +81,33 @@ export default function Profile() {
                   <Sparkles className="h-4 w-4" /> Explorer summary
                 </div>
                 <h2 className="mt-3 font-display text-3xl font-extrabold">
-                  Your Heritage Quest is growing.
+                  {summary.completed
+                    ? `${player?.name}, your Heritage Quest is growing.`
+                    : `Welcome, ${player?.name}. Your quest starts here.`}
                 </h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-white/65">
-                  Complete two more learning sessions this week to reach your
-                  next reward milestone.
+                  Every score, unfinished chapter and reward on this browser is
+                  saved separately under your explorer name.
                 </p>
               </div>
               <div className="rounded-2xl bg-white/10 p-4 text-center">
                 <Target className="mx-auto h-6 w-6 text-heritage-gold" />
-                <div className="mt-2 text-2xl font-extrabold">4/6</div>
-                <div className="text-[11px] text-white/60">weekly goal</div>
+                <div className="mt-2 text-2xl font-extrabold">{summary.completed}/12</div>
+                <div className="text-[11px] text-white/60">chapters completed</div>
               </div>
             </div>
           </div>
+
           <div className="grid gap-6 md:grid-cols-2">
             <div className="rounded-3xl border border-slate-200 bg-white p-6">
               <div className="flex items-center justify-between">
-                <h2 className="font-extrabold">Recent progress</h2>
+                <h2 className="font-extrabold">Your saved progress</h2>
                 <BookOpen className="h-5 w-5 text-heritage-green" />
               </div>
               <div className="mt-5 space-y-5">
-                <ProgressBar value={80} label="Monuments" />
-                <ProgressBar value={65} label="Dynasties" />
-                <ProgressBar value={55} label="Civilizations" />
+                <ProgressBar value={summary.overallProgress} label="All chapters" />
+                <ProgressBar value={Math.min(100, summary.completed * 10)} label="Quest completion" />
+                <ProgressBar value={Math.min(100, summary.badges * 16)} label="Achievement progress" />
               </div>
             </div>
             <div className="rounded-3xl border border-slate-200 bg-white p-6">
@@ -100,18 +116,18 @@ export default function Profile() {
                 <Trophy className="h-5 w-5 text-heritage-gold" />
               </div>
               <p className="mt-5 text-sm leading-6 text-slate-500">
-                Finish one complete 10-question chapter to move toward your next
-                achievement.
+                Finish a complete chapter to move toward your next achievement.
               </p>
-              <ProgressBar value={68} className="mt-5" />
+              <ProgressBar value={summary.overallProgress} className="mt-5" />
               <Link
-                to="/leaderboard"
+                to="/learn"
                 className="focus-ring mt-5 inline-flex rounded-xl text-sm font-extrabold text-heritage-green"
               >
-                View leaderboard →
+                Continue your chapters →
               </Link>
             </div>
           </div>
+
           <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
             {rows.map(([label, Icon, href]) => (
               <Link
@@ -132,6 +148,7 @@ export default function Profile() {
     </div>
   );
 }
+
 function Stat({ n, l }) {
   return (
     <div className="rounded-2xl bg-heritage-cream p-3">
@@ -140,6 +157,7 @@ function Stat({ n, l }) {
     </div>
   );
 }
+
 function Mini({ icon: Icon, n, l }) {
   return (
     <div className="flex items-center gap-2 rounded-2xl bg-slate-50 p-3 text-left">
