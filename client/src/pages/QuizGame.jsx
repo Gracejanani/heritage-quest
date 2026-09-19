@@ -66,7 +66,7 @@ export default function QuizGame() {
       .catch(() => {
         if (active)
           setError(
-            "Could not load the chapter questions. Make sure the Node.js server is running on port 4000.",
+            "Could not load the chapter questions. Please refresh the page and try again.",
           );
       })
       .finally(() => active && setLoading(false));
