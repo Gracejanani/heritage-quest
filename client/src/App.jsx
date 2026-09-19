@@ -14,6 +14,8 @@ import Achievements from "./pages/Achievements";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
+import PlayerGate from "./components/PlayerGate";
+import { PlayerProvider } from "./context/PlayerContext";
 
 export default function App() {
   const { pathname } = useLocation();
@@ -50,7 +52,11 @@ export default function App() {
   );
   return (
     <ToastProvider>
-      {immersive ? content : <Layout>{content}</Layout>}
+      <PlayerProvider>
+        <PlayerGate>
+          {immersive ? content : <Layout>{content}</Layout>}
+        </PlayerGate>
+      </PlayerProvider>
     </ToastProvider>
   );
 }
