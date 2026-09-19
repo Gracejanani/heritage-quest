@@ -1,0 +1,2270 @@
+{
+  "games": [
+    {
+      "id": "ancient",
+      "slug": "ancient-india-quest",
+      "title": "Ancient India Quest",
+      "description": "Trace states, ideas and evidence.",
+      "longDescription": "Travel through early settlements, mahajanapadas and intellectual traditions while solving evidence-based history challenges.",
+      "category": "History",
+      "difficulty": "Medium",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/hero-heritage.jpg",
+      "chapterSlug": "ancient-india",
+      "learn": [
+        "Sources & archaeology",
+        "Mahajanapadas",
+        "Buddhist & Jain traditions",
+        "Regional diversity"
+      ],
+      "achievements": [
+        "Ancient Explorer",
+        "Source Sleuth"
+      ]
+    },
+    {
+      "id": "harappan",
+      "slug": "harappan-explorer",
+      "title": "Harappan Explorer",
+      "description": "Uncover the lost cities.",
+      "longDescription": "Investigate seals, streets, drainage, crafts and trade clues as an archaeology trainee exploring the Indus civilization.",
+      "category": "Civilizations",
+      "difficulty": "Advanced",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/game-harappan.jpg",
+      "chapterSlug": "indus-valley-civilization",
+      "learn": [
+        "Urban planning",
+        "Trade",
+        "Craft production",
+        "Archaeological inference"
+      ],
+      "achievements": [
+        "Lost City Finder",
+        "Seal Decoder"
+      ]
+    },
+    {
+      "id": "maurya",
+      "slug": "maurya-empire-mission",
+      "title": "Maurya Empire Mission",
+      "description": "Read edicts. Govern an empire.",
+      "longDescription": "Interpret inscriptions, routes and policies to understand how the Mauryan Empire communicated and governed across a vast territory.",
+      "category": "Dynasties",
+      "difficulty": "Advanced",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/game-map.jpg",
+      "chapterSlug": "maurya-empire",
+      "learn": [
+        "Ashokan edicts",
+        "Dhamma",
+        "Administration",
+        "Imperial communication"
+      ],
+      "achievements": [
+        "Edict Reader",
+        "Empire Analyst"
+      ]
+    },
+    {
+      "id": "gupta",
+      "slug": "gupta-knowledge-lab",
+      "title": "Gupta Knowledge Lab",
+      "description": "Science. Art. Power.",
+      "longDescription": "Connect coins, inscriptions, literature and scientific ideas to evaluate the Gupta period beyond simple labels.",
+      "category": "Dynasties",
+      "difficulty": "Advanced",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/hero-heritage.jpg",
+      "chapterSlug": "gupta-empire",
+      "learn": [
+        "Coins & inscriptions",
+        "Science",
+        "Literature",
+        "Temple art"
+      ],
+      "achievements": [
+        "Knowledge Keeper",
+        "Gupta Scholar"
+      ]
+    },
+    {
+      "id": "chola",
+      "slug": "chola-empire-builder",
+      "title": "Chola Empire Builder",
+      "description": "Build. Trade. Expand.",
+      "longDescription": "Step into the Chola world. Follow inscriptions, irrigation, temples, merchant networks and maritime expeditions while learning history.",
+      "category": "Dynasties",
+      "difficulty": "Advanced",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/game-chola.jpg",
+      "chapterSlug": "chola-dynasty",
+      "learn": [
+        "Administration",
+        "Maritime trade",
+        "Temples",
+        "Bronze art"
+      ],
+      "achievements": [
+        "Chola Explorer",
+        "Ocean Trader"
+      ]
+    },
+    {
+      "id": "mughal",
+      "slug": "mughal-court-chronicles",
+      "title": "Mughal Court Chronicles",
+      "description": "Govern. Compare. Interpret.",
+      "longDescription": "Use court records, revenue systems, architecture and regional evidence to understand Mughal power and culture.",
+      "category": "History",
+      "difficulty": "Advanced",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/game-taj.jpg",
+      "chapterSlug": "mughal-empire",
+      "learn": [
+        "Mansabdari",
+        "Revenue",
+        "Architecture",
+        "Regional politics"
+      ],
+      "achievements": [
+        "Court Chronicler",
+        "Imperial Analyst"
+      ]
+    },
+    {
+      "id": "freedom",
+      "slug": "freedom-trail",
+      "title": "Freedom Trail",
+      "description": "Follow movements. Connect moments.",
+      "longDescription": "Build a careful chronology of organizations, protests, mass movements and political debates from the late nineteenth century to 1947.",
+      "category": "Freedom Struggle",
+      "difficulty": "Advanced",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/hero-heritage.jpg",
+      "chapterSlug": "indian-freedom-movement",
+      "learn": [
+        "Movements",
+        "Leaders",
+        "Constitutional debates",
+        "Mass participation"
+      ],
+      "achievements": [
+        "Freedom Scholar",
+        "Timeline Master"
+      ]
+    },
+    {
+      "id": "monument",
+      "slug": "monument-mania",
+      "title": "Monument Mania",
+      "description": "Identify. Compare. Conserve.",
+      "longDescription": "Move beyond simple identification by comparing patronage, architectural form, conservation and the layered history of Indian monuments.",
+      "category": "Monuments",
+      "difficulty": "Medium",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/game-taj.jpg",
+      "chapterSlug": "indian-monuments",
+      "learn": [
+        "Architecture",
+        "Patronage",
+        "Conservation",
+        "Historical layers"
+      ],
+      "achievements": [
+        "Monument Scholar",
+        "Heritage Keeper"
+      ]
+    },
+    {
+      "id": "art",
+      "slug": "art-culture-studio",
+      "title": "Art & Culture Studio",
+      "description": "Listen. Observe. Interpret.",
+      "longDescription": "Explore living traditions in dance, music, painting and craft through context-rich challenges.",
+      "category": "Art & Culture",
+      "difficulty": "Medium",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/game-festival.jpg",
+      "chapterSlug": "indian-art-culture",
+      "learn": [
+        "Dance",
+        "Music",
+        "Painting",
+        "Craft"
+      ],
+      "achievements": [
+        "Culture Champ",
+        "Pattern Pro"
+      ]
+    },
+    {
+      "id": "festival",
+      "slug": "festival-fiesta",
+      "title": "Festival Fiesta",
+      "description": "Compare living traditions.",
+      "longDescription": "Explore harvest cycles, calendars, regional variation and changing festival practices across India.",
+      "category": "Festivals",
+      "difficulty": "Medium",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/game-festival.jpg",
+      "chapterSlug": "indian-festivals",
+      "learn": [
+        "Seasonality",
+        "Regional traditions",
+        "Food",
+        "Living heritage"
+      ],
+      "achievements": [
+        "Festival Friend",
+        "Tradition Tracker"
+      ]
+    },
+    {
+      "id": "states",
+      "slug": "state-map-sprint",
+      "title": "State Map Sprint",
+      "description": "Map. Connect. Understand.",
+      "longDescription": "Connect physical geography, state formation, languages and regional diversity instead of memorizing isolated capitals.",
+      "category": "States of India",
+      "difficulty": "Medium",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/game-map.jpg",
+      "chapterSlug": "states-of-india",
+      "learn": [
+        "Geography",
+        "State formation",
+        "Languages",
+        "Regional diversity"
+      ],
+      "achievements": [
+        "Map Ace",
+        "Regional Explorer"
+      ]
+    },
+    {
+      "id": "people",
+      "slug": "people-who-shaped-india",
+      "title": "People Who Shaped India",
+      "description": "Ideas. Action. Legacy.",
+      "longDescription": "Match influential reformers, leaders, scientists and cultural figures to their historical contexts and contributions.",
+      "category": "Famous Personalities",
+      "difficulty": "Advanced",
+      "players": "Single Player",
+      "time": "12–15 min",
+      "image": "/assets/explorer-mobile.jpg",
+      "chapterSlug": "famous-personalities",
+      "learn": [
+        "Reform",
+        "Science",
+        "Politics",
+        "Historical memory"
+      ],
+      "achievements": [
+        "Biography Buff",
+        "Legacy Analyst"
+      ]
+    }
+  ],
+  "chapters": [
+    {
+      "slug": "ancient-india",
+      "title": "Ancient India",
+      "era": "Foundations to c. 600 CE",
+      "category": "History",
+      "image": "/assets/hero-heritage.jpg",
+      "description": "Explore early settlements, Vedic traditions, states, ideas and evidence from archaeology and texts.",
+      "learn": [
+        "Early settlements and urbanization",
+        "Vedic and later Vedic society",
+        "Mahajanapadas and changing states",
+        "Buddhist and Jain traditions",
+        "Using archaeology and texts together"
+      ]
+    },
+    {
+      "slug": "indus-valley-civilization",
+      "title": "Indus Valley Civilization",
+      "era": "c. 2600–1900 BCE",
+      "category": "Civilizations",
+      "image": "/assets/game-harappan.jpg",
+      "description": "Investigate planned cities, craft production, trade, seals and the limits of archaeological interpretation.",
+      "learn": [
+        "Urban planning and drainage",
+        "Craft specialization",
+        "Trade networks",
+        "Seals and undeciphered script",
+        "Archaeological inference"
+      ]
+    },
+    {
+      "slug": "maurya-empire",
+      "title": "Maurya Empire",
+      "era": "c. 322–185 BCE",
+      "category": "Dynasties",
+      "image": "/assets/game-map.jpg",
+      "description": "Study imperial expansion, administration, Ashokan inscriptions, dhamma and long-distance networks.",
+      "learn": [
+        "Imperial administration",
+        "Ashoka and dhamma",
+        "Inscriptions as sources",
+        "Roads, trade and communication",
+        "Regional governance"
+      ]
+    },
+    {
+      "slug": "gupta-empire",
+      "title": "Gupta Empire",
+      "era": "c. 4th–6th century CE",
+      "category": "Dynasties",
+      "image": "/assets/hero-heritage.jpg",
+      "description": "Explore political history alongside developments in literature, mathematics, astronomy, art and regional power.",
+      "learn": [
+        "Political structure",
+        "Science and mathematics",
+        "Sanskrit literature",
+        "Temple and sculptural art",
+        "Debates around the 'golden age' label"
+      ]
+    },
+    {
+      "slug": "chola-dynasty",
+      "title": "Chola Dynasty",
+      "era": "c. 9th–13th century CE",
+      "category": "Dynasties",
+      "image": "/assets/game-chola.jpg",
+      "description": "Trace Chola administration, inscriptions, temples, bronze art, irrigation and Indian Ocean connections.",
+      "learn": [
+        "Local administration",
+        "Temple patronage",
+        "Maritime trade",
+        "Naval expeditions",
+        "Bronze art and inscriptions"
+      ]
+    },
+    {
+      "slug": "mughal-empire",
+      "title": "Mughal Empire",
+      "era": "16th–19th century CE",
+      "category": "History",
+      "image": "/assets/game-taj.jpg",
+      "description": "Study administration, court culture, architecture, revenue systems, regional politics and changing imperial power.",
+      "learn": [
+        "Mansabdari system",
+        "Revenue administration",
+        "Architecture and gardens",
+        "Court culture and painting",
+        "Regional politics"
+      ]
+    },
+    {
+      "slug": "indian-freedom-movement",
+      "title": "Indian Freedom Movement",
+      "era": "19th–20th century",
+      "category": "Freedom Struggle",
+      "image": "/assets/hero-heritage.jpg",
+      "description": "Build a chronology of organizations, mass movements, constitutional debates, revolutionary currents and independence.",
+      "learn": [
+        "National organizations",
+        "Mass movements",
+        "Constitutional politics",
+        "Revolutionary movements",
+        "Partition and independence"
+      ]
+    },
+    {
+      "slug": "indian-monuments",
+      "title": "Indian Monuments",
+      "era": "Across periods",
+      "category": "Monuments",
+      "image": "/assets/game-taj.jpg",
+      "description": "Compare architectural styles, patronage, materials and historical contexts behind major Indian monuments.",
+      "learn": [
+        "Architectural styles",
+        "Patronage and purpose",
+        "Materials and engineering",
+        "Conservation",
+        "Regional diversity"
+      ]
+    },
+    {
+      "slug": "indian-art-culture",
+      "title": "Indian Art & Culture",
+      "era": "Living heritage",
+      "category": "Art & Culture",
+      "image": "/assets/game-festival.jpg",
+      "description": "Explore classical and folk traditions in dance, music, painting, crafts and performance.",
+      "learn": [
+        "Classical dance traditions",
+        "Music systems",
+        "Painting schools",
+        "Crafts and textiles",
+        "Living cultural transmission"
+      ]
+    },
+    {
+      "slug": "indian-festivals",
+      "title": "Indian Festivals",
+      "era": "Living heritage",
+      "category": "Festivals",
+      "image": "/assets/game-festival.jpg",
+      "description": "Understand regional, seasonal, agricultural and religious contexts behind diverse Indian festivals.",
+      "learn": [
+        "Seasonal cycles",
+        "Regional traditions",
+        "Agricultural links",
+        "Ritual and community",
+        "Cultural diversity"
+      ]
+    },
+    {
+      "slug": "states-of-india",
+      "title": "States of India",
+      "era": "Modern India",
+      "category": "States of India",
+      "image": "/assets/game-map.jpg",
+      "description": "Connect geography, languages, culture, history and landscapes across India's states and regions.",
+      "learn": [
+        "Physical geography",
+        "State formation",
+        "Languages and cultures",
+        "Capitals and regions",
+        "Economic and ecological diversity"
+      ]
+    },
+    {
+      "slug": "famous-personalities",
+      "title": "Famous Personalities",
+      "era": "Across eras",
+      "category": "Famous Personalities",
+      "image": "/assets/explorer-mobile.jpg",
+      "description": "Match influential thinkers, rulers, reformers, scientists, artists and freedom leaders to their contributions.",
+      "learn": [
+        "Historical context",
+        "Social reform",
+        "Science and ideas",
+        "Political leadership",
+        "Cultural contributions"
+      ]
+    }
+  ],
+  "questionsByChapter": {
+    "ancient-india": [
+      {
+        "id": "AI1",
+        "difficulty": "Medium",
+        "question": "Why do historians combine archaeological evidence with literary sources when reconstructing ancient Indian history?",
+        "answers": [
+          "Because all literary texts are exact chronicles",
+          "Because material remains and texts reveal different kinds of evidence",
+          "Because archaeology can translate every ancient script",
+          "Because literary sources eliminate the need for dating evidence"
+        ],
+        "correct": 1,
+        "explanation": "Archaeology reveals material life, settlement patterns and objects, while texts reflect ideas, institutions and perspectives. Comparing them helps historians test and qualify conclusions.",
+        "hint": "Think about what objects can show that texts may not, and vice versa."
+      },
+      {
+        "id": "AI2",
+        "difficulty": "Medium",
+        "question": "The growth of mahajanapadas in the first millennium BCE is most closely linked with which broader development?",
+        "answers": [
+          "A complete end to agriculture",
+          "Larger territorial states, expanding trade and urban centers",
+          "European colonial intervention",
+          "The disappearance of iron technology"
+        ],
+        "correct": 1,
+        "explanation": "Mahajanapadas emerged alongside agricultural expansion, iron use, growing towns, trade and more complex political organization.",
+        "hint": "Look for the option connecting states with economic and urban change."
+      },
+      {
+        "id": "AI3",
+        "difficulty": "Medium",
+        "question": "What best explains why the Ganga valley became important to state formation in northern India?",
+        "answers": [
+          "It had no major rivers",
+          "Fertile alluvial plains supported agriculture and dense settlements",
+          "It was isolated from trade routes",
+          "Its climate prevented permanent settlement"
+        ],
+        "correct": 1,
+        "explanation": "The fertile plains of the Ganga system supported agricultural surplus, population growth and urban development, helping larger states emerge.",
+        "hint": "Focus on agriculture, population and surplus."
+      },
+      {
+        "id": "AI4",
+        "difficulty": "Medium",
+        "question": "Buddhist and Jain traditions in the sixth century BCE can be understood partly as responses to what?",
+        "answers": [
+          "Debates about ritual, social order and paths to liberation",
+          "The introduction of printing presses",
+          "The fall of the Mughal Empire",
+          "Industrialization in port cities"
+        ],
+        "correct": 0,
+        "explanation": "Buddhism and Jainism arose amid debates over ritual authority, social practices, renunciation and different routes to ethical and spiritual liberation.",
+        "hint": "The relevant context is intellectual and religious change in the first millennium BCE."
+      },
+      {
+        "id": "AI5",
+        "difficulty": "Medium",
+        "question": "Which statement best describes the historical value of inscriptions?",
+        "answers": [
+          "They are always neutral accounts",
+          "They can provide names, titles, donations and political messages from particular patrons",
+          "They only describe weather",
+          "They are useful only when written in modern languages"
+        ],
+        "correct": 1,
+        "explanation": "Inscriptions can identify rulers, donors, institutions and public messages, but historians also consider who commissioned them and why.",
+        "hint": "Think about both information and perspective."
+      },
+      {
+        "id": "AI6",
+        "difficulty": "Medium",
+        "question": "Why is the term 'Vedic period' used cautiously by historians?",
+        "answers": [
+          "Because no texts survive from any part of ancient India",
+          "Because it covers long periods and varied regions that changed over time",
+          "Because Vedic texts were written in English",
+          "Because archaeology proves society remained unchanged"
+        ],
+        "correct": 1,
+        "explanation": "The label spans centuries and diverse regions. Social, political and economic patterns changed significantly, so historians avoid treating it as a single unchanging phase.",
+        "hint": "Look for the answer that recognizes change over time."
+      },
+      {
+        "id": "AI7",
+        "difficulty": "Advanced",
+        "question": "If a settlement shows increasing craft specialization, storage facilities and long-distance goods, what is the strongest historical inference?",
+        "answers": [
+          "The settlement had no economic organization",
+          "Its economy likely included surplus production and exchange networks",
+          "All residents performed the same occupation",
+          "Long-distance contact was impossible"
+        ],
+        "correct": 1,
+        "explanation": "Specialized crafts, storage and non-local materials usually indicate surplus, organized production and exchange beyond simple household subsistence.",
+        "hint": "Infer from multiple kinds of material evidence together."
+      },
+      {
+        "id": "AI8",
+        "difficulty": "Advanced",
+        "question": "Why should historians be cautious about using later religious texts to describe much earlier social conditions?",
+        "answers": [
+          "Later texts can contain layers composed in different periods and may reflect changing ideals",
+          "Religious texts never contain historical information",
+          "All later texts were forged",
+          "Earlier societies had no social institutions"
+        ],
+        "correct": 0,
+        "explanation": "Many texts developed over long periods. Their descriptions may represent ideals or later conditions, so chronology and textual layers matter.",
+        "hint": "Think about when a source was composed relative to the period studied."
+      },
+      {
+        "id": "AI9",
+        "difficulty": "Advanced",
+        "question": "Which approach best avoids turning ancient Indian history into a single-region narrative?",
+        "answers": [
+          "Use only sources from imperial capitals",
+          "Compare evidence from multiple regions and recognize different trajectories",
+          "Assume every region changed at the same pace",
+          "Ignore coastal and southern sites"
+        ],
+        "correct": 1,
+        "explanation": "Ancient India contained many regional histories. Comparing archaeological and textual evidence across regions avoids treating one area as representative of the whole subcontinent.",
+        "hint": "The key idea is regional diversity."
+      },
+      {
+        "id": "AI10",
+        "difficulty": "Advanced",
+        "question": "A historian finds a royal inscription praising a ruler's victories. What is the best way to use it?",
+        "answers": [
+          "Accept every claim literally",
+          "Reject the inscription completely",
+          "Use it as evidence while comparing it with other sources and considering political purpose",
+          "Treat it only as a work of fiction"
+        ],
+        "correct": 2,
+        "explanation": "Royal inscriptions are valuable primary sources, but praise and political messaging can shape their claims. Corroboration with other evidence is essential.",
+        "hint": "Consider both the source's value and its possible bias."
+      }
+    ],
+    "indus-valley-civilization": [
+      {
+        "id": "IV1",
+        "difficulty": "Medium",
+        "question": "What does the repeated use of standardized weights at Harappan sites most strongly suggest?",
+        "answers": [
+          "No exchange took place",
+          "Some degree of shared measurement practice supported trade and administration",
+          "Every city used unrelated systems",
+          "Coins were the only form of exchange"
+        ],
+        "correct": 1,
+        "explanation": "Standardized weights point to shared conventions that would make exchange, craft production and accounting more consistent across settlements.",
+        "hint": "Think about why merchants and administrators need common measures."
+      },
+      {
+        "id": "IV2",
+        "difficulty": "Medium",
+        "question": "Why are Harappan drainage systems important to historians?",
+        "answers": [
+          "They prove every house was identical",
+          "They show coordinated urban planning and concern with water management",
+          "They were built during the Mughal period",
+          "They were used only for military defense"
+        ],
+        "correct": 1,
+        "explanation": "Covered drains, wells and planned streets show organized construction and maintenance in several Harappan cities.",
+        "hint": "Focus on what infrastructure reveals about urban organization."
+      },
+      {
+        "id": "IV3",
+        "difficulty": "Medium",
+        "question": "The discovery of Harappan seals in Mesopotamian contexts is strongest evidence for what?",
+        "answers": [
+          "Direct Roman conquest",
+          "Long-distance exchange between the Indus region and western Asia",
+          "A lack of maritime trade",
+          "The use of Sanskrit inscriptions"
+        ],
+        "correct": 1,
+        "explanation": "Archaeological finds and Mesopotamian references to Meluhha support the existence of long-distance trade connections with the Indus region.",
+        "hint": "Look for exchange rather than political control."
+      },
+      {
+        "id": "IV4",
+        "difficulty": "Medium",
+        "question": "Why is the Harappan script still a major limitation for historians?",
+        "answers": [
+          "No signs or symbols have been found",
+          "It remains undeciphered, limiting direct access to Harappan written communication",
+          "It was written only on paper that survives",
+          "It is identical to modern Hindi"
+        ],
+        "correct": 1,
+        "explanation": "Thousands of inscriptions exist, but the script has not been securely deciphered. This limits what can be said about language, institutions and beliefs from texts.",
+        "hint": "The problem is not absence of writing, but inability to read it with confidence."
+      },
+      {
+        "id": "IV5",
+        "difficulty": "Medium",
+        "question": "Which feature most clearly distinguishes Harappan urban sites from many contemporary rural settlements?",
+        "answers": [
+          "Large planned street grids and drainage networks",
+          "Use of smartphones",
+          "Medieval stone forts",
+          "Modern railway lines"
+        ],
+        "correct": 0,
+        "explanation": "Major Harappan cities show planned streets, drainage, wells and substantial baked-brick construction at a scale not typical of smaller rural settlements.",
+        "hint": "Choose the feature associated with planned urbanism."
+      },
+      {
+        "id": "IV6",
+        "difficulty": "Medium",
+        "question": "What is the strongest reason historians avoid calling every Harappan settlement a 'city'?",
+        "answers": [
+          "Settlement sizes and functions varied greatly",
+          "All settlements were temporary camps",
+          "No agriculture existed",
+          "Every settlement was identical"
+        ],
+        "correct": 0,
+        "explanation": "The civilization included large cities, towns, villages, craft centers and ports. Their size and economic roles differed substantially.",
+        "hint": "Think about variation within one civilization."
+      },
+      {
+        "id": "IV7",
+        "difficulty": "Advanced",
+        "question": "If bead-making debris and specialized furnaces are concentrated in one neighborhood, what does that most reasonably indicate?",
+        "answers": [
+          "Craft specialization and organized production areas",
+          "A royal palace",
+          "Absence of trade",
+          "Agricultural abandonment"
+        ],
+        "correct": 0,
+        "explanation": "Concentrations of tools, waste and furnaces are strong archaeological indicators of specialized craft production in particular areas.",
+        "hint": "Use archaeological context, not just individual objects."
+      },
+      {
+        "id": "IV8",
+        "difficulty": "Advanced",
+        "question": "Why is the decline of Harappan urban centers better explained as a process than a single sudden collapse?",
+        "answers": [
+          "Evidence shows regional change at different times, including settlement shifts and environmental pressures",
+          "Every city was destroyed on the same day",
+          "A single inscription describes one invasion",
+          "Urban life continued unchanged everywhere"
+        ],
+        "correct": 0,
+        "explanation": "Archaeological evidence points to varied regional transformations, changing river systems, settlement movement and altered trade rather than one universally accepted single event.",
+        "hint": "Look for an explanation that allows different regional timelines."
+      },
+      {
+        "id": "IV9",
+        "difficulty": "Advanced",
+        "question": "Which claim about Harappan political organization is most historically cautious?",
+        "answers": [
+          "A single emperor is proven by named inscriptions",
+          "Large-scale coordination existed, but the exact political structure remains uncertain",
+          "There was definitely no authority of any kind",
+          "Harappan rulers are fully listed in surviving texts"
+        ],
+        "correct": 1,
+        "explanation": "Standardization and large public works imply coordination, yet the undeciphered script and lack of clear royal monuments make the exact form of government uncertain.",
+        "hint": "Separate evidence for coordination from claims about specific rulers."
+      },
+      {
+        "id": "IV10",
+        "difficulty": "Advanced",
+        "question": "Why can identical brick proportions across distant Harappan sites be historically significant?",
+        "answers": [
+          "They may indicate shared technical standards and cultural conventions across a wide network",
+          "They prove all buildings had one architect",
+          "They show bricks were imported from Europe",
+          "They make local variation impossible"
+        ],
+        "correct": 0,
+        "explanation": "Recurring brick ratios suggest common building conventions or shared technical knowledge across settlements, even though local differences remained.",
+        "hint": "Consider standardization without assuming complete central control."
+      }
+    ],
+    "maurya-empire": [
+      {
+        "id": "MA1",
+        "difficulty": "Medium",
+        "question": "Why are Ashoka's inscriptions especially important for studying the Maurya Empire?",
+        "answers": [
+          "They provide contemporary royal messages across many regions",
+          "They were written centuries before the Mauryas",
+          "They are only literary legends",
+          "They list every village in the empire"
+        ],
+        "correct": 0,
+        "explanation": "Ashokan edicts are contemporary inscriptions placed across a wide geographic area and provide direct evidence of royal policy, dhamma and administration.",
+        "hint": "Think about contemporaneity and geographic spread."
+      },
+      {
+        "id": "MA2",
+        "difficulty": "Medium",
+        "question": "What does the wide distribution of Ashokan edicts suggest?",
+        "answers": [
+          "The Mauryas had no communication network",
+          "Imperial messages were intended for audiences across diverse regions",
+          "Only the capital mattered",
+          "Writing was unknown outside Pataliputra"
+        ],
+        "correct": 1,
+        "explanation": "Edicts in different scripts and languages across distant regions show an effort to communicate royal policy to varied populations.",
+        "hint": "Look for communication across a large empire."
+      },
+      {
+        "id": "MA3",
+        "difficulty": "Medium",
+        "question": "Ashoka's idea of dhamma is best understood as what?",
+        "answers": [
+          "A single detailed legal code replacing all local customs",
+          "An ethical program stressing restraint, respect and welfare across communities",
+          "A military recruitment system",
+          "A tax on maritime trade"
+        ],
+        "correct": 1,
+        "explanation": "Ashokan dhamma emphasized ethical conduct, non-violence, respect, generosity and social harmony rather than establishing one uniform religious law.",
+        "hint": "It was broader than a single sectarian doctrine."
+      },
+      {
+        "id": "MA4",
+        "difficulty": "Medium",
+        "question": "Why would a large empire like the Mauryan state require provincial administration?",
+        "answers": [
+          "Long distances made centralized day-to-day control from one city impractical",
+          "The empire had no roads",
+          "All provinces were independent kingdoms",
+          "Officials were prohibited from traveling"
+        ],
+        "correct": 0,
+        "explanation": "Large territories need delegated administration, officials and communication networks because the center cannot manage every locality directly.",
+        "hint": "Think about scale and distance."
+      },
+      {
+        "id": "MA5",
+        "difficulty": "Medium",
+        "question": "What is one limitation of using the Arthashastra as a direct description of Mauryan government?",
+        "answers": [
+          "Its date and layers are debated, and it may describe ideals rather than exact practice",
+          "It contains no discussion of governance",
+          "It was written in the twentieth century",
+          "It is an inscription by Ashoka"
+        ],
+        "correct": 0,
+        "explanation": "The Arthashastra is vital for political thought, but its composition is complex and it should not automatically be treated as a complete administrative manual of one Mauryan reign.",
+        "hint": "Distinguish prescriptive texts from actual practice."
+      },
+      {
+        "id": "MA6",
+        "difficulty": "Medium",
+        "question": "The Mauryan capital Pataliputra was strategically important partly because of what?",
+        "answers": [
+          "Its location near major river routes",
+          "Its distance from agricultural zones",
+          "Its isolation from trade",
+          "Its position on the Arabian Sea coast"
+        ],
+        "correct": 0,
+        "explanation": "Pataliputra's location in the middle Ganga plain near important rivers supported communication, agriculture and movement of goods and officials.",
+        "hint": "Think about river transport and fertile plains."
+      },
+      {
+        "id": "MA7",
+        "difficulty": "Advanced",
+        "question": "What does the use of different languages and scripts in Ashokan inscriptions reveal?",
+        "answers": [
+          "The empire communicated with regionally diverse populations",
+          "Only one language existed in the empire",
+          "Literacy was limited to Greek settlers",
+          "The edicts were all copied in modern times"
+        ],
+        "correct": 0,
+        "explanation": "Ashokan inscriptions used forms such as Prakrit in Brahmi, Kharosthi in the northwest, and Greek and Aramaic in some regions, reflecting linguistic diversity.",
+        "hint": "Consider why a ruler would adapt messages to local audiences."
+      },
+      {
+        "id": "MA8",
+        "difficulty": "Advanced",
+        "question": "Why is Ashoka's response to the Kalinga war historically significant beyond the military event itself?",
+        "answers": [
+          "His inscriptions connect conquest with remorse and a shift in the language of kingship",
+          "It ended all warfare everywhere in South Asia",
+          "Kalinga disappeared from history",
+          "The war created the Gupta Empire"
+        ],
+        "correct": 0,
+        "explanation": "The Kalinga edicts present remorse over suffering and emphasize dhamma and welfare, making them important evidence for how Ashoka publicly reframed royal authority.",
+        "hint": "Focus on the ruler's own public message after conquest."
+      },
+      {
+        "id": "MA9",
+        "difficulty": "Advanced",
+        "question": "Which evidence would best test claims about Mauryan economic integration?",
+        "answers": [
+          "Distribution of punch-marked coins, roads, trade goods and settlement patterns",
+          "Only later legends about emperors",
+          "One palace description",
+          "Modern political boundaries"
+        ],
+        "correct": 0,
+        "explanation": "Economic integration is best assessed by combining material evidence for exchange, routes, coin circulation and settlement rather than relying on a single textual claim.",
+        "hint": "Look for multiple independent indicators of exchange."
+      },
+      {
+        "id": "MA10",
+        "difficulty": "Advanced",
+        "question": "Why should historians avoid assuming Mauryan control was equally strong in every region?",
+        "answers": [
+          "Large empires often governed core and frontier zones differently, and evidence varies by region",
+          "Empires always have identical administration everywhere",
+          "The Mauryan Empire had no frontiers",
+          "All local institutions were abolished"
+        ],
+        "correct": 0,
+        "explanation": "Imperial authority can be uneven. Geography, local elites, communication and military presence affect how directly a center controls different regions.",
+        "hint": "Think about variation within large empires."
+      }
+    ],
+    "gupta-empire": [
+      {
+        "id": "GU1",
+        "difficulty": "Medium",
+        "question": "Why is the phrase 'Golden Age' used cautiously for the Gupta period?",
+        "answers": [
+          "Cultural achievements were significant, but prosperity and social experience were not uniform for everyone",
+          "No art or science developed in the period",
+          "The Guptas ruled all of Asia",
+          "The term refers only to gold coins"
+        ],
+        "correct": 0,
+        "explanation": "The period saw major achievements in literature, art and science, but historians caution that broad labels can hide regional differences, conflict and social inequality.",
+        "hint": "Look for a balanced interpretation rather than a total rejection."
+      },
+      {
+        "id": "GU2",
+        "difficulty": "Medium",
+        "question": "Which source type is especially useful for reconstructing Gupta political history?",
+        "answers": [
+          "Inscriptions and coins",
+          "Television broadcasts",
+          "Portuguese factory records",
+          "Mughal farmans"
+        ],
+        "correct": 0,
+        "explanation": "Gupta inscriptions and coinage provide names, titles, genealogies, religious patronage and political claims that can be compared with literary evidence.",
+        "hint": "Choose sources contemporary to the period."
+      },
+      {
+        "id": "GU3",
+        "difficulty": "Medium",
+        "question": "Why are Gupta gold coins valuable historical evidence?",
+        "answers": [
+          "They can reveal royal titles, imagery, religious symbolism and economic activity",
+          "They give complete census data",
+          "They prove all trade used gold",
+          "They contain modern maps"
+        ],
+        "correct": 0,
+        "explanation": "Coins combine economic evidence with political iconography, titles and symbols, though they must be interpreted in context.",
+        "hint": "Think beyond just monetary value."
+      },
+      {
+        "id": "GU4",
+        "difficulty": "Medium",
+        "question": "Which development is associated with classical Sanskrit culture in the Gupta age?",
+        "answers": [
+          "Expansion of courtly literature and drama",
+          "Disappearance of written literature",
+          "Exclusive use of Persian at court",
+          "Printing of newspapers"
+        ],
+        "correct": 0,
+        "explanation": "Sanskrit courtly literature flourished, with works associated with figures such as Kalidasa becoming influential in later literary traditions.",
+        "hint": "Focus on language and literary patronage."
+      },
+      {
+        "id": "GU5",
+        "difficulty": "Medium",
+        "question": "Aryabhata's work is important primarily in which fields?",
+        "answers": [
+          "Mathematics and astronomy",
+          "Naval warfare and sculpture",
+          "Architecture and law only",
+          "Agriculture and taxation"
+        ],
+        "correct": 0,
+        "explanation": "Aryabhata made influential contributions to mathematics and astronomy, including computational methods and astronomical models.",
+        "hint": "Think of scientific scholarship."
+      },
+      {
+        "id": "GU6",
+        "difficulty": "Medium",
+        "question": "What do land-grant inscriptions help historians study?",
+        "answers": [
+          "Relations among rulers, religious institutions, local elites and agrarian expansion",
+          "Only royal battles",
+          "Modern industrialization",
+          "Ocean currents"
+        ],
+        "correct": 0,
+        "explanation": "Land grants record transfers of revenue rights and land to individuals or institutions, helping reconstruct agrarian relations and changing political authority.",
+        "hint": "Look for local power and land revenue."
+      },
+      {
+        "id": "GU7",
+        "difficulty": "Advanced",
+        "question": "How can coin imagery help historians study Gupta kingship?",
+        "answers": [
+          "It shows how rulers represented power, ritual, warfare and cultural ideals",
+          "It provides exact biographies of all subjects",
+          "It proves images were photographs",
+          "It has no political meaning"
+        ],
+        "correct": 0,
+        "explanation": "Gupta coins depict rulers in activities such as archery, horse sacrifice or music, offering evidence about royal self-presentation and ideology.",
+        "hint": "Think of coins as political media."
+      },
+      {
+        "id": "GU8",
+        "difficulty": "Advanced",
+        "question": "Why did Gupta political authority vary across the subcontinent?",
+        "answers": [
+          "The empire interacted with tributary rulers, frontier regions and local powers rather than administering every place identically",
+          "All regions were directly governed by one village council",
+          "There were no regional rulers",
+          "Geography had no effect on political control"
+        ],
+        "correct": 0,
+        "explanation": "Gupta power combined direct rule with alliances, subordinate rulers and regional arrangements, producing uneven political control.",
+        "hint": "Large states often use mixed forms of authority."
+      },
+      {
+        "id": "GU9",
+        "difficulty": "Advanced",
+        "question": "What is the best way to evaluate claims of scientific achievement in the Gupta period?",
+        "answers": [
+          "Examine surviving mathematical and astronomical texts and place them in wider intellectual traditions",
+          "Accept modern slogans without sources",
+          "Assume all discoveries originated in one court",
+          "Ignore manuscript transmission"
+        ],
+        "correct": 0,
+        "explanation": "Historical evaluation requires studying texts, commentaries, dates and intellectual networks rather than treating achievements as isolated national myths.",
+        "hint": "Use source-based historical method."
+      },
+      {
+        "id": "GU10",
+        "difficulty": "Advanced",
+        "question": "Why can temple architecture from the Gupta period be historically important even when buildings were later altered?",
+        "answers": [
+          "Surviving plans, sculpture and structural techniques help trace the development of early temple forms",
+          "Alterations make all evidence useless",
+          "Only inscriptions matter",
+          "Architecture cannot reflect religious practice"
+        ],
+        "correct": 0,
+        "explanation": "Even modified monuments preserve structural and sculptural evidence that helps historians study evolving temple design and patronage.",
+        "hint": "Consider how material remains retain layers of history."
+      }
+    ],
+    "chola-dynasty": [
+      {
+        "id": "CH1",
+        "difficulty": "Medium",
+        "question": "What made the Kaveri delta especially important to Chola power?",
+        "answers": [
+          "Irrigated agriculture generated substantial surplus and supported dense settlements",
+          "It was entirely desert",
+          "It had no river system",
+          "It prevented temple construction"
+        ],
+        "correct": 0,
+        "explanation": "The fertile, irrigated Kaveri delta supported intensive agriculture, population and revenue, forming a core base of Chola power.",
+        "hint": "Think about agriculture and state resources."
+      },
+      {
+        "id": "CH2",
+        "difficulty": "Medium",
+        "question": "Why are Chola inscriptions especially valuable to historians?",
+        "answers": [
+          "They record donations, taxes, local institutions and temple administration",
+          "They are modern translations only",
+          "They discuss only mythology",
+          "They contain no names or dates"
+        ],
+        "correct": 0,
+        "explanation": "Thousands of inscriptions preserve detailed evidence about land, taxation, local assemblies, donations and temple-centered economic activity.",
+        "hint": "Look for administrative and social detail."
+      },
+      {
+        "id": "CH3",
+        "difficulty": "Medium",
+        "question": "The Brihadisvara Temple at Thanjavur is most closely associated with which ruler?",
+        "answers": [
+          "Rajaraja I",
+          "Ashoka",
+          "Harsha",
+          "Alauddin Khalji"
+        ],
+        "correct": 0,
+        "explanation": "Rajaraja I commissioned the Brihadisvara Temple in the early eleventh century, making it a major statement of Chola royal and religious patronage.",
+        "hint": "This ruler is closely linked with Thanjavur."
+      },
+      {
+        "id": "CH4",
+        "difficulty": "Medium",
+        "question": "Why was maritime trade important to the Chola realm?",
+        "answers": [
+          "It connected South India with Indian Ocean commercial networks and merchant communities",
+          "It isolated the Cholas from Southeast Asia",
+          "It replaced all agriculture",
+          "It ended temple patronage"
+        ],
+        "correct": 0,
+        "explanation": "Ports and merchant groups linked the Chola region to Sri Lanka and Southeast Asian trade routes, moving textiles, spices and other goods.",
+        "hint": "Think of sea routes as economic networks."
+      },
+      {
+        "id": "CH5",
+        "difficulty": "Medium",
+        "question": "Chola bronze images are especially famous for what?",
+        "answers": [
+          "Sophisticated lost-wax casting and dynamic sacred forms such as Nataraja",
+          "Use of concrete skyscraper methods",
+          "Roman alphabet inscriptions only",
+          "Mass production by modern factories"
+        ],
+        "correct": 0,
+        "explanation": "Chola-period bronzes are celebrated for lost-wax casting, refined modeling and iconic devotional images, including Shiva as Nataraja.",
+        "hint": "Focus on material technique and sacred art."
+      },
+      {
+        "id": "CH6",
+        "difficulty": "Medium",
+        "question": "What do references to sabha and ur in Chola inscriptions help historians understand?",
+        "answers": [
+          "Forms of local assembly and village administration",
+          "Only naval warfare",
+          "European colonial courts",
+          "Modern state legislatures"
+        ],
+        "correct": 0,
+        "explanation": "Chola inscriptions describe local bodies such as sabha in Brahmadeya villages and ur in other villages, showing local administrative practices.",
+        "hint": "Think about village-level governance."
+      },
+      {
+        "id": "CH7",
+        "difficulty": "Advanced",
+        "question": "How should Chola naval expeditions to Southeast Asia be interpreted most cautiously?",
+        "answers": [
+          "As evidence of long-distance military and commercial interests, not automatic proof of permanent territorial rule everywhere",
+          "As proof the Cholas governed all of Southeast Asia for centuries",
+          "As purely fictional stories with no evidence",
+          "As European colonial campaigns"
+        ],
+        "correct": 0,
+        "explanation": "The expeditions show maritime capacity and strategic interests, but historians distinguish raids and influence from sustained direct administration.",
+        "hint": "Separate military reach from permanent rule."
+      },
+      {
+        "id": "CH8",
+        "difficulty": "Advanced",
+        "question": "Why did temples function as more than religious buildings in the Chola period?",
+        "answers": [
+          "They could receive land, employ specialists, store wealth and organize festivals and redistribution",
+          "They were legally forbidden to own resources",
+          "They served only as military prisons",
+          "They had no relation to local society"
+        ],
+        "correct": 0,
+        "explanation": "Large temples were religious institutions but also economic and social centers tied to landholding, employment, ritual and patronage.",
+        "hint": "Think about institutions with many social functions."
+      },
+      {
+        "id": "CH9",
+        "difficulty": "Advanced",
+        "question": "What can the Uttaramerur inscriptions contribute to debates about Chola local governance?",
+        "answers": [
+          "They provide detailed rules for committee selection in a specific locality, but should not be generalized uncritically to all villages",
+          "They prove universal adult democracy across the whole empire",
+          "They contain no administrative information",
+          "They describe Mughal mansabdars"
+        ],
+        "correct": 0,
+        "explanation": "Uttaramerur inscriptions are important evidence for local committee procedures, yet they reflect a particular context and eligibility rules rather than a modern democratic system everywhere.",
+        "hint": "Use the source carefully without overgeneralizing."
+      },
+      {
+        "id": "CH10",
+        "difficulty": "Advanced",
+        "question": "Why is it useful to compare temple inscriptions with trade evidence when studying Chola society?",
+        "answers": [
+          "It connects political-religious patronage with economic networks and merchant activity",
+          "The two types of evidence are unrelated",
+          "Trade evidence replaces inscriptions entirely",
+          "Temple records only describe architecture"
+        ],
+        "correct": 0,
+        "explanation": "Combining inscriptions, ports, merchant records and material finds reveals how agrarian surplus, temples, merchants and overseas trade interacted.",
+        "hint": "Historical synthesis uses multiple source types."
+      }
+    ],
+    "mughal-empire": [
+      {
+        "id": "MU1",
+        "difficulty": "Medium",
+        "question": "What was the main purpose of the mansabdari system?",
+        "answers": [
+          "To rank imperial officials and connect status with military and administrative obligations",
+          "To elect village councils",
+          "To regulate only temple architecture",
+          "To abolish revenue collection"
+        ],
+        "correct": 0,
+        "explanation": "Mansabs ranked imperial servants and helped organize service, pay and cavalry obligations within the Mughal administrative structure.",
+        "hint": "Think about rank and service."
+      },
+      {
+        "id": "MU2",
+        "difficulty": "Medium",
+        "question": "Why is Akbar's revenue administration associated with Todar Mal?",
+        "answers": [
+          "He is linked with systematic measurement and revenue assessment reforms",
+          "He led the East India Company",
+          "He designed the Taj Mahal",
+          "He founded the Delhi Sultanate"
+        ],
+        "correct": 0,
+        "explanation": "Todar Mal is associated with revenue reforms that used measurement, crop data and assessed rates, though practices varied by region.",
+        "hint": "Focus on land revenue."
+      },
+      {
+        "id": "MU3",
+        "difficulty": "Medium",
+        "question": "What does Mughal miniature painting reveal to historians?",
+        "answers": [
+          "Court life, patronage, workshops, artistic exchange and political representation",
+          "Only agricultural yield statistics",
+          "The exact speech of every ruler",
+          "No information about imperial culture"
+        ],
+        "correct": 0,
+        "explanation": "Paintings illuminate courtly tastes, workshop organization, natural history, diplomacy and royal self-presentation, though they are curated images rather than neutral snapshots.",
+        "hint": "Treat visual sources as evidence with purpose."
+      },
+      {
+        "id": "MU4",
+        "difficulty": "Medium",
+        "question": "Why were gardens important in Mughal architecture?",
+        "answers": [
+          "They expressed aesthetic, symbolic and political ideas through planned landscapes",
+          "They were used only for growing wheat",
+          "They had no relation to architecture",
+          "They were introduced after independence"
+        ],
+        "correct": 0,
+        "explanation": "Charbagh and other garden forms combined geometry, water and landscape, often carrying ideas of order, paradise and imperial refinement.",
+        "hint": "Look for symbolism and design."
+      },
+      {
+        "id": "MU5",
+        "difficulty": "Medium",
+        "question": "Which feature best explains why Mughal rule depended on regional elites?",
+        "answers": [
+          "The empire governed vast and diverse territories through alliances, service and negotiated authority",
+          "The Mughals had no army",
+          "Every village was ruled directly by the emperor",
+          "Regional politics did not exist"
+        ],
+        "correct": 0,
+        "explanation": "Mughal administration incorporated nobles, zamindars and local powerholders, making imperial rule partly dependent on negotiation and service relationships.",
+        "hint": "Large empires often govern through local intermediaries."
+      },
+      {
+        "id": "MU6",
+        "difficulty": "Medium",
+        "question": "Why is the Ain-i-Akbari a major historical source?",
+        "answers": [
+          "It records aspects of Akbar's administration, economy, court and empire",
+          "It is a twentieth-century census",
+          "It is a Harappan inscription",
+          "It contains only poetry"
+        ],
+        "correct": 0,
+        "explanation": "Abu'l Fazl's Ain-i-Akbari provides detailed descriptions of imperial administration and resources, though historians also examine its courtly perspective.",
+        "hint": "Think about an administrative court text."
+      },
+      {
+        "id": "MU7",
+        "difficulty": "Advanced",
+        "question": "Why should historians compare Mughal court chronicles with regional records?",
+        "answers": [
+          "Court chronicles privilege imperial viewpoints, while regional sources can reveal different experiences and conflicts",
+          "Court chronicles are always false",
+          "Regional records are always neutral",
+          "Only architecture can be trusted"
+        ],
+        "correct": 0,
+        "explanation": "Comparing sources helps identify how imperial narratives differ from local experiences, especially in areas of resistance, taxation or negotiation.",
+        "hint": "Different sources reflect different viewpoints."
+      },
+      {
+        "id": "MU8",
+        "difficulty": "Advanced",
+        "question": "What does the jagir system reveal about Mughal governance?",
+        "answers": [
+          "Revenue assignments linked imperial service to control over income rather than simple private land ownership",
+          "All land was permanently owned by mansabdars",
+          "Revenue had no role in administration",
+          "Jagirs were modern industrial zones"
+        ],
+        "correct": 0,
+        "explanation": "Jagirs were revenue assignments used to support mansabdars and administration; they were transferable and should not be equated simply with modern private property.",
+        "hint": "Distinguish rights to revenue from outright ownership."
+      },
+      {
+        "id": "MU9",
+        "difficulty": "Advanced",
+        "question": "Why did the Mughal Empire face growing political strain in the eighteenth century?",
+        "answers": [
+          "Fiscal pressures, succession conflicts, regional powers and changing military-political balances weakened central authority",
+          "One single battle instantly ended the empire",
+          "Agriculture disappeared completely",
+          "All nobles left India at once"
+        ],
+        "correct": 0,
+        "explanation": "Mughal decline was a complex process involving fiscal challenges, factional conflict, regional state formation and external pressures rather than a single cause.",
+        "hint": "Look for a multi-causal explanation."
+      },
+      {
+        "id": "MU10",
+        "difficulty": "Advanced",
+        "question": "How can the Taj Mahal be studied beyond the story of Shah Jahan and Mumtaz Mahal?",
+        "answers": [
+          "As evidence of imperial patronage, labor, materials, garden design and Mughal architectural traditions",
+          "Only as a modern tourist site",
+          "As a Gupta-era temple",
+          "As evidence of Harappan trade"
+        ],
+        "correct": 0,
+        "explanation": "The Taj Mahal can be analyzed through architecture, craft organization, material sourcing, symbolism and imperial culture in addition to its commemorative purpose.",
+        "hint": "Think of monuments as complex historical evidence."
+      }
+    ],
+    "indian-freedom-movement": [
+      {
+        "id": "FR1",
+        "difficulty": "Medium",
+        "question": "Why was the formation of the Indian National Congress in 1885 historically significant?",
+        "answers": [
+          "It created a sustained all-India political forum for debate and representation",
+          "It immediately ended British rule",
+          "It was the first kingdom in South Asia",
+          "It abolished all princely states"
+        ],
+        "correct": 0,
+        "explanation": "The Congress provided an enduring platform through which Indian political leaders debated reforms, representation and eventually self-government and independence.",
+        "hint": "Think institution-building, not immediate independence."
+      },
+      {
+        "id": "FR2",
+        "difficulty": "Medium",
+        "question": "What distinguished the Swadeshi movement after the 1905 partition of Bengal?",
+        "answers": [
+          "Boycott of imported goods and promotion of indigenous production and national education",
+          "Support for unlimited imports",
+          "Withdrawal from all public activity",
+          "A campaign only for military recruitment"
+        ],
+        "correct": 0,
+        "explanation": "Swadeshi linked political protest to economic action through boycott, indigenous enterprise and new educational initiatives.",
+        "hint": "The term itself relates to 'of one's own country'."
+      },
+      {
+        "id": "FR3",
+        "difficulty": "Medium",
+        "question": "Why did Gandhi's use of satyagraha differ from conventional armed rebellion?",
+        "answers": [
+          "It emphasized disciplined nonviolent resistance and moral-political pressure",
+          "It rejected all mass participation",
+          "It relied only on secret armies",
+          "It avoided public protest"
+        ],
+        "correct": 0,
+        "explanation": "Satyagraha sought to mobilize people through nonviolent resistance, civil disobedience and moral discipline rather than armed insurrection.",
+        "hint": "Focus on method and ethics."
+      },
+      {
+        "id": "FR4",
+        "difficulty": "Medium",
+        "question": "The Non-Cooperation Movement was suspended in 1922 largely because of what?",
+        "answers": [
+          "Violence at Chauri Chaura conflicted with Gandhi's commitment to nonviolence",
+          "India had already achieved independence",
+          "The Simon Commission accepted all demands",
+          "World War II ended"
+        ],
+        "correct": 0,
+        "explanation": "After protesters killed policemen at Chauri Chaura, Gandhi suspended the movement because he believed mass struggle had to remain nonviolent.",
+        "hint": "The trigger was a violent local incident."
+      },
+      {
+        "id": "FR5",
+        "difficulty": "Medium",
+        "question": "Why was the Salt March politically powerful?",
+        "answers": [
+          "It turned an everyday taxed commodity into a symbol of colonial control and mass civil disobedience",
+          "Salt had no economic relevance",
+          "It was a secret military operation",
+          "It focused only on princely succession"
+        ],
+        "correct": 0,
+        "explanation": "The 1930 march dramatized colonial taxation through salt, an everyday necessity, and encouraged widespread participation in civil disobedience.",
+        "hint": "Think symbolic issue + mass participation."
+      },
+      {
+        "id": "FR6",
+        "difficulty": "Medium",
+        "question": "What was one major feature of the Quit India Movement of 1942?",
+        "answers": [
+          "A call for immediate British withdrawal amid wartime conditions and widespread protest",
+          "Support for permanent colonial rule",
+          "A campaign to restore the Mughal Empire",
+          "A movement limited to one university"
+        ],
+        "correct": 0,
+        "explanation": "The Congress launched Quit India during World War II demanding an end to British rule. Leaders were quickly arrested, but protests spread in many regions.",
+        "hint": "Consider the wartime context."
+      },
+      {
+        "id": "FR7",
+        "difficulty": "Advanced",
+        "question": "Why is it misleading to describe the freedom struggle as the work of only one organization or leader?",
+        "answers": [
+          "It involved varied movements, regions, ideologies, social groups and political strategies",
+          "Only one person participated",
+          "All groups agreed on every issue",
+          "Regional movements had no impact"
+        ],
+        "correct": 0,
+        "explanation": "India's anti-colonial struggle included Congress politics, revolutionary groups, peasant and labor mobilization, social reform, regional movements and other organizations with differing goals and methods.",
+        "hint": "Look for diversity of actors and strategies."
+      },
+      {
+        "id": "FR8",
+        "difficulty": "Advanced",
+        "question": "How did constitutional reforms under colonial rule affect nationalist politics?",
+        "answers": [
+          "They expanded limited representation while also creating new arenas for contest over franchise, federalism and power",
+          "They transferred complete sovereignty immediately",
+          "They ended political debate",
+          "They abolished legislatures"
+        ],
+        "correct": 0,
+        "explanation": "Reforms such as the 1909, 1919 and 1935 Acts created limited representative institutions that nationalists used and criticized, shaping debates over future government.",
+        "hint": "Think partial reform rather than full self-rule."
+      },
+      {
+        "id": "FR9",
+        "difficulty": "Advanced",
+        "question": "Why should historians study participation by peasants, workers, women and marginalized communities separately?",
+        "answers": [
+          "Different groups could join national movements for distinct local grievances and aspirations",
+          "All participants had identical motives",
+          "Only elite speeches count as evidence",
+          "Local issues were unrelated to nationalism"
+        ],
+        "correct": 0,
+        "explanation": "Mass participation was shaped by local economic, social and political conditions, so the meaning of nationalism varied among communities.",
+        "hint": "National movements can carry different meanings for different participants."
+      },
+      {
+        "id": "FR10",
+        "difficulty": "Advanced",
+        "question": "Why is Partition in 1947 central to understanding independence?",
+        "answers": [
+          "Independence coincided with territorial division, mass migration and communal violence, shaping the new states profoundly",
+          "Partition occurred decades after independence",
+          "It affected no civilians",
+          "It created no new international borders"
+        ],
+        "correct": 0,
+        "explanation": "The end of British rule also brought Partition, displacement and violence affecting millions, making independence both a political achievement and a human catastrophe.",
+        "hint": "Consider both state formation and human consequences."
+      }
+    ],
+    "indian-monuments": [
+      {
+        "id": "MO1",
+        "difficulty": "Medium",
+        "question": "Why is the Qutub Minar complex historically important beyond the tower itself?",
+        "answers": [
+          "It contains layers of construction and reuse reflecting early Delhi Sultanate political and architectural change",
+          "It was built entirely in one modern year",
+          "It is a Harappan city",
+          "It contains no inscriptions"
+        ],
+        "correct": 0,
+        "explanation": "The complex includes multiple structures, inscriptions and phases of construction that reveal changing patronage and architectural practice in early Sultanate Delhi.",
+        "hint": "Think of monuments as layered sites."
+      },
+      {
+        "id": "MO2",
+        "difficulty": "Medium",
+        "question": "What makes the Brihadisvara Temple a major example of Chola architecture?",
+        "answers": [
+          "Its monumental stone temple form, inscriptions and royal patronage under Rajaraja I",
+          "Its Gothic stained glass",
+          "Its Mughal charbagh plan",
+          "Its modern steel frame"
+        ],
+        "correct": 0,
+        "explanation": "The temple's scale, vimana, sculpture and inscriptions demonstrate Chola engineering, ritual patronage and royal power.",
+        "hint": "Focus on South Indian temple architecture."
+      },
+      {
+        "id": "MO3",
+        "difficulty": "Medium",
+        "question": "Why is Sanchi important to the history of Buddhist architecture?",
+        "answers": [
+          "Its stupas, gateways and reliefs show changing Buddhist patronage and visual storytelling",
+          "It is a Mughal fort",
+          "It is a Chola port",
+          "It was built as a colonial railway station"
+        ],
+        "correct": 0,
+        "explanation": "Sanchi preserves stupas and elaborately carved gateways developed through multiple phases, making it crucial for studying Buddhist art and patronage.",
+        "hint": "Think stupas and reliefs."
+      },
+      {
+        "id": "MO4",
+        "difficulty": "Medium",
+        "question": "What is a key architectural idea behind Mughal charbagh gardens?",
+        "answers": [
+          "Geometric division using paths and water channels",
+          "Irregular streets with no planning",
+          "Circular Roman amphitheaters",
+          "Only defensive walls"
+        ],
+        "correct": 0,
+        "explanation": "Charbagh layouts divide space into ordered garden sections with water and paths, combining aesthetic and symbolic ideas.",
+        "hint": "Look for geometry and water."
+      },
+      {
+        "id": "MO5",
+        "difficulty": "Medium",
+        "question": "Why are inscriptions on monuments useful?",
+        "answers": [
+          "They can identify patrons, dates, dedications and political messages",
+          "They always provide complete objective histories",
+          "They are decorative only",
+          "They cannot be dated"
+        ],
+        "correct": 0,
+        "explanation": "Monument inscriptions often record patronage, construction, religious dedication and public claims, though their perspective must be considered.",
+        "hint": "Think of inscriptions as contextual evidence."
+      },
+      {
+        "id": "MO6",
+        "difficulty": "Medium",
+        "question": "What distinguishes rock-cut architecture such as Ajanta or Ellora from structural buildings?",
+        "answers": [
+          "Spaces are excavated from living rock rather than assembled primarily from separate masonry blocks",
+          "They use no tools",
+          "They are built only from wood",
+          "They have no sculpture"
+        ],
+        "correct": 0,
+        "explanation": "Rock-cut architecture creates halls, shrines and sculptures by excavating into cliffs, requiring different engineering and planning from freestanding construction.",
+        "hint": "The building is carved out, not built up."
+      },
+      {
+        "id": "MO7",
+        "difficulty": "Advanced",
+        "question": "Why can a monument have multiple historical meanings over time?",
+        "answers": [
+          "Later communities may reuse, reinterpret, conserve or contest the site in new political and cultural contexts",
+          "A monument's meaning never changes",
+          "Only the original patron matters",
+          "Visitors have no role in heritage"
+        ],
+        "correct": 0,
+        "explanation": "Monuments acquire new associations as regimes, communities and conservation practices change, so heritage is often layered and contested.",
+        "hint": "Think beyond the moment of construction."
+      },
+      {
+        "id": "MO8",
+        "difficulty": "Advanced",
+        "question": "What is the best way to compare Nagara and Dravida temple traditions?",
+        "answers": [
+          "Compare characteristic plans and superstructures while recognizing regional variation and mixed forms",
+          "Treat every northern and southern temple as identical",
+          "Assume one style replaced the other everywhere",
+          "Use only modern state borders"
+        ],
+        "correct": 0,
+        "explanation": "The broad labels identify recurring architectural tendencies, but actual temples show regional variation, chronology and hybrid features.",
+        "hint": "Architectural categories are useful but not absolute."
+      },
+      {
+        "id": "MO9",
+        "difficulty": "Advanced",
+        "question": "Why is conservation of historic monuments technically difficult?",
+        "answers": [
+          "Materials weather differently, earlier repairs may cause damage, and conservation must balance stability with authenticity",
+          "Old buildings never deteriorate",
+          "Replacing all original material is always preferred",
+          "Climate has no effect on stone"
+        ],
+        "correct": 0,
+        "explanation": "Conservation requires understanding material decay, previous interventions, structural safety and historical integrity rather than simply making a monument look new.",
+        "hint": "Think preservation, not reconstruction alone."
+      },
+      {
+        "id": "MO10",
+        "difficulty": "Advanced",
+        "question": "How can architecture communicate political authority?",
+        "answers": [
+          "Scale, location, inscriptions, ceremonial routes and costly materials can project legitimacy and power",
+          "Buildings cannot communicate political ideas",
+          "Only written constitutions express authority",
+          "Monuments are unrelated to patronage"
+        ],
+        "correct": 0,
+        "explanation": "Rulers and institutions often use monumental form, urban placement and decoration to make authority visible and memorable.",
+        "hint": "Consider architecture as public messaging."
+      }
+    ],
+    "indian-art-culture": [
+      {
+        "id": "AC1",
+        "difficulty": "Medium",
+        "question": "Why are Indian classical dance traditions both historical and living forms?",
+        "answers": [
+          "They draw on older repertoires and texts while performers continually reinterpret them",
+          "They have remained completely unchanged for thousands of years",
+          "They exist only in museums",
+          "They have no regional traditions"
+        ],
+        "correct": 0,
+        "explanation": "Classical dance forms carry inherited techniques and narratives, yet performance, teaching and repertoire continue to evolve in modern contexts.",
+        "hint": "Living traditions change while preserving continuity."
+      },
+      {
+        "id": "AC2",
+        "difficulty": "Medium",
+        "question": "What is the basic distinction between raga and tala in Indian classical music?",
+        "answers": [
+          "Raga organizes melodic possibilities, while tala organizes rhythmic cycles",
+          "Both mean exactly the same thing",
+          "Raga is only an instrument and tala only a dance",
+          "Tala describes architecture"
+        ],
+        "correct": 0,
+        "explanation": "Raga provides a melodic framework and characteristic movement, while tala structures rhythm through recurring cycles.",
+        "hint": "Think melody versus rhythm."
+      },
+      {
+        "id": "AC3",
+        "difficulty": "Medium",
+        "question": "Why are miniature paintings useful cultural sources?",
+        "answers": [
+          "They reveal patronage, costume, court life, literary themes and artistic conventions",
+          "They provide exact photographs",
+          "They contain no symbolic content",
+          "They were all produced by one workshop"
+        ],
+        "correct": 0,
+        "explanation": "Miniatures can illuminate courtly culture and artistic exchange, although they are composed images shaped by patronage and style.",
+        "hint": "Treat images as interpreted representations."
+      },
+      {
+        "id": "AC4",
+        "difficulty": "Medium",
+        "question": "What is one reason handloom and craft traditions vary strongly by region?",
+        "answers": [
+          "Local materials, climate, patronage, community skills and trade histories shape production",
+          "Every region uses identical fibers and techniques",
+          "Crafts developed without social context",
+          "Modern borders created all techniques"
+        ],
+        "correct": 0,
+        "explanation": "Textiles and crafts reflect locally available materials, inherited specialist knowledge, markets and patronage, producing distinctive regional traditions.",
+        "hint": "Culture is shaped by environment and social history."
+      },
+      {
+        "id": "AC5",
+        "difficulty": "Medium",
+        "question": "Why is oral transmission important in many performing arts?",
+        "answers": [
+          "Knowledge can be taught through demonstration, memory and teacher-student practice beyond written notation",
+          "Oral traditions contain no structured knowledge",
+          "Only printed books can transmit technique",
+          "Performance cannot be learned socially"
+        ],
+        "correct": 0,
+        "explanation": "Many music, dance and storytelling traditions rely heavily on embodied teaching and memory, often alongside written or recorded resources.",
+        "hint": "Think about learning through performance."
+      },
+      {
+        "id": "AC6",
+        "difficulty": "Medium",
+        "question": "What does the diversity of Indian painting traditions demonstrate?",
+        "answers": [
+          "Art developed through multiple regional courts, communities, religious settings and markets",
+          "There was only one national style in every era",
+          "Painting was absent outside Delhi",
+          "All traditions used identical materials"
+        ],
+        "correct": 0,
+        "explanation": "Schools and traditions such as Mughal, Rajput, Pahari, Deccani, folk and tribal arts reflect varied patronage and visual cultures.",
+        "hint": "Look for regional plurality."
+      },
+      {
+        "id": "AC7",
+        "difficulty": "Advanced",
+        "question": "Why should historians be cautious when labeling a tradition 'unchanged' or 'pure'?",
+        "answers": [
+          "Cultural forms often adapt through migration, patronage, technology and exchange",
+          "Traditions never interact",
+          "Any change destroys authenticity",
+          "Historical evidence shows no cultural borrowing"
+        ],
+        "correct": 0,
+        "explanation": "Living traditions evolve. Exchange and adaptation are part of cultural history, so claims of complete purity can oversimplify complex processes.",
+        "hint": "Think of continuity and change together."
+      },
+      {
+        "id": "AC8",
+        "difficulty": "Advanced",
+        "question": "How can patronage shape artistic style?",
+        "answers": [
+          "Patrons influence themes, resources, workshop organization and audiences while artists also exercise creativity",
+          "Patrons have no effect on production",
+          "Artists never respond to markets",
+          "Style is determined only by climate"
+        ],
+        "correct": 0,
+        "explanation": "Court, temple, community and market patronage can affect subjects, materials and scale, but artistic choices also emerge from workshop traditions and individual innovation.",
+        "hint": "Art is produced within institutions and relationships."
+      },
+      {
+        "id": "AC9",
+        "difficulty": "Advanced",
+        "question": "Why is intangible cultural heritage harder to preserve than a stone monument?",
+        "answers": [
+          "It depends on active practitioners, transmission and social contexts rather than only physical conservation",
+          "It cannot be documented",
+          "It never changes",
+          "It requires no community participation"
+        ],
+        "correct": 0,
+        "explanation": "Music, dance, ritual and craft skills survive through people and practice. Preservation therefore requires supporting communities and transmission, not only objects.",
+        "hint": "Living heritage exists through practice."
+      },
+      {
+        "id": "AC10",
+        "difficulty": "Advanced",
+        "question": "What is a responsible way to present regional cultural traditions on an educational platform?",
+        "answers": [
+          "Give context, acknowledge diversity within communities and avoid treating one version as the only authentic form",
+          "Present stereotypes as universal facts",
+          "Remove all regional names",
+          "Assume every practice has one origin story"
+        ],
+        "correct": 0,
+        "explanation": "Cultural traditions often contain internal variation. Good educational design explains context and avoids flattening complex communities into stereotypes.",
+        "hint": "Think accuracy plus respect for diversity."
+      }
+    ],
+    "indian-festivals": [
+      {
+        "id": "FE1",
+        "difficulty": "Medium",
+        "question": "Why do many Indian festivals have different regional forms?",
+        "answers": [
+          "Local histories, languages, agricultural cycles and community traditions shape celebration",
+          "Every region follows one identical ritual",
+          "Festivals are unrelated to geography",
+          "Regional practices were created only after 2000"
+        ],
+        "correct": 0,
+        "explanation": "Shared festival names can encompass distinct foods, rituals, stories and calendars because communities adapt celebrations to local histories and environments.",
+        "hint": "Think diversity within shared traditions."
+      },
+      {
+        "id": "FE2",
+        "difficulty": "Medium",
+        "question": "What explains the agricultural significance of harvest festivals such as Pongal or Bihu?",
+        "answers": [
+          "They mark seasonal cycles and express gratitude around cultivation and harvest",
+          "They are unrelated to rural economies",
+          "They celebrate industrial production",
+          "They occur only in deserts"
+        ],
+        "correct": 0,
+        "explanation": "Harvest festivals are tied to seasonal agriculture, livestock, community feasting and gratitude for production.",
+        "hint": "Connect festival timing with farming cycles."
+      },
+      {
+        "id": "FE3",
+        "difficulty": "Medium",
+        "question": "Why can the date of some Indian festivals vary each year on the Gregorian calendar?",
+        "answers": [
+          "Many are calculated using lunar or lunisolar calendars",
+          "No calendar system is used",
+          "Dates are chosen randomly",
+          "All festivals follow only the solar Gregorian calendar"
+        ],
+        "correct": 0,
+        "explanation": "Several festivals use regional lunar or lunisolar calendars, so their Gregorian dates shift from year to year.",
+        "hint": "Think calendar systems."
+      },
+      {
+        "id": "FE4",
+        "difficulty": "Medium",
+        "question": "What does the celebration of Onam reveal about festivals as cultural narratives?",
+        "answers": [
+          "Festivals can combine seasonal, regional and legendary traditions into community identity",
+          "Festivals have no stories",
+          "Only one religious text defines all regional festivals",
+          "Seasonal food is never part of festivals"
+        ],
+        "correct": 0,
+        "explanation": "Onam combines Kerala's seasonal and cultural practices with narratives associated with Mahabali, showing how festivals carry layered meanings.",
+        "hint": "Look for a regional festival with multiple cultural dimensions."
+      },
+      {
+        "id": "FE5",
+        "difficulty": "Medium",
+        "question": "Why are foods important in festival traditions?",
+        "answers": [
+          "They connect seasonality, local ingredients, ritual practice and family or community memory",
+          "Food is unrelated to culture",
+          "Every festival requires the same dish",
+          "Festival foods have no regional variation"
+        ],
+        "correct": 0,
+        "explanation": "Festival foods often reflect local crops, ritual meanings and shared memory, making cuisine a major part of living heritage.",
+        "hint": "Food can be both symbolic and seasonal."
+      },
+      {
+        "id": "FE6",
+        "difficulty": "Medium",
+        "question": "What is a good way to compare Diwali celebrations across India?",
+        "answers": [
+          "Identify shared themes while also documenting regional stories, calendars and practices",
+          "Assume every household performs identical rituals",
+          "Treat one city's customs as national rules",
+          "Ignore local languages"
+        ],
+        "correct": 0,
+        "explanation": "Diwali has widely shared associations with light and renewal, but meanings and ritual emphases vary across regions and communities.",
+        "hint": "Compare commonality and variation."
+      },
+      {
+        "id": "FE7",
+        "difficulty": "Advanced",
+        "question": "Why should an educational game avoid presenting festivals as belonging to only one fixed community when evidence is more complex?",
+        "answers": [
+          "Festivals often have overlapping regional, social and historical participation",
+          "Cultural participation never changes",
+          "Communities do not interact",
+          "Historical context is irrelevant"
+        ],
+        "correct": 0,
+        "explanation": "Many festivals are shared, adapted or interpreted by different communities. A careful platform should reflect that complexity rather than oversimplify identity.",
+        "hint": "Think inclusive historical context."
+      },
+      {
+        "id": "FE8",
+        "difficulty": "Advanced",
+        "question": "How can festival processions be studied historically?",
+        "answers": [
+          "As public performances shaped by space, patronage, community organization and changing political contexts",
+          "Only as entertainment with no social meaning",
+          "As evidence that cities never change",
+          "Without considering routes or participants"
+        ],
+        "correct": 0,
+        "explanation": "Processions use public space and can express community identity, patronage and politics, so historians examine routes, organizers and historical change.",
+        "hint": "Public ritual interacts with social space."
+      },
+      {
+        "id": "FE9",
+        "difficulty": "Advanced",
+        "question": "What is one challenge in documenting living festivals?",
+        "answers": [
+          "Practices can vary by family, locality and generation, so a single description may be incomplete",
+          "Every practice is identical everywhere",
+          "Oral accounts are never useful",
+          "Modern media cannot affect traditions"
+        ],
+        "correct": 0,
+        "explanation": "Living traditions are dynamic and locally varied. Documentation should record multiple voices and recognize change over time.",
+        "hint": "Avoid assuming one universal version."
+      },
+      {
+        "id": "FE10",
+        "difficulty": "Advanced",
+        "question": "Why can environmental concerns become part of contemporary festival practice?",
+        "answers": [
+          "Communities may adapt materials and rituals in response to pollution, waste and ecological awareness",
+          "Traditions cannot ever change",
+          "Environmental effects are unrelated to public celebrations",
+          "Only governments can influence practice"
+        ],
+        "correct": 0,
+        "explanation": "Modern communities sometimes modify materials, immersion practices, lighting or waste management while negotiating continuity and environmental responsibility.",
+        "hint": "Living heritage responds to present-day challenges."
+      }
+    ],
+    "states-of-india": [
+      {
+        "id": "ST1",
+        "difficulty": "Medium",
+        "question": "Why does India's physical geography contribute to strong regional diversity?",
+        "answers": [
+          "Mountains, plateaus, plains, coasts and climate zones create different ecological and economic conditions",
+          "The entire country has identical terrain",
+          "Rivers have no effect on settlement",
+          "Climate is uniform from Kashmir to Kerala"
+        ],
+        "correct": 0,
+        "explanation": "India spans major mountain systems, river plains, plateaus, deserts and long coastlines, producing varied climates, crops, settlement patterns and cultural landscapes.",
+        "hint": "Think about terrain and climate."
+      },
+      {
+        "id": "ST2",
+        "difficulty": "Medium",
+        "question": "Why do state boundaries in India not perfectly match language or culture?",
+        "answers": [
+          "States were formed through historical, linguistic, administrative and political processes, and cultural regions often overlap",
+          "Every boundary follows one language exactly",
+          "States were fixed in ancient times",
+          "Culture ends sharply at state borders"
+        ],
+        "correct": 0,
+        "explanation": "Linguistic reorganization mattered greatly, but boundaries also reflect historical states, administrative choices and mixed populations.",
+        "hint": "Political borders and cultural regions are not identical."
+      },
+      {
+        "id": "ST3",
+        "difficulty": "Medium",
+        "question": "Which geographic factor most strongly explains the dense settlement of the Indo-Gangetic plain?",
+        "answers": [
+          "Fertile alluvial soils and major river systems",
+          "Absence of water",
+          "Permanent snow cover",
+          "Lack of agricultural land"
+        ],
+        "correct": 0,
+        "explanation": "Fertile alluvial soils, water availability and transport routes supported intensive agriculture and large populations.",
+        "hint": "Focus on river plains."
+      },
+      {
+        "id": "ST4",
+        "difficulty": "Medium",
+        "question": "Why are coastal states historically important to Indian Ocean trade?",
+        "answers": [
+          "Ports linked inland production with overseas commercial networks",
+          "Coasts prevented sea travel",
+          "Trade occurred only across Himalayan passes",
+          "Ports had no relation to cities"
+        ],
+        "correct": 0,
+        "explanation": "Ports on the Arabian Sea and Bay of Bengal connected Indian regions with West Asia, East Africa and Southeast Asia for centuries.",
+        "hint": "Think maritime connectivity."
+      },
+      {
+        "id": "ST5",
+        "difficulty": "Medium",
+        "question": "What is a major reason the Western Ghats are environmentally significant?",
+        "answers": [
+          "They are a biodiversity hotspot influencing rainfall and river systems",
+          "They are a desert with no endemic species",
+          "They contain no forests",
+          "They lie outside India"
+        ],
+        "correct": 0,
+        "explanation": "The Western Ghats contain high biodiversity and strongly affect monsoon rainfall and watersheds across peninsular India.",
+        "hint": "Connect mountains with ecology and rainfall."
+      },
+      {
+        "id": "ST6",
+        "difficulty": "Medium",
+        "question": "Why do northeastern states show exceptional linguistic and cultural diversity?",
+        "answers": [
+          "Long histories of multiple communities, migration, mountain geography and cross-border connections",
+          "All residents share one language",
+          "The region had no historical trade",
+          "Mountains always eliminate diversity"
+        ],
+        "correct": 0,
+        "explanation": "The northeast contains many communities and language families shaped by complex histories and trans-Himalayan and Southeast Asian connections.",
+        "hint": "Think multiple communities and borderland history."
+      },
+      {
+        "id": "ST7",
+        "difficulty": "Advanced",
+        "question": "Why is it misleading to use present-day state borders to explain all premodern history?",
+        "answers": [
+          "Modern boundaries are recent, while earlier kingdoms, trade zones and cultural regions crossed them",
+          "Modern states existed unchanged for thousands of years",
+          "Premodern people never traveled",
+          "All historical sources use current maps"
+        ],
+        "correct": 0,
+        "explanation": "Current states are administrative units formed in modern times. Earlier political and cultural geographies often cut across today's boundaries.",
+        "hint": "Avoid projecting modern maps backward."
+      },
+      {
+        "id": "ST8",
+        "difficulty": "Advanced",
+        "question": "How can a river function as both a unifying and dividing feature between states?",
+        "answers": [
+          "It supports shared economies and ecosystems but can also generate disputes over water allocation",
+          "Rivers have no political importance",
+          "A river always belongs to one district only",
+          "Water cannot cross boundaries"
+        ],
+        "correct": 0,
+        "explanation": "River basins link regions ecologically and economically, while competing irrigation, urban and power needs can create interstate disputes.",
+        "hint": "One resource can connect and create conflict."
+      },
+      {
+        "id": "ST9",
+        "difficulty": "Advanced",
+        "question": "Why is a state's official language not a complete description of its linguistic reality?",
+        "answers": [
+          "States can contain many languages, dialects and minority communities",
+          "Official languages are the only languages spoken",
+          "Migration never changes language use",
+          "Dialects do not exist"
+        ],
+        "correct": 0,
+        "explanation": "Administrative language policy simplifies a much richer linguistic landscape shaped by minority languages, dialects and migration.",
+        "hint": "Policy categories are not the same as lived diversity."
+      },
+      {
+        "id": "ST10",
+        "difficulty": "Advanced",
+        "question": "What is the best way to teach state-level culture without stereotyping?",
+        "answers": [
+          "Present multiple regions, communities and historical layers within each state",
+          "Assign one food, dress and dance as the state's only identity",
+          "Ignore urban change and migration",
+          "Assume culture never changes"
+        ],
+        "correct": 0,
+        "explanation": "States are internally diverse. Responsible teaching presents several traditions and explains how migration, cities and history shape cultural life.",
+        "hint": "Avoid reducing complex regions to one symbol."
+      }
+    ],
+    "famous-personalities": [
+      {
+        "id": "FP1",
+        "difficulty": "Medium",
+        "question": "Why is B. R. Ambedkar central to the history of modern India?",
+        "answers": [
+          "He was a leading anti-caste thinker, jurist and key figure in constitution-making",
+          "He founded the Maurya Empire",
+          "He built the Taj Mahal",
+          "He led the Chola navy"
+        ],
+        "correct": 0,
+        "explanation": "Ambedkar combined scholarship, legal work, social reform and political leadership, and chaired the Constitution's Drafting Committee.",
+        "hint": "Think social justice and constitution-making."
+      },
+      {
+        "id": "FP2",
+        "difficulty": "Medium",
+        "question": "What made Savitribai Phule's work historically significant?",
+        "answers": [
+          "She pioneered girls' education and challenged caste and gender exclusion",
+          "She served as a Mughal emperor",
+          "She discovered the Indus Valley Civilization",
+          "She designed India Gate"
+        ],
+        "correct": 0,
+        "explanation": "Savitribai Phule, with Jyotirao Phule and others, advanced education for girls and marginalized communities and opposed caste and gender discrimination.",
+        "hint": "Focus on education and social reform."
+      },
+      {
+        "id": "FP3",
+        "difficulty": "Medium",
+        "question": "Why is Rabindranath Tagore important beyond literature?",
+        "answers": [
+          "His work also engaged education, music, art and debates on nationalism and humanism",
+          "He was only a military commander",
+          "He served as a Mauryan governor",
+          "He invented the steam engine"
+        ],
+        "correct": 0,
+        "explanation": "Tagore was a poet, composer, educator and thinker whose institutions and writings addressed culture, education and nationalism.",
+        "hint": "Look for interdisciplinary cultural influence."
+      },
+      {
+        "id": "FP4",
+        "difficulty": "Medium",
+        "question": "What is C. V. Raman best known for?",
+        "answers": [
+          "Research on light scattering that led to the Raman effect",
+          "Discovery of penicillin",
+          "Building the first Indian railway",
+          "Writing the Arthashastra"
+        ],
+        "correct": 0,
+        "explanation": "Raman's work on the scattering of light led to the Raman effect and the 1930 Nobel Prize in Physics.",
+        "hint": "Think optics."
+      },
+      {
+        "id": "FP5",
+        "difficulty": "Medium",
+        "question": "Why is Rani Lakshmibai remembered in the history of 1857?",
+        "answers": [
+          "She became a prominent leader of resistance in Jhansi during the uprising",
+          "She negotiated the 1935 Government of India Act",
+          "She was a Gupta queen",
+          "She founded the Indian National Congress"
+        ],
+        "correct": 0,
+        "explanation": "Rani Lakshmibai led resistance in Jhansi during the 1857 uprising and became an enduring symbol of anti-colonial courage.",
+        "hint": "Connect her with Jhansi and 1857."
+      },
+      {
+        "id": "FP6",
+        "difficulty": "Medium",
+        "question": "What is one reason Sardar Vallabhbhai Patel is significant after 1947?",
+        "answers": [
+          "He played a major role in integrating princely states into the Indian Union",
+          "He founded the East India Company",
+          "He wrote the Vedas",
+          "He ruled the Vijayanagara Empire"
+        ],
+        "correct": 0,
+        "explanation": "As deputy prime minister and home minister, Patel worked with officials including V. P. Menon on the accession and integration of princely states.",
+        "hint": "Think post-independence political integration."
+      },
+      {
+        "id": "FP7",
+        "difficulty": "Advanced",
+        "question": "Why should historical biographies avoid presenting major figures as acting alone?",
+        "answers": [
+          "Political and social change depends on institutions, collaborators, opponents and wider movements",
+          "Individuals never influence history",
+          "Only crowds matter",
+          "Biographies should exclude context"
+        ],
+        "correct": 0,
+        "explanation": "Even influential individuals operate within networks, institutions and historical conditions. Context prevents 'great person' narratives from oversimplifying change.",
+        "hint": "Think agency plus context."
+      },
+      {
+        "id": "FP8",
+        "difficulty": "Advanced",
+        "question": "How can historians evaluate conflicting accounts of a political leader?",
+        "answers": [
+          "Compare speeches, letters, official records, contemporary criticism and later scholarship",
+          "Use only the leader's autobiography",
+          "Accept the most popular internet claim",
+          "Ignore chronology"
+        ],
+        "correct": 0,
+        "explanation": "Triangulating multiple primary and secondary sources helps distinguish self-representation, criticism and evidence from later interpretation.",
+        "hint": "Use source comparison."
+      },
+      {
+        "id": "FP9",
+        "difficulty": "Advanced",
+        "question": "Why is it useful to study reformers such as Periyar, Narayana Guru, Phule or Pandita Ramabai in regional context?",
+        "answers": [
+          "Their ideas responded to specific social structures while also contributing to wider debates on caste, gender and equality",
+          "All reform movements were identical",
+          "Regional history is irrelevant",
+          "They worked without organizations or audiences"
+        ],
+        "correct": 0,
+        "explanation": "Reform movements emerged from particular regional social conditions, languages and institutions, even when addressing broader issues.",
+        "hint": "Local context shapes wider ideas."
+      },
+      {
+        "id": "FP10",
+        "difficulty": "Advanced",
+        "question": "What makes a person's 'legacy' historically contested?",
+        "answers": [
+          "Later generations can emphasize different actions, ideas and consequences based on new evidence and political values",
+          "A legacy is fixed forever at death",
+          "Historical interpretation never changes",
+          "Only monuments determine legacy"
+        ],
+        "correct": 0,
+        "explanation": "Legacies are constructed through memory, scholarship, commemoration and political debate, so interpretations can change over time.",
+        "hint": "Think historical memory and reinterpretation."
+      }
+    ]
+  },
+  "achievements": [
+    {
+      "name": "History Explorer",
+      "icon": "Medal",
+      "detail": "Completed 5 chapters",
+      "current": 5,
+      "target": 5,
+      "unlocked": true
+    },
+    {
+      "name": "Quiz Master",
+      "icon": "Trophy",
+      "detail": "Answered 100 questions",
+      "current": 100,
+      "target": 100,
+      "unlocked": true
+    },
+    {
+      "name": "Culture Champ",
+      "icon": "Star",
+      "detail": "Completed culture challenges",
+      "current": 6,
+      "target": 6,
+      "unlocked": true
+    },
+    {
+      "name": "Puzzle Pro",
+      "icon": "Puzzle",
+      "detail": "Solved 20 puzzles",
+      "current": 12,
+      "target": 20,
+      "unlocked": false
+    },
+    {
+      "name": "Streak Star",
+      "icon": "Flame",
+      "detail": "Played for 7 days",
+      "current": 4,
+      "target": 7,
+      "unlocked": false
+    },
+    {
+      "name": "Heritage Guardian",
+      "icon": "Map",
+      "detail": "Explored every category",
+      "current": 7,
+      "target": 8,
+      "unlocked": false
+    }
+  ],
+  "leaderboard": [
+    {
+      "rank": 1,
+      "name": "Aarav",
+      "points": 1850,
+      "badges": 9,
+      "streak": 11
+    },
+    {
+      "rank": 2,
+      "name": "Diya",
+      "points": 1720,
+      "badges": 7,
+      "streak": 8
+    },
+    {
+      "rank": 3,
+      "name": "Karthik",
+      "points": 1680,
+      "badges": 6,
+      "streak": 6
+    },
+    {
+      "rank": 4,
+      "name": "Oviya",
+      "points": 1620,
+      "badges": 5,
+      "streak": 4,
+      "current": true
+    },
+    {
+      "rank": 5,
+      "name": "Sneha",
+      "points": 1590,
+      "badges": 5,
+      "streak": 7
+    },
+    {
+      "rank": 6,
+      "name": "Rohan",
+      "points": 1540,
+      "badges": 4,
+      "streak": 3
+    },
+    {
+      "rank": 7,
+      "name": "Meera",
+      "points": 1500,
+      "badges": 4,
+      "streak": 5
+    }
+  ]
+}
