@@ -16,7 +16,8 @@ import {
   Eye,
 } from "lucide-react";
 import { learningTopics } from "../data/content";
-import { api, saveLocalProgress } from "../lib/api";
+import { api } from "../lib/api";
+import { usePlayer } from "../context/PlayerContext";
 import { Badge, Button, ProgressBar, useToast } from "../components/ui";
 
 export default function QuizGame() {
@@ -37,20 +38,24 @@ export default function QuizGame() {
   const [hint, setHint] = useState(false);
   const [answers, setAnswers] = useState([]);
   const toast = useToast();
+  const { player, saveProgress, getProgress } = usePlayer();
+  const [restored, setRestored] = useState(false);
 
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError("");
-    setIndex(0);
+    const saved = getProgress(`quiz:${chapterSlug}`, null);
+    setIndex(saved?.index || 0);
     setSelected(null);
     setResult(null);
-    setFinished(false);
+    setFinished(Boolean(saved?.finished));
     setReviewing(false);
-    setAnswers([]);
-    setScore(0);
-    setXp(0);
-    setCoins(50);
+    setAnswers(saved?.answers || []);
+    setScore(saved?.score || 0);
+    setXp(saved?.xp || 0);
+    setCoins(saved?.coins ?? 50);
+    setRestored(Boolean(saved));
     api(`/chapters/${chapterSlug}/questions`)
       .then((data) => {
         if (active) setQuestions(data.questions || []);
@@ -65,10 +70,10 @@ export default function QuizGame() {
     return () => {
       active = false;
     };
-  }, [chapterSlug]);
+  }, [chapterSlug, getProgress]);
 
   useEffect(() => {
-    saveLocalProgress(`quiz:${chapterSlug}`, {
+    saveProgress(`quiz:${chapterSlug}`, {
       index,
       score,
       xp,
@@ -76,7 +81,7 @@ export default function QuizGame() {
       finished,
       answers,
     });
-  }, [chapterSlug, index, score, xp, coins, finished, answers]);
+  }, [chapterSlug, index, score, xp, coins, finished, answers, saveProgress]);
 
   const q = questions[index];
   const progress = useMemo(
@@ -267,7 +272,9 @@ export default function QuizGame() {
             <ArrowLeft className="h-4 w-4" /> Exit
           </Link>
           <div className="text-center">
-            <div className="text-xs font-bold text-white/60">{topic.title}</div>
+            <div className="text-xs font-bold text-white/60">
+              {player?.name} · {topic.title}
+            </div>
             <div className="text-sm font-extrabold">
               Question {index + 1} of {questions.length}
             </div>
@@ -285,6 +292,11 @@ export default function QuizGame() {
           value={progress}
           className="mt-5 [&>div]:bg-white/15 [&>div>div]:bg-heritage-gold"
         />
+        {restored && index > 0 && !finished && (
+          <div className="mt-3 rounded-xl bg-white/10 px-4 py-2 text-center text-xs font-bold text-white/75">
+            Resumed {player?.name}'s saved quest at question {index + 1}.
+          </div>
+        )}
         <div className="mt-6 overflow-hidden rounded-[2rem] bg-white shadow-2xl">
           <div className="h-2 bg-gradient-to-r from-heritage-saffron via-heritage-gold to-heritage-green" />
           <div className="p-6 sm:p-9">
