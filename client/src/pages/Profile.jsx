@@ -43,6 +43,9 @@ export default function Profile() {
           <p className="mt-1 text-sm font-semibold text-slate-500">
             Proud to Explore India’s Heritage 🇮🇳
           </p>
+          <p className="mt-2 text-xs font-bold text-slate-400">
+            Date of birth: {player?.dob || "—"}
+          </p>
           <div className="mt-6 grid grid-cols-3 gap-2">
             <Stat n={summary.completed} l="Chapters" />
             <Stat n={summary.badges} l="Badges" />
@@ -87,7 +90,7 @@ export default function Profile() {
                 </h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-white/65">
                   Every score, unfinished chapter and reward on this browser is
-                  saved separately under your explorer name.
+                  saved separately using your name and date of birth.
                 </p>
               </div>
               <div className="rounded-2xl bg-white/10 p-4 text-center">
