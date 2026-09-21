@@ -5,26 +5,32 @@ import {
   ArrowRight,
   BookOpen,
   CheckCircle2,
+  ExternalLink,
   Gamepad2,
   Lightbulb,
   HelpCircle,
 } from "lucide-react";
 import { games, learningTopics } from "../data/content";
 import { Badge, Button } from "../components/ui";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function LearnTopic() {
   const { slug } = useParams();
-  const topic =
-    learningTopics.find((t) => t.slug === slug) || learningTopics[0];
-  const related = games.find((g) => g.chapterSlug === topic.slug) || games[0];
+  const { t, localizeTopic } = useLanguage();
+  const baseTopic =
+    learningTopics.find((item) => item.slug === slug) || learningTopics[0];
+  const topic = localizeTopic(baseTopic);
+  const related = games.find((g) => g.chapterSlug === baseTopic.slug) || games[0];
+
   return (
     <div className="container-app py-10 sm:py-14">
       <Link
         to="/learn"
         className="focus-ring inline-flex items-center gap-2 rounded-xl px-2 py-2 text-sm font-bold text-slate-500 hover:text-heritage-green"
       >
-        <ArrowLeft className="h-4 w-4" /> Back to Learn
+        <ArrowLeft className="h-4 w-4" /> {t("backToLearn")}
       </Link>
+
       <article className="mt-4 overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-card">
         <div className="relative h-[320px] sm:h-[420px]">
           <img
@@ -36,77 +42,131 @@ export default function LearnTopic() {
           <div className="absolute bottom-0 left-0 right-0 p-7 text-white sm:p-10">
             <div className="flex flex-wrap gap-2">
               <Badge tone="gold">{topic.era}</Badge>
-              <Badge tone="orange">{topic.questionCount} questions</Badge>
+              {topic.studyOnly ? (
+                <Badge tone="orange">{t("studyMaterial")}</Badge>
+              ) : (
+                <Badge tone="orange">10 · {t("normalAdvanced")}</Badge>
+              )}
             </div>
             <h1 className="mt-3 font-display text-4xl font-extrabold sm:text-5xl">
               {topic.title}
             </h1>
-            <p className="mt-2 max-w-2xl text-sm text-white/75">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-white/80">
               {topic.description}
             </p>
           </div>
         </div>
-        <div className="grid gap-8 p-7 sm:p-10 lg:grid-cols-[1fr_340px]">
+
+        <div className={`grid gap-8 p-7 sm:p-10 ${topic.studyOnly ? "" : "lg:grid-cols-[1fr_340px]"}`}>
           <div>
             <div className="inline-flex items-center gap-2 text-sm font-extrabold text-heritage-green">
-              <BookOpen className="h-5 w-5" /> What you'll learn
+              <BookOpen className="h-5 w-5" /> {t("whatYouLearn")}
             </div>
-            <div className="mt-5 grid gap-3">
-              {topic.learn.map((p) => (
+
+            <div className="mt-5 grid gap-3 sm:grid-cols-2">
+              {topic.learn.map((point) => (
                 <div
-                  key={p}
+                  key={point}
                   className="flex items-start gap-3 rounded-2xl bg-heritage-cream p-4 text-sm font-semibold text-slate-700"
                 >
                   <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-heritage-green" />
-                  {p}
+                  {point}
                 </div>
               ))}
             </div>
-            <div className="mt-8 rounded-3xl border border-sky-100 bg-sky-50 p-6">
-              <div className="flex items-center gap-2 font-extrabold text-sky-900">
-                <Lightbulb className="h-5 w-5" /> Learning approach
+
+            {topic.sections?.length > 0 && (
+              <div className="mt-8 grid gap-5">
+                {topic.sections.map((section, index) => (
+                  <section
+                    key={section.title}
+                    className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+                  >
+                    <div className="text-xs font-extrabold tracking-[.14em] text-heritage-saffron">
+                      {String(index + 1).padStart(2, "0")}
+                    </div>
+                    <h2 className="mt-2 text-xl font-extrabold text-slate-950">
+                      {section.title}
+                    </h2>
+                    <p className="mt-3 text-sm leading-7 text-slate-600">
+                      {section.body}
+                    </p>
+                  </section>
+                ))}
               </div>
-              <p className="mt-2 text-sm leading-6 text-sky-900/70">
-                Heritage Quest uses medium and advanced questions focused on
-                chronology, comparison, evidence, causation and historical
-                context. Explanations appear after every answer so the quiz
-                teaches rather than only scores.
-              </p>
-            </div>
+            )}
+
+            {!topic.studyOnly && (
+              <div className="mt-8 rounded-3xl border border-sky-100 bg-sky-50 p-6">
+                <div className="flex items-center gap-2 font-extrabold text-sky-900">
+                  <Lightbulb className="h-5 w-5" /> {t("learningApproach")}
+                </div>
+                <p className="mt-2 text-sm leading-6 text-sky-900/70">
+                  Every chapter uses 10 questions: seven normal-level questions
+                  and three advanced questions. The advanced questions are mixed
+                  into the chapter rather than grouped together, and answer
+                  options are deliberately mixed.
+                </p>
+              </div>
+            )}
+
+            {topic.studyOnly && topic.sourceUrl && (
+              <div className="mt-8 rounded-3xl border border-emerald-100 bg-emerald-50 p-6">
+                <div className="text-sm font-extrabold text-emerald-950">
+                  {t("source")}
+                </div>
+                <p className="mt-2 text-sm leading-6 text-emerald-900/70">
+                  This prototype study note is a concise educational summary.
+                  Use the linked reference for the fuller source article and its
+                  citations.
+                </p>
+                <a
+                  href={topic.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="focus-ring mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-extrabold text-heritage-green shadow-sm"
+                >
+                  {t("wikipediaReference")} <ExternalLink className="h-4 w-4" />
+                </a>
+              </div>
+            )}
           </div>
-          <aside className="rounded-3xl bg-heritage-forest p-6 text-white">
-            <Gamepad2 className="h-8 w-8 text-heritage-gold" />
-            <h2 className="mt-4 text-xl font-extrabold">
-              Ready for the chapter challenge?
-            </h2>
-            <p className="mt-2 text-sm leading-6 text-white/65">
-              Answer {topic.questionCount} questions. Medium answers earn 20 XP;
-              advanced answers earn 30 XP.
-            </p>
-            <div className="mt-5 overflow-hidden rounded-2xl bg-white/10">
-              <img
-                src={related.image}
-                alt="Related game"
-                className="h-28 w-full object-cover"
-              />
-              <div className="p-4">
-                <div className="font-extrabold">{related.title}</div>
-                <div className="mt-1 text-xs text-white/60">
-                  {related.description}
+
+          {!topic.studyOnly && (
+            <aside className="rounded-3xl bg-heritage-forest p-6 text-white">
+              <Gamepad2 className="h-8 w-8 text-heritage-gold" />
+              <h2 className="mt-4 text-xl font-extrabold">
+                Ready for the chapter challenge?
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-white/65">
+                Answer 10 questions: seven normal and three advanced. Normal
+                answers earn 20 XP; advanced answers earn 30 XP.
+              </p>
+              <div className="mt-5 overflow-hidden rounded-2xl bg-white/10">
+                <img
+                  src={related.image}
+                  alt="Related game"
+                  className="h-28 w-full object-cover"
+                />
+                <div className="p-4">
+                  <div className="font-extrabold">{related.title}</div>
+                  <div className="mt-1 text-xs text-white/60">
+                    {related.description}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-100">
-              <HelpCircle className="h-4 w-4" /> Medium + Advanced only
-            </div>
-            <Button
-              as={Link}
-              to={`/play/quiz/${topic.slug}`}
-              className="mt-5 w-full"
-            >
-              Start Chapter <ArrowRight className="h-4 w-4" />
-            </Button>
-          </aside>
+              <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-100">
+                <HelpCircle className="h-4 w-4" /> {t("normalAdvanced")}
+              </div>
+              <Button
+                as={Link}
+                to={`/play/quiz/${baseTopic.slug}`}
+                className="mt-5 w-full"
+              >
+                Start Chapter <ArrowRight className="h-4 w-4" />
+              </Button>
+            </aside>
+          )}
         </div>
       </article>
     </div>
