@@ -14,12 +14,13 @@ import {
 import Logo from "./Logo";
 import { SearchBar } from "./ui";
 import { usePlayer } from "../context/PlayerContext";
+import { useLanguage } from "../context/LanguageContext";
 const links = [
-  ["Home", "/"],
-  ["Games", "/games"],
-  ["Learn", "/learn"],
-  ["Leaderboard", "/leaderboard"],
-  ["About", "/about"],
+  ["home", "/"],
+  ["games", "/games"],
+  ["learn", "/learn"],
+  ["leaderboard", "/leaderboard"],
+  ["about", "/about"],
 ];
 export function Navbar() {
   const [open, setOpen] = useState(false);
@@ -27,6 +28,7 @@ export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { player, switchPlayer } = usePlayer();
+  const { language, setLanguage, languages, t } = useLanguage();
   useEffect(() => setOpen(false), [location.pathname]);
   const submit = (e) => {
     e.preventDefault();
@@ -49,10 +51,22 @@ export function Navbar() {
                 `focus-ring rounded-xl px-4 py-2 text-sm font-bold transition ${isActive ? "bg-orange-50 text-heritage-saffron" : "text-slate-700 hover:bg-white hover:text-heritage-green"}`
               }
             >
-              {l}
+              {t(l)}
             </NavLink>
           ))}
         </nav>
+        <select
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          aria-label={t("language")}
+          className="focus-ring hidden rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 lg:block"
+        >
+          {languages.map((item) => (
+            <option key={item.code} value={item.code}>
+              {item.label}
+            </option>
+          ))}
+        </select>
         <form onSubmit={submit} className="hidden w-64 xl:block">
           <SearchBar
             value={search}
@@ -94,6 +108,22 @@ export function Navbar() {
       {open && (
         <div className="border-t border-slate-200 bg-white lg:hidden">
           <div className="container-app py-4">
+            <div className="mb-3">
+              <label className="mb-1 block text-xs font-extrabold uppercase tracking-wide text-slate-400">
+                {t("language")}
+              </label>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="focus-ring w-full rounded-xl border border-slate-200 bg-white px-3 py-3 font-bold text-slate-700"
+              >
+                {languages.map((item) => (
+                  <option key={item.code} value={item.code}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+            </div>
             <form onSubmit={submit} className="mb-3">
               <SearchBar
                 value={search}
@@ -108,14 +138,14 @@ export function Navbar() {
                   to={h}
                   className="rounded-xl px-4 py-3 font-bold text-slate-700 hover:bg-emerald-50"
                 >
-                  {l}
+                  {t(l)}
                 </NavLink>
               ))}
               <NavLink
                 to="/achievements"
                 className="rounded-xl px-4 py-3 font-bold text-slate-700 hover:bg-emerald-50"
               >
-                Achievements
+                {t("achievements")}
               </NavLink>
               <NavLink
                 to="/profile"
@@ -128,7 +158,7 @@ export function Navbar() {
                 onClick={switchPlayer}
                 className="rounded-xl px-4 py-3 text-left font-bold text-slate-700 hover:bg-orange-50 hover:text-heritage-saffron"
               >
-                Switch Explorer
+                {t("switchExplorer")}
               </button>
             </div>
           </div>
