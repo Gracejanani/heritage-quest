@@ -38,6 +38,39 @@ async function readState() {
 async function writeState(state) {
   await fs.writeFile(stateFile, JSON.stringify(state, null, 2))
 }
+const ADVANCED_QUESTION_INDEXES = new Set([3, 6, 9]) // Q4, Q7, Q10
+const CORRECT_POSITION_PATTERNS = [
+  [2, 0, 3, 1, 2, 3, 0, 1, 3, 2],
+  [1, 3, 0, 2, 3, 1, 2, 0, 1, 3],
+  [3, 1, 2, 0, 1, 3, 2, 0, 3, 1],
+  [0, 2, 1, 3, 2, 0, 3, 1, 0, 2],
+]
+
+function prepareQuestion(question, index, chapterIndex = 0) {
+  const sourceAnswers = [...question.answers]
+  const correctText = sourceAnswers[question.correct]
+  const remaining = sourceAnswers.filter((_, answerIndex) => answerIndex !== question.correct)
+  const desiredCorrectIndex =
+    CORRECT_POSITION_PATTERNS[chapterIndex % CORRECT_POSITION_PATTERNS.length][index % 10]
+
+  const answers = []
+  let remainingIndex = 0
+  for (let position = 0; position < 4; position += 1) {
+    answers.push(
+      position === desiredCorrectIndex
+        ? correctText
+        : remaining[remainingIndex++]
+    )
+  }
+
+  return {
+    ...question,
+    difficulty: ADVANCED_QUESTION_INDEXES.has(index) ? 'Advanced' : 'Normal',
+    answers,
+    correct: desiredCorrectIndex,
+  }
+}
+
 const publicQuestion = ({ correct, explanation, ...q }) => q
 
 app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'Heritage Quest API', version: '2.0.0', questions: Object.values(questionsByChapter).flat().length }))
@@ -73,16 +106,21 @@ app.get('/api/chapters/:slug', (req, res) => {
 app.get('/api/chapters/:slug/questions', (req, res) => {
   const chapter = chapters.find(c => c.slug === req.params.slug)
   if (!chapter) return res.status(404).json({ error: 'Chapter not found' })
-  const qs = questionsByChapter[chapter.slug] || []
+  const chapterIndex = Math.max(0, chapters.findIndex(item => item.slug === chapter.slug))
+  const qs = (questionsByChapter[chapter.slug] || [])
+    .slice(0, 10)
+    .map((question, index) => prepareQuestion(question, index, chapterIndex))
   res.json({ chapter: chapter.title, chapterSlug: chapter.slug, totalQuestions: qs.length, questions: qs.map(publicQuestion) })
 })
 
 app.post('/api/quiz/check-answer', (req, res) => {
   const { chapterSlug, questionId, answerIndex } = req.body || {}
-  const qs = questionsByChapter[chapterSlug]
-  if (!qs) return res.status(404).json({ error: 'Chapter not found' })
-  const q = qs.find(item => item.id === questionId)
-  if (!q) return res.status(404).json({ error: 'Question not found' })
+  const rawQuestions = questionsByChapter[chapterSlug]
+  if (!rawQuestions) return res.status(404).json({ error: 'Chapter not found' })
+  const questionIndex = rawQuestions.slice(0, 10).findIndex(item => item.id === questionId)
+  if (questionIndex < 0) return res.status(404).json({ error: 'Question not found' })
+  const chapterIndex = Math.max(0, chapters.findIndex(item => item.slug === chapterSlug))
+  const q = prepareQuestion(rawQuestions[questionIndex], questionIndex, chapterIndex)
   const selected = Number(answerIndex)
   const isCorrect = selected === q.correct
   const xp = isCorrect ? (q.difficulty === 'Advanced' ? 30 : 20) : 0
