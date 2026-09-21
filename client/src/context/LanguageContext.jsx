@@ -44,6 +44,20 @@ const ui = {
     correct: "Correct!",
     notQuite: "Not quite.",
     chapterComplete: "Chapter Completed!",
+    journeyTag: "YOUR JOURNEY, YOUR PROGRESS",
+    welcome: "Welcome to Heritage Quest",
+    gateCopy:
+      "Enter your name and date of birth to begin. Together they identify your prototype profile on this browser, so your unfinished quests, scores and progress stay separate from other students.",
+    yourName: "Your name",
+    dateOfBirth: "Date of birth",
+    enterQuest: "Enter Quest",
+    recentExplorers: "Recent explorers on this browser",
+    continueAs: "Continue as",
+    separateJourney: "Every explorer gets a separate journey.",
+    separateJourneyCopy:
+      "Name + date of birth keeps each prototype profile distinct, even when two students have the same name.",
+    searchPlaceholder: "Search games, chapters...",
+    rewards: "Rewards",
   },
   ta: {
     home: "முகப்பு",
@@ -79,6 +93,20 @@ const ui = {
     correct: "சரி!",
     notQuite: "முழுமையாக இல்லை.",
     chapterComplete: "அத்தியாயம் முடிந்தது!",
+    journeyTag: "உங்கள் பயணம், உங்கள் முன்னேற்றம்",
+    welcome: "Heritage Quest-க்கு வரவேற்கிறோம்",
+    gateCopy:
+      "தொடங்க உங்கள் பெயரும் பிறந்த தேதியும் உள்ளிடுங்கள். இவை இந்த உலாவியில் உங்கள் மாதிரி சுயவிவரத்தை தனித்துவமாக அடையாளம் கண்டு, உங்கள் முன்னேற்றத்தை மற்ற மாணவர்களிலிருந்து தனியாக வைத்திருக்கும்.",
+    yourName: "உங்கள் பெயர்",
+    dateOfBirth: "பிறந்த தேதி",
+    enterQuest: "Quest-க்கு நுழை",
+    recentExplorers: "இந்த உலாவியில் சமீபத்திய பயனர்கள்",
+    continueAs: "தொடரவும்",
+    separateJourney: "ஒவ்வொரு பயனருக்கும் தனி பயணம்.",
+    separateJourneyCopy:
+      "ஒரே பெயர் கொண்ட மாணவர்கள் இருந்தாலும் பெயர் + பிறந்த தேதி மூலம் தனித்தனி மாதிரி சுயவிவரங்கள் உருவாகும்.",
+    searchPlaceholder: "விளையாட்டுகள், அத்தியாயங்கள் தேடுங்கள்...",
+    rewards: "வெகுமதிகள்",
   },
   hi: {
     home: "होम",
@@ -114,6 +142,20 @@ const ui = {
     correct: "सही!",
     notQuite: "पूरी तरह सही नहीं।",
     chapterComplete: "अध्याय पूरा हुआ!",
+    journeyTag: "आपकी यात्रा, आपकी प्रगति",
+    welcome: "Heritage Quest में आपका स्वागत है",
+    gateCopy:
+      "शुरू करने के लिए अपना नाम और जन्मतिथि दर्ज करें। ये दोनों इस ब्राउज़र पर आपकी प्रोटोटाइप प्रोफ़ाइल को अलग पहचान देते हैं, ताकि आपकी अधूरी क्वेस्ट और प्रगति दूसरे विद्यार्थियों से अलग रहें।",
+    yourName: "आपका नाम",
+    dateOfBirth: "जन्मतिथि",
+    enterQuest: "क्वेस्ट में प्रवेश करें",
+    recentExplorers: "इस ब्राउज़र के हाल के विद्यार्थी",
+    continueAs: "जारी रखें",
+    separateJourney: "हर विद्यार्थी की यात्रा अलग है।",
+    separateJourneyCopy:
+      "एक ही नाम वाले विद्यार्थियों के लिए भी नाम + जन्मतिथि अलग प्रोटोटाइप प्रोफ़ाइल बनाती है।",
+    searchPlaceholder: "गेम्स और अध्याय खोजें...",
+    rewards: "रिवॉर्ड्स",
   },
 };
 
