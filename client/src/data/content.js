@@ -461,6 +461,82 @@ export const learningTopics = [
     ],
     questionCount: 10,
   },
+  {
+    slug: "antikythera-mechanism",
+    title: "Antikythera Mechanism",
+    era: "Hellenistic period · 2nd century BCE",
+    description:
+      "Explore the ancient Greek geared device often described as the oldest known analogue computer and learn how it modeled astronomical cycles.",
+    image: "/assets/game-map.jpg",
+    tag: "Science & Technology",
+    learn: [
+      "Ancient astronomical calculation",
+      "Bronze gear systems",
+      "Solar and lunar cycles",
+      "Eclipse prediction",
+      "Archaeological reconstruction",
+    ],
+    studyOnly: true,
+    questionCount: 0,
+    sourceLabel: "Wikipedia — Antikythera mechanism",
+    sourceUrl: "https://en.wikipedia.org/wiki/Antikythera_mechanism",
+    sections: [
+      {
+        title: "What was it?",
+        body: "The Antikythera mechanism was an ancient Greek, hand-powered astronomical device built with interlocking bronze gears. It is widely described as the oldest known example of an analogue computer.",
+      },
+      {
+        title: "What could it do?",
+        body: "Researchers have reconstructed functions that tracked astronomical cycles and could predict eclipses and positions of the Sun and Moon. The mechanism also connected astronomical cycles with calendrical and athletic-game cycles.",
+      },
+      {
+        title: "How was it found?",
+        body: "Fragments were recovered from a shipwreck near the Greek island of Antikythera in 1901. Later imaging and X-ray studies helped scholars inspect hidden gears and inscriptions without taking the surviving fragments apart.",
+      },
+      {
+        title: "Why does it matter?",
+        body: "Its complex gearing shows that Hellenistic craftspeople combined astronomy, mathematics and precision metalwork at a remarkable level. It is an important case study in reconstructing lost technologies from fragmentary evidence.",
+      },
+    ],
+  },
+  {
+    slug: "nalanda-mahavihara",
+    title: "Nalanda Mahavihara",
+    era: "c. 5th century CE onward",
+    description:
+      "Study Nalanda in present-day Bihar as a major Buddhist monastic centre of learning, debate and knowledge exchange across Asia.",
+    image: "/assets/hero-heritage.jpg",
+    tag: "Learning Heritage",
+    learn: [
+      "Buddhist mahavihara tradition",
+      "Teaching and scholarship",
+      "Asian knowledge exchange",
+      "Archaeological evidence",
+      "Heritage conservation",
+    ],
+    studyOnly: true,
+    questionCount: 0,
+    sourceLabel: "Wikipedia — Nalanda mahavihara",
+    sourceUrl: "https://en.wikipedia.org/wiki/Nalanda_mahavihara",
+    sections: [
+      {
+        title: "A major centre of learning",
+        body: "Nalanda was a renowned Buddhist mahavihara in the historical region of Magadha, in present-day Bihar. It developed into a major centre where monastic life, teaching, study and intellectual exchange were closely connected.",
+      },
+      {
+        title: "Knowledge across regions",
+        body: "Nalanda attracted scholars and students from different parts of Asia. Its history is important for understanding how Buddhist texts, philosophy and other fields of knowledge circulated across regional networks.",
+      },
+      {
+        title: "What survives today?",
+        body: "Archaeological remains include monastic and temple structures that help historians reconstruct the scale and changing layout of the institution. The site is protected as an important heritage landscape.",
+      },
+      {
+        title: "A useful historical caution",
+        body: "Nalanda is often compared with a residential university, but historians also note that modern university categories should not be applied too simply to a premodern Buddhist monastic institution.",
+      },
+    ],
+,
 ];
 
 export const achievements = [
