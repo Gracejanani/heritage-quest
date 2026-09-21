@@ -10,6 +10,39 @@ async function getBundledContent() {
   return contentPromise;
 }
 
+const ADVANCED_QUESTION_INDEXES = new Set([3, 6, 9]); // Q4, Q7, Q10
+const CORRECT_POSITION_PATTERNS = [
+  [2, 0, 3, 1, 2, 3, 0, 1, 3, 2],
+  [1, 3, 0, 2, 3, 1, 2, 0, 1, 3],
+  [3, 1, 2, 0, 1, 3, 2, 0, 3, 1],
+  [0, 2, 1, 3, 2, 0, 3, 1, 0, 2],
+];
+
+function prepareQuestion(question, index, chapterIndex = 0) {
+  const sourceAnswers = [...question.answers];
+  const correctText = sourceAnswers[question.correct];
+  const remaining = sourceAnswers.filter((_, answerIndex) => answerIndex !== question.correct);
+  const desiredCorrectIndex =
+    CORRECT_POSITION_PATTERNS[chapterIndex % CORRECT_POSITION_PATTERNS.length][index % 10];
+
+  const answers = [];
+  let remainingIndex = 0;
+  for (let position = 0; position < 4; position += 1) {
+    answers.push(
+      position === desiredCorrectIndex
+        ? correctText
+        : remaining[remainingIndex++],
+    );
+  }
+
+  return {
+    ...question,
+    difficulty: ADVANCED_QUESTION_INDEXES.has(index) ? "Advanced" : "Normal",
+    answers,
+    correct: desiredCorrectIndex,
+  };
+}
+
 function publicQuestion({ correct, explanation, ...question }) {
   return question;
 }
@@ -71,7 +104,10 @@ async function localApi(path, options = {}) {
     const slug = decodeURIComponent(questionMatch[1]);
     const chapter = chapters.find((item) => item.slug === slug);
     if (!chapter) throw new Error("Chapter not found");
-    const questions = questionsByChapter[slug] || [];
+    const chapterIndex = Math.max(0, chapters.findIndex((item) => item.slug === slug));
+    const questions = (questionsByChapter[slug] || [])
+      .slice(0, 10)
+      .map((question, index) => prepareQuestion(question, index, chapterIndex));
     return {
       chapter: chapter.title,
       chapterSlug: slug,
@@ -93,9 +129,18 @@ async function localApi(path, options = {}) {
 
   if (method === "POST" && pathname === "/quiz/check-answer") {
     const body = JSON.parse(options.body || "{}");
-    const questions = questionsByChapter[body.chapterSlug] || [];
-    const question = questions.find((item) => item.id === body.questionId);
-    if (!question) throw new Error("Question not found");
+    const rawQuestions = (questionsByChapter[body.chapterSlug] || []).slice(0, 10);
+    const questionIndex = rawQuestions.findIndex((item) => item.id === body.questionId);
+    if (questionIndex < 0) throw new Error("Question not found");
+    const chapterIndex = Math.max(
+      0,
+      chapters.findIndex((item) => item.slug === body.chapterSlug),
+    );
+    const question = prepareQuestion(
+      rawQuestions[questionIndex],
+      questionIndex,
+      chapterIndex,
+    );
     const selected = Number(body.answerIndex);
     const correct = selected === question.correct;
     return {
