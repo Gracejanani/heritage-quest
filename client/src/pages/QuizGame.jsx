@@ -18,6 +18,7 @@ import {
 import { learningTopics } from "../data/content";
 import { api } from "../lib/api";
 import { usePlayer } from "../context/PlayerContext";
+import { useLanguage } from "../context/LanguageContext";
 import { Badge, Button, ProgressBar, useToast } from "../components/ui";
 
 export default function QuizGame() {
@@ -39,6 +40,7 @@ export default function QuizGame() {
   const [answers, setAnswers] = useState([]);
   const toast = useToast();
   const { player, saveProgress, getProgress } = usePlayer();
+  const { language, setLanguage, languages, t } = useLanguage();
   const [restored, setRestored] = useState(false);
   const [progressReady, setProgressReady] = useState(false);
 
@@ -243,7 +245,7 @@ export default function QuizGame() {
             <Trophy className="h-12 w-12" />
           </div>
           <h1 className="mt-6 font-display text-4xl font-extrabold text-slate-950">
-            Chapter Completed!
+            {t("chapterComplete")}
           </h1>
           <p className="mt-3 text-slate-600">
             You finished <strong>{topic.title}</strong>. Review the explanations
@@ -290,10 +292,22 @@ export default function QuizGame() {
               {player?.name} · {topic.title}
             </div>
             <div className="text-sm font-extrabold">
-              Question {index + 1} of {questions.length}
+              {t("question")} {index + 1} {t("of")} {questions.length}
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              aria-label={t("language")}
+              className="focus-ring rounded-xl border border-white/15 bg-white/10 px-2 py-1.5 text-xs font-bold text-white"
+            >
+              {languages.map((item) => (
+                <option key={item.code} value={item.code} className="text-slate-900">
+                  {item.label}
+                </option>
+              ))}
+            </select>
             <span className="rounded-full bg-white/10 px-3 py-1.5 text-sm font-bold">
               {xp} XP
             </span>
@@ -316,10 +330,10 @@ export default function QuizGame() {
           <div className="p-6 sm:p-9">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <Badge tone={q.difficulty === "Advanced" ? "red" : "gold"}>
-                {q.difficulty}
+                {q.difficulty === "Advanced" ? t("quizAdvanced") : t("quizNormal")}
               </Badge>
               <span className="text-xs font-bold text-slate-400">
-                Medium + Advanced chapter
+                {t("normalAdvanced")}
               </span>
             </div>
             <div className="mt-5 flex items-start gap-3">
@@ -365,7 +379,7 @@ export default function QuizGame() {
             </div>
             {hint && selected === null && (
               <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-                <strong>Hint:</strong> {q.hint}
+                <strong>{t("hint")}:</strong> {q.hint}
               </div>
             )}
             {result && (
@@ -374,8 +388,8 @@ export default function QuizGame() {
               >
                 <div className="font-extrabold">
                   {result.correct
-                    ? `✓ Correct! +${result.xp} XP`
-                    : `✕ Not quite. Correct answer: ${q.answers[result.correctIndex]}`}
+                    ? `✓ ${t("correct")} +${result.xp} XP`
+                    : `✕ ${t("notQuite")} Correct answer: ${q.answers[result.correctIndex]}`}
                 </div>
                 <p className="mt-2 text-sm leading-6 opacity-80">
                   {result.explanation}
@@ -394,14 +408,14 @@ export default function QuizGame() {
                 }}
                 disabled={selected !== null}
               >
-                <Lightbulb className="h-4 w-4" /> Hint
+                <Lightbulb className="h-4 w-4" /> {t("hint")}
               </Button>
               <div className="flex items-center gap-2">
                 <Button as={Link} to={`/learn/${chapterSlug}`} variant="ghost">
-                  <BookOpen className="h-4 w-4" /> Learn
+                  <BookOpen className="h-4 w-4" /> {t("learnFirst")}
                 </Button>
                 <Button onClick={next} disabled={!result}>
-                  {index === questions.length - 1 ? "Finish" : "Next"}{" "}
+                  {index === questions.length - 1 ? t("finish") : t("next")}{" "}
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
