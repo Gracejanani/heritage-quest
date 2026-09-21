@@ -40,9 +40,12 @@ export default function QuizGame() {
   const [answers, setAnswers] = useState([]);
   const toast = useToast();
   const { player, saveProgress, getProgress } = usePlayer();
-  const { language, setLanguage, languages, t } = useLanguage();
+  const { language, setLanguage, languages, t, translateText } = useLanguage();
   const [restored, setRestored] = useState(false);
   const [progressReady, setProgressReady] = useState(false);
+  const [translatedQuestion, setTranslatedQuestion] = useState(null);
+  const [translatedExplanation, setTranslatedExplanation] = useState("");
+  const [translating, setTranslating] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -100,6 +103,63 @@ export default function QuizGame() {
   ]);
 
   const q = questions[index];
+
+  useEffect(() => {
+    let active = true;
+    if (!q) return () => {};
+
+    if (language === "en") {
+      setTranslatedQuestion(null);
+      setTranslating(false);
+      return () => {};
+    }
+
+    setTranslating(true);
+    Promise.all([
+      translateText(q.question),
+      ...q.answers.map((answerText) => translateText(answerText)),
+      translateText(q.hint || ""),
+    ])
+      .then(([questionText, ...translatedParts]) => {
+        if (!active) return;
+        setTranslatedQuestion({
+          question: questionText,
+          answers: translatedParts.slice(0, 4),
+          hint: translatedParts[4] || q.hint,
+        });
+      })
+      .finally(() => active && setTranslating(false));
+
+    return () => {
+      active = false;
+    };
+  }, [q?.id, language, translateText]);
+
+  useEffect(() => {
+    let active = true;
+    if (!result?.explanation || language === "en") {
+      setTranslatedExplanation("");
+      return () => {};
+    }
+
+    translateText(result.explanation).then((text) => {
+      if (active) setTranslatedExplanation(text);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [result?.explanation, language, translateText]);
+
+  const visibleQ = q
+    ? {
+        ...q,
+        question: translatedQuestion?.question || q.question,
+        answers: translatedQuestion?.answers || q.answers,
+        hint: translatedQuestion?.hint || q.hint,
+      }
+    : q;
+
   const progress = useMemo(
     () =>
       questions.length
@@ -333,7 +393,7 @@ export default function QuizGame() {
                 {q.difficulty === "Advanced" ? t("quizAdvanced") : t("quizNormal")}
               </Badge>
               <span className="text-xs font-bold text-slate-400">
-                {t("normalAdvanced")}
+                {translating ? t("translating") : t("normalAdvanced")}
               </span>
             </div>
             <div className="mt-5 flex items-start gap-3">
@@ -341,11 +401,11 @@ export default function QuizGame() {
                 <CircleHelp className="h-5 w-5" />
               </div>
               <h1 className="text-2xl font-extrabold leading-snug text-slate-950 sm:text-3xl">
-                {q.question}
+                {visibleQ.question}
               </h1>
             </div>
             <div className="mt-7 grid gap-3">
-              {q.answers.map((a, i) => {
+              {visibleQ.answers.map((a, i) => {
                 const answered = selected !== null && result;
                 const correct = answered && i === result.correctIndex;
                 const chosen = i === selected;
@@ -379,7 +439,7 @@ export default function QuizGame() {
             </div>
             {hint && selected === null && (
               <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-                <strong>{t("hint")}:</strong> {q.hint}
+                <strong>{t("hint")}:</strong> {visibleQ.hint}
               </div>
             )}
             {result && (
@@ -389,10 +449,10 @@ export default function QuizGame() {
                 <div className="font-extrabold">
                   {result.correct
                     ? `✓ ${t("correct")} +${result.xp} XP`
-                    : `✕ ${t("notQuite")} Correct answer: ${q.answers[result.correctIndex]}`}
+                    : `✕ ${t("notQuite")} ${t("correctAnswer")}: ${visibleQ.answers[result.correctIndex]}`}
                 </div>
                 <p className="mt-2 text-sm leading-6 opacity-80">
-                  {result.explanation}
+                  {translatedExplanation || result.explanation}
                 </p>
               </div>
             )}
