@@ -536,7 +536,7 @@ export const learningTopics = [
         body: "Nalanda is often compared with a residential university, but historians also note that modern university categories should not be applied too simply to a premodern Buddhist monastic institution.",
       },
     ],
-,
+  },
 ];
 
 export const achievements = [
