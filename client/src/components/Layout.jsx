@@ -105,7 +105,7 @@ export function Navbar() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder={t("searchPlaceholder")}
-                className="focus-ring h-12 w-full rounded-2xl border border-slate-200 bg-white pl-13 pr-16 text-sm font-semibold text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-emerald-200 focus:border-heritage-green focus:shadow-md"
+                className="focus-ring h-12 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-16 text-sm font-semibold text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-emerald-200 focus:border-heritage-green focus:shadow-md"
               />
               <button
                 type="submit"
