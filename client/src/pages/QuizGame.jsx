@@ -114,6 +114,7 @@ export default function QuizGame() {
       return () => {};
     }
 
+    setTranslatedQuestion(null);
     setTranslating(true);
     Promise.all([
       translateText(q.question),
