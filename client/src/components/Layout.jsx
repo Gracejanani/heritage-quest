@@ -71,7 +71,7 @@ export function Navbar() {
           <SearchBar
             value={search}
             onChange={setSearch}
-            placeholder="Search games, chapters..."
+            placeholder={t("searchPlaceholder")}
           />
         </form>
         <Link
@@ -128,7 +128,7 @@ export function Navbar() {
               <SearchBar
                 value={search}
                 onChange={setSearch}
-                placeholder="Search games, chapters..."
+                placeholder={t("searchPlaceholder")}
               />
             </form>
             <div className="grid gap-1">
@@ -168,12 +168,13 @@ export function Navbar() {
   );
 }
 export function MobileBottomNav() {
+  const { t } = useLanguage();
   const items = [
-    ["Home", "/", Home],
-    ["Games", "/games", Gamepad2],
-    ["Learn", "/learn", BookOpen],
-    ["Rewards", "/achievements", Trophy],
-    ["Profile", "/profile", UserRound],
+    ["home", "/", Home],
+    ["games", "/games", Gamepad2],
+    ["learn", "/learn", BookOpen],
+    ["rewards", "/achievements", Trophy],
+    ["profile", "/profile", UserRound],
   ];
   return (
     <nav
@@ -190,7 +191,7 @@ export function MobileBottomNav() {
             }
           >
             <I className="h-5 w-5" />
-            <span>{l}</span>
+            <span>{t(l)}</span>
           </NavLink>
         ))}
       </div>
