@@ -26,14 +26,16 @@ export function Button({
     ghost: "text-heritage-forest hover:bg-emerald-50",
     dark: "bg-heritage-forest text-white hover:bg-emerald-950",
   };
+
   const sizes = {
     sm: "px-3 py-2 text-sm",
     md: "px-5 py-3 text-sm",
     lg: "px-6 py-3.5 text-base",
   };
+
   return (
     <Tag
-      className="focus-ring h-12 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none placeholder:text-slate-400 transition hover:border-emerald-200 focus:border-heritage-green focus:shadow-md"
+      className={`focus-ring inline-flex items-center justify-center gap-2 rounded-2xl font-bold transition-all duration-200 active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
       disabled={disabled || loading}
       {...props}
     >
@@ -54,6 +56,7 @@ export function Badge({ children, tone = "green", className = "" }) {
     gray: "bg-slate-100 text-slate-700",
     red: "bg-rose-100 text-rose-800",
   };
+
   return (
     <span
       className={`inline-flex rounded-full px-3 py-1 text-xs font-bold ${tones[tone]} ${className}`}
@@ -65,6 +68,7 @@ export function Badge({ children, tone = "green", className = "" }) {
 
 export function ProgressBar({ value, label, className = "" }) {
   const safe = Math.max(0, Math.min(100, value));
+
   return (
     <div className={className}>
       {label && (
@@ -73,6 +77,7 @@ export function ProgressBar({ value, label, className = "" }) {
           <span>{safe}%</span>
         </div>
       )}
+
       <div
         className="h-2.5 overflow-hidden rounded-full bg-slate-200"
         aria-label={label || "Progress"}
@@ -109,11 +114,35 @@ export function SearchBar({
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
-        className="focus-ring h-12 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none placeholder:text-slate-400 hover:border-emerald-200 focus:border-heritage-green focus:shadow-md"
+        className="focus-ring h-12 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none placeholder:text-slate-400 transition hover:border-emerald-200 focus:border-heritage-green focus:shadow-md"
       />
     </label>
   );
 }
+
+export function Tabs({ items, value, onChange }) {
+  return (
+    <div className="inline-flex rounded-2xl bg-slate-100 p-1" role="tablist">
+      {items.map((item) => (
+        <button
+          key={item}
+          type="button"
+          className={`focus-ring rounded-xl px-4 py-2 text-sm font-bold transition ${
+            value === item
+              ? "bg-white text-heritage-forest shadow-sm"
+              : "text-slate-500 hover:text-slate-800"
+          }`}
+          onClick={() => onChange(item)}
+          role="tab"
+          aria-selected={value === item}
+        >
+          {item}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 export function Select({
   value,
   onChange,
@@ -135,6 +164,7 @@ export function Select({
           </option>
         ))}
       </select>
+
       <ChevronDown
         className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
         aria-hidden="true"
@@ -146,11 +176,15 @@ export function Select({
 export function Modal({ open, onClose, title, children }) {
   useEffect(() => {
     if (!open) return;
+
     const onKey = (e) => e.key === "Escape" && onClose?.();
     window.addEventListener("keydown", onKey);
+
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
   if (!open) return null;
+
   return (
     <div
       className="fixed inset-0 z-[90] grid place-items-center bg-slate-950/55 p-4"
@@ -167,14 +201,17 @@ export function Modal({ open, onClose, title, children }) {
           >
             {title}
           </h2>
+
           <button
-            className={`focus-ring inline-flex items-center justify-center gap-2 rounded-2xl font-bold transition-all duration-200 active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
+            type="button"
+            className="focus-ring rounded-xl p-2 text-slate-500 transition hover:bg-slate-100"
             onClick={onClose}
             aria-label="Close dialog"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
+
         <div className="mt-5">{children}</div>
       </div>
     </div>
@@ -182,16 +219,20 @@ export function Modal({ open, onClose, title, children }) {
 }
 
 const ToastContext = createContext(() => {});
+
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
+
   const push = (message, type = "success") => {
     const id = Date.now() + Math.random();
     setToasts((t) => [...t, { id, message, type }]);
     setTimeout(() => setToasts((t) => t.filter((x) => x.id !== id)), 2800);
   };
+
   return (
     <ToastContext.Provider value={push}>
       {children}
+
       <div
         className="fixed right-4 top-24 z-[100] flex w-[calc(100%-2rem)] max-w-sm flex-col gap-2"
         aria-live="polite"
@@ -206,6 +247,7 @@ export function ToastProvider({ children }) {
             ) : (
               <CheckCircle2 className="mt-0.5 h-5 w-5 text-heritage-green" />
             )}
+
             <p className="text-sm font-semibold text-slate-700">{t.message}</p>
           </div>
         ))}
@@ -213,4 +255,5 @@ export function ToastProvider({ children }) {
     </ToastContext.Provider>
   );
 }
+
 export const useToast = () => useContext(ToastContext);
