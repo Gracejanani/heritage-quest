@@ -16,6 +16,7 @@ import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import PlayerGate from "./components/PlayerGate";
 import { PlayerProvider } from "./context/PlayerContext";
+import { LanguageProvider } from "./context/LanguageContext";
 
 export default function App() {
   const { pathname } = useLocation();
@@ -52,11 +53,13 @@ export default function App() {
   );
   return (
     <ToastProvider>
-      <PlayerProvider>
-        <PlayerGate>
-          {immersive ? content : <Layout>{content}</Layout>}
-        </PlayerGate>
-      </PlayerProvider>
+      <LanguageProvider>
+        <PlayerProvider>
+          <PlayerGate>
+            {immersive ? content : <Layout>{content}</Layout>}
+          </PlayerGate>
+        </PlayerProvider>
+      </LanguageProvider>
     </ToastProvider>
   );
 }
