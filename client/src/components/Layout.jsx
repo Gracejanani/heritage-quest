@@ -8,7 +8,7 @@ import {
   BookOpen,
   Trophy,
   UserRound,
-  Award,
+  Search,
   LogOut,
 } from "lucide-react";
 import Logo from "./Logo";
@@ -67,20 +67,6 @@ export function Navbar() {
             </option>
           ))}
         </select>
-        <form onSubmit={submit} className="hidden w-64 xl:block">
-          <SearchBar
-            value={search}
-            onChange={setSearch}
-            placeholder={t("searchPlaceholder")}
-          />
-        </form>
-        <Link
-          to="/achievements"
-          className="focus-ring hidden rounded-xl p-2 text-heritage-forest hover:bg-emerald-50 sm:block"
-          aria-label="Achievements"
-        >
-          <Award className="h-5 w-5" />
-        </Link>
         <Link
           to="/profile"
           className="focus-ring hidden rounded-2xl bg-heritage-green px-4 py-2.5 text-sm font-bold text-white shadow-soft hover:bg-emerald-700 sm:inline-flex"
@@ -105,6 +91,34 @@ export function Navbar() {
           {open ? <X /> : <Menu />}
         </button>
       </div>
+
+      <div className="hidden border-t border-slate-200/70 bg-white/80 sm:block">
+        <div className="container-app py-3">
+          <form onSubmit={submit} className="mx-auto max-w-3xl">
+            <label className="relative block">
+              <span className="sr-only">{t("searchPlaceholder")}</span>
+              <Search
+                className="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+                aria-hidden="true"
+              />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t("searchPlaceholder")}
+                className="focus-ring h-12 w-full rounded-2xl border border-slate-200 bg-white pl-13 pr-16 text-sm font-semibold text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-emerald-200 focus:border-heritage-green focus:shadow-md"
+              />
+              <button
+                type="submit"
+                aria-label="Search"
+                className="focus-ring absolute right-2 top-1/2 grid h-9 w-9 -translate-y-1/2 place-items-center rounded-xl bg-heritage-green text-white shadow-sm transition hover:bg-emerald-700"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </label>
+          </form>
+        </div>
+      </div>
+
       {open && (
         <div className="border-t border-slate-200 bg-white lg:hidden">
           <div className="container-app py-4">
