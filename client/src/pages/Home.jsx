@@ -103,7 +103,7 @@ export default function Home() {
             </div>
             <div className="mt-9 grid max-w-2xl grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-5">
               {[
-                ["12", "Chapters"],
+                ["14", "Learning Modules"],
                 ["120", "Quiz Questions"],
                 ["28", "States"],
                 ["50+", "Game Ideas"],
@@ -241,8 +241,8 @@ export default function Home() {
               </span>
             </h2>
             <p className="mt-5 max-w-xl text-base leading-7 text-white/75">
-              Discover people, places, events and traditions through 12
-              structured learning chapters and 120 medium-to-advanced questions.
+              Discover people, places, events and traditions through 12 quiz
+              chapters, 2 additional study materials and 120 mixed normal-and-advanced questions.
             </p>
             <Button as={Link} to="/learn" className="mt-7" size="lg">
               Start Learning <ArrowRight className="h-5 w-5" />
