@@ -8,8 +8,10 @@ function normalizeName(value = "") {
   return value.trim().replace(/\s+/g, " ");
 }
 
-function makePlayerId(name) {
-  return encodeURIComponent(normalizeName(name).toLocaleLowerCase("en-IN"));
+function makePlayerId(name, dob) {
+  return encodeURIComponent(
+    `${normalizeName(name).toLocaleLowerCase("en-IN")}::${dob}`,
+  );
 }
 
 function readProfiles() {
@@ -25,7 +27,8 @@ function readSessionPlayer() {
     const id = sessionStorage.getItem(ACTIVE_KEY);
     if (!id) return null;
     const profiles = readProfiles();
-    return profiles[id] || null;
+    const profile = profiles[id] || null;
+    return profile?.dob ? profile : null;
   } catch {
     return null;
   }
@@ -35,19 +38,28 @@ export function PlayerProvider({ children }) {
   const [player, setPlayer] = useState(() => readSessionPlayer());
   const [profiles, setProfiles] = useState(() => readProfiles());
 
-  const startPlayer = useCallback((rawName) => {
+  const startPlayer = useCallback((rawName, rawDob) => {
     const name = normalizeName(rawName);
+    const dob = String(rawDob || "").trim();
     if (name.length < 2 || name.length > 40) {
       return { ok: false, message: "Please enter a name between 2 and 40 characters." };
     }
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
+      return { ok: false, message: "Please select your date of birth." };
+    }
+    const dobDate = new Date(`${dob}T00:00:00`);
+    if (Number.isNaN(dobDate.getTime()) || dobDate >= new Date()) {
+      return { ok: false, message: "Please enter a valid date of birth." };
+    }
 
-    const id = makePlayerId(name);
+    const id = makePlayerId(name, dob);
     const now = new Date().toISOString();
     const next = {
       ...profiles,
       [id]: {
         id,
         name,
+        dob,
         createdAt: profiles[id]?.createdAt || now,
         lastSeenAt: now,
       },
@@ -140,9 +152,12 @@ export function PlayerProvider({ children }) {
   }, [player]);
 
   const knownProfiles = useMemo(
-    () => Object.values(profiles).sort((a, b) =>
-      String(b.lastSeenAt || "").localeCompare(String(a.lastSeenAt || "")),
-    ),
+    () =>
+      Object.values(profiles)
+        .filter((profile) => profile?.dob)
+        .sort((a, b) =>
+          String(b.lastSeenAt || "").localeCompare(String(a.lastSeenAt || "")),
+        ),
     [profiles],
   );
 
