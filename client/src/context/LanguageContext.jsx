@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
 
 const LanguageContext = createContext(null);
 const STORAGE_KEY = "heritageQuest:language";
@@ -58,6 +58,8 @@ const ui = {
       "Name + date of birth keeps each prototype profile distinct, even when two students have the same name.",
     searchPlaceholder: "Search games, chapters...",
     rewards: "Rewards",
+    translating: "Translating...",
+    correctAnswer: "Correct answer",
   },
   ta: {
     home: "முகப்பு",
@@ -107,6 +109,8 @@ const ui = {
       "ஒரே பெயர் கொண்ட மாணவர்கள் இருந்தாலும் பெயர் + பிறந்த தேதி மூலம் தனித்தனி மாதிரி சுயவிவரங்கள் உருவாகும்.",
     searchPlaceholder: "விளையாட்டுகள், அத்தியாயங்கள் தேடுங்கள்...",
     rewards: "வெகுமதிகள்",
+    translating: "மொழிபெயர்க்கப்படுகிறது...",
+    correctAnswer: "சரியான பதில்",
   },
   hi: {
     home: "होम",
@@ -156,6 +160,8 @@ const ui = {
       "एक ही नाम वाले विद्यार्थियों के लिए भी नाम + जन्मतिथि अलग प्रोटोटाइप प्रोफ़ाइल बनाती है।",
     searchPlaceholder: "गेम्स और अध्याय खोजें...",
     rewards: "रिवॉर्ड्स",
+    translating: "अनुवाद हो रहा है...",
+    correctAnswer: "सही उत्तर",
   },
 };
 
@@ -344,6 +350,53 @@ export function LanguageProvider({ children }) {
 
   const t = (key) => ui[language]?.[key] || ui.en[key] || key;
 
+  const translateText = useCallback(
+    async (text, target = language) => {
+      if (!text || target === "en") return text;
+
+      const sourceText = String(text);
+      let hash = 0;
+      for (let i = 0; i < sourceText.length; i += 1) {
+        hash = (hash * 31 + sourceText.charCodeAt(i)) >>> 0;
+      }
+      const cacheKey = `heritageQuest:translation:${target}:${hash}`;
+
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) return cached;
+      } catch {
+        // Ignore storage failures and translate normally.
+      }
+
+      try {
+        const url =
+          "https://api.mymemory.translated.net/get?q=" +
+          encodeURIComponent(sourceText.slice(0, 450)) +
+          "&langpair=en|" +
+          encodeURIComponent(target);
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Translation request failed");
+        const data = await response.json();
+        const translated = data?.responseData?.translatedText;
+        const safe =
+          typeof translated === "string" &&
+          translated.trim() &&
+          !translated.toUpperCase().includes("MYMEMORY WARNING")
+            ? translated
+            : sourceText;
+        try {
+          localStorage.setItem(cacheKey, safe);
+        } catch {
+          // Cache is optional.
+        }
+        return safe;
+      } catch {
+        return sourceText;
+      }
+    },
+    [language],
+  );
+
   const localizeTopic = (topic) => {
     if (language === "en") return topic;
     const translated = topicTranslations[language]?.[topic.slug];
@@ -351,8 +404,8 @@ export function LanguageProvider({ children }) {
   };
 
   const value = useMemo(
-    () => ({ language, setLanguage, languages, t, localizeTopic }),
-    [language],
+    () => ({ language, setLanguage, languages, t, localizeTopic, translateText }),
+    [language, translateText],
   );
 
   return (
