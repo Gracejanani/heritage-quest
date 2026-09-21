@@ -47,22 +47,20 @@ export default function PlayerGate({ children }) {
             </select>
           </div>
           <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-extrabold tracking-[.14em] text-heritage-green">
-            <Compass className="h-4 w-4" /> YOUR JOURNEY, YOUR PROGRESS
+            <Compass className="h-4 w-4" /> {t("journeyTag")}
           </div>
           <h1 className="mt-5 font-display text-4xl font-extrabold leading-tight text-heritage-brown sm:text-5xl">
-            Welcome to Heritage Quest
+            {t("welcome")}
           </h1>
           <p className="mt-4 max-w-lg leading-7 text-slate-600">
-            Enter your name and date of birth to begin. Together they identify
-            your prototype profile on this browser, so your unfinished quests,
-            scores and progress stay separate from other students.
+            {t("gateCopy")}
           </p>
 
           <form onSubmit={submit} className="mt-8">
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="explorer-name" className="text-sm font-extrabold text-slate-800">
-                  Your name
+                  {t("yourName")}
                 </label>
                 <div className="relative mt-2 min-w-0">
                   <UserRound className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -83,7 +81,7 @@ export default function PlayerGate({ children }) {
               </div>
               <div>
                 <label htmlFor="explorer-dob" className="text-sm font-extrabold text-slate-800">
-                  Date of birth
+                  {t("dateOfBirth")}
                 </label>
                 <div className="relative mt-2 min-w-0">
                   <CalendarDays className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
@@ -105,7 +103,7 @@ export default function PlayerGate({ children }) {
               type="submit"
               className="focus-ring mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-heritage-green px-6 font-extrabold text-white transition hover:bg-emerald-700"
             >
-              Enter Quest <ArrowRight className="h-4 w-4" />
+              {t("enterQuest")} <ArrowRight className="h-4 w-4" />
             </button>
             {error && (
               <p className="mt-3 text-sm font-semibold text-rose-600" role="alert">
@@ -117,7 +115,7 @@ export default function PlayerGate({ children }) {
           {knownProfiles.length > 0 && (
             <div className="mt-8 border-t border-slate-100 pt-6">
               <p className="text-xs font-extrabold uppercase tracking-[.14em] text-slate-400">
-                Recent explorers on this browser
+                {t("recentExplorers")}
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {knownProfiles.slice(0, 5).map((profile) => (
@@ -127,7 +125,7 @@ export default function PlayerGate({ children }) {
                     onClick={() => enter(profile.name, profile.dob)}
                     className="focus-ring rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-sm font-bold text-heritage-green hover:bg-emerald-100"
                   >
-                    Continue as {profile.name} · {profile.dob}
+                    {t("continueAs")} {profile.name} · {profile.dob}
                   </button>
                 ))}
               </div>
@@ -144,11 +142,10 @@ export default function PlayerGate({ children }) {
           <div className="absolute inset-0 bg-gradient-to-t from-heritage-forest/90 via-heritage-forest/10 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-10 text-white">
             <p className="font-display text-4xl font-extrabold">
-              Every explorer gets a separate journey.
+              {t("separateJourney")}
             </p>
             <p className="mt-3 max-w-lg text-sm leading-6 text-white/75">
-              Name + date of birth keeps each prototype profile distinct, even
-              when two students have the same name.
+              {t("separateJourneyCopy")}
             </p>
           </div>
         </aside>
