@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { ArrowRight, CalendarDays, Compass, UserRound } from "lucide-react";
 import Logo from "./Logo";
 import { usePlayer } from "../context/PlayerContext";
+import { useLanguage } from "../context/LanguageContext";
 
 export default function PlayerGate({ children }) {
   const { player, knownProfiles, startPlayer } = usePlayer();
+  const { language, setLanguage, languages, t } = useLanguage();
   const [name, setName] = useState("");
   const [dob, setDob] = useState("");
   const [error, setError] = useState("");
@@ -29,7 +31,21 @@ export default function PlayerGate({ children }) {
     <main className="min-h-screen bg-heritage-cream">
       <div className="container-app grid min-h-screen items-center gap-8 py-10 lg:grid-cols-[.95fr_1.05fr]">
         <section className="mx-auto w-full max-w-xl rounded-[2rem] border border-orange-100 bg-white p-7 shadow-card sm:p-10">
-          <Logo />
+          <div className="flex items-center justify-between gap-4">
+            <Logo />
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              aria-label={t("language")}
+              className="focus-ring rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700"
+            >
+              {languages.map((item) => (
+                <option key={item.code} value={item.code}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-extrabold tracking-[.14em] text-heritage-green">
             <Compass className="h-4 w-4" /> YOUR JOURNEY, YOUR PROGRESS
           </div>
