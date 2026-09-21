@@ -33,7 +33,7 @@ export function Button({
   };
   return (
     <Tag
-      className={`focus-ring inline-flex items-center justify-center gap-2 rounded-2xl font-bold transition-all duration-200 active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
+      className="focus-ring h-12 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none placeholder:text-slate-400 transition hover:border-emerald-200 focus:border-heritage-green focus:shadow-md"
       disabled={disabled || loading}
       {...props}
     >
@@ -99,38 +99,21 @@ export function SearchBar({
   return (
     <label className={`relative block ${className}`}>
       <span className="sr-only">{placeholder}</span>
+
       <Search
-        className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+        className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
         aria-hidden="true"
       />
+
       <input
         value={value}
         onChange={(e) => onChange?.(e.target.value)}
         placeholder={placeholder}
-        className="focus-ring w-full rounded-2xl border border-slate-200 bg-white py-3 pl-11 pr-4 text-sm shadow-sm outline-none placeholder:text-slate-400"
+        className="focus-ring h-12 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-4 text-sm font-semibold text-slate-700 shadow-sm outline-none placeholder:text-slate-400 hover:border-emerald-200 focus:border-heritage-green focus:shadow-md"
       />
     </label>
   );
 }
-
-export function Tabs({ items, value, onChange }) {
-  return (
-    <div className="inline-flex rounded-2xl bg-slate-100 p-1" role="tablist">
-      {items.map((item) => (
-        <button
-          key={item}
-          className={`focus-ring rounded-xl px-4 py-2 text-sm font-bold transition ${value === item ? "bg-white text-heritage-forest shadow-sm" : "text-slate-500 hover:text-slate-800"}`}
-          onClick={() => onChange(item)}
-          role="tab"
-          aria-selected={value === item}
-        >
-          {item}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 export function Select({
   value,
   onChange,
@@ -185,7 +168,7 @@ export function Modal({ open, onClose, title, children }) {
             {title}
           </h2>
           <button
-            className="focus-ring rounded-xl p-2 text-slate-500 hover:bg-slate-100"
+            className={`focus-ring inline-flex items-center justify-center gap-2 rounded-2xl font-bold transition-all duration-200 active:scale-[.98] disabled:cursor-not-allowed disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
             onClick={onClose}
             aria-label="Close dialog"
           >
