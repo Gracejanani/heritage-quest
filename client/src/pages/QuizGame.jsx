@@ -14,12 +14,14 @@ import {
   BookOpen,
   Trophy,
   Eye,
+  Award,
 } from "lucide-react";
 import { learningTopics } from "../data/content";
 import { api } from "../lib/api";
 import { usePlayer } from "../context/PlayerContext";
 import { useLanguage } from "../context/LanguageContext";
 import { Badge, Button, ProgressBar, useToast } from "../components/ui";
+import { AGE_GROUPS } from "../lib/age";
 
 export default function QuizGame() {
   const { chapterSlug = "ancient-india" } = useParams();
@@ -39,17 +41,27 @@ export default function QuizGame() {
   const [hint, setHint] = useState(false);
   const [answers, setAnswers] = useState([]);
   const toast = useToast();
-  const { player, saveProgress, getProgress } = usePlayer();
+  const {
+    player,
+    saveProgress,
+    getProgress,
+    progressReady: cloudProgressReady,
+    logActivity,
+  } = usePlayer();
   const { language, setLanguage, languages, t, translateText } = useLanguage();
   const [restored, setRestored] = useState(false);
-  const [progressReady, setProgressReady] = useState(false);
+  const [quizProgressReady, setQuizProgressReady] = useState(false);
+  const ageGroup = player?.ageGroup || "scholar";
+  const ageInfo = AGE_GROUPS[ageGroup] || AGE_GROUPS.scholar;
   const [translatedQuestion, setTranslatedQuestion] = useState(null);
   const [translatedExplanation, setTranslatedExplanation] = useState("");
   const [translating, setTranslating] = useState(false);
 
   useEffect(() => {
+    if (!cloudProgressReady) return () => {};
+
     let active = true;
-    setProgressReady(false);
+    setQuizProgressReady(false);
     setLoading(true);
     setError("");
     const saved = getProgress(`quiz:${chapterSlug}`, null);
@@ -63,8 +75,10 @@ export default function QuizGame() {
     setXp(saved?.xp || 0);
     setCoins(saved?.coins ?? 50);
     setRestored(Boolean(saved));
-    setProgressReady(true);
-    api(`/chapters/${chapterSlug}/questions`)
+    setQuizProgressReady(true);
+    api(
+      `/chapters/${chapterSlug}/questions?ageGroup=${encodeURIComponent(ageGroup)}`,
+    )
       .then((data) => {
         if (active) setQuestions(data.questions || []);
       })
@@ -78,10 +92,10 @@ export default function QuizGame() {
     return () => {
       active = false;
     };
-  }, [chapterSlug, getProgress]);
+  }, [chapterSlug, getProgress, cloudProgressReady, ageGroup]);
 
   useEffect(() => {
-    if (!progressReady) return;
+    if (!quizProgressReady) return;
     saveProgress(`quiz:${chapterSlug}`, {
       index,
       score,
@@ -99,7 +113,7 @@ export default function QuizGame() {
     finished,
     answers,
     saveProgress,
-    progressReady,
+    quizProgressReady,
   ]);
 
   const q = questions[index];
@@ -177,18 +191,27 @@ export default function QuizGame() {
     try {
       const data = await api("/quiz/check-answer", {
         method: "POST",
-        body: JSON.stringify({ chapterSlug, questionId: q.id, answerIndex: i }),
+        body: JSON.stringify({
+          chapterSlug,
+          questionId: q.id,
+          answerIndex: i,
+          ageGroup,
+        }),
       });
       setResult(data);
       const gainedScore = data.correct
         ? q.difficulty === "Advanced"
           ? 150
-          : 100
+          : q.difficulty === "Entry"
+            ? 60
+            : 100
         : 0;
       const gainedCoins = data.correct
         ? q.difficulty === "Advanced"
           ? 15
-          : 10
+          : q.difficulty === "Entry"
+            ? 6
+            : 10
         : 0;
       setScore((s) => s + gainedScore);
       setXp((v) => v + (data.xp || 0));
@@ -220,6 +243,15 @@ export default function QuizGame() {
     setXp(finalXp);
     setCoins(finalCoins);
     setFinished(true);
+    logActivity("chapter_completed", {
+      chapterSlug,
+      taskName: topic.title,
+      score,
+      xp: finalXp,
+      coins: finalCoins,
+      accuracy,
+      ageGroup,
+    });
     confetti({ particleCount: 150, spread: 85, origin: { y: 0.65 } });
     try {
       await api("/progress", {
@@ -309,8 +341,9 @@ export default function QuizGame() {
             {t("chapterComplete")}
           </h1>
           <p className="mt-3 text-slate-600">
-            You finished <strong>{topic.title}</strong>. Review the explanations
-            or continue your Heritage Quest.
+            You finished <strong>{topic.title}</strong> as a{" "}
+            <strong>{ageInfo.label}</strong>. Review your answers, download your
+            certificate, or continue your Heritage Quest.
           </p>
           <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <ResultStat n={`${correctCount}/${questions.length}`} l="Correct" />
@@ -328,6 +361,9 @@ export default function QuizGame() {
             </Button>
             <Button onClick={reset} variant="outline">
               <RotateCcw className="h-4 w-4" /> Try Again
+            </Button>
+            <Button as={Link} to={`/certificate/${chapterSlug}`} variant="secondary">
+              <Award className="h-4 w-4" /> Download Certificate
             </Button>
             <Button as={Link} to="/learn">
               Next Chapter <ArrowRight className="h-4 w-4" />
@@ -390,11 +426,21 @@ export default function QuizGame() {
           <div className="h-2 bg-gradient-to-r from-heritage-saffron via-heritage-gold to-heritage-green" />
           <div className="p-6 sm:p-9">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <Badge tone={q.difficulty === "Advanced" ? "red" : "gold"}>
-                {q.difficulty === "Advanced" ? t("quizAdvanced") : t("quizNormal")}
+              <Badge
+                tone={
+                  q.difficulty === "Advanced"
+                    ? "red"
+                    : q.difficulty === "Entry"
+                      ? "green"
+                      : "gold"
+                }
+              >
+                {q.difficulty}
               </Badge>
               <span className="text-xs font-bold text-slate-400">
-                {translating ? t("translating") : t("normalAdvanced")}
+                {translating
+                  ? t("translating")
+                  : `${ageInfo.label} · ${ageInfo.range}`}
               </span>
             </div>
             <div className="mt-5 flex items-start gap-3">
