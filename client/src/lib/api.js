@@ -1,4 +1,5 @@
 import { getAgeQuestionBank } from "../data/ageQuestionBanks";
+import { buildGeneratedAgeQuestions } from "../data/generatedAgeQuestions";
 import { supabase, supabaseConfigured } from "./supabase";
 
 let contentPromise;
@@ -225,7 +226,9 @@ async function localApi(path, options = {}) {
     if (!chapter) throw new Error("Chapter not found");
     const chapterIndex = Math.max(0, chapters.findIndex((item) => item.slug === slug));
     const ageGroup = String(params.get("ageGroup") || "scholar");
-    const ageBank = getAgeQuestionBank(slug, ageGroup);
+    const ageBank =
+      getAgeQuestionBank(slug, ageGroup) ||
+      buildGeneratedAgeQuestions(slug, ageGroup, chapters);
     const sourceQuestions = ageBank || questionsByChapter[slug] || [];
     const questions = sourceQuestions
       .slice(0, 10)
@@ -254,7 +257,9 @@ async function localApi(path, options = {}) {
   if (method === "POST" && pathname === "/quiz/check-answer") {
     const body = JSON.parse(options.body || "{}");
     const ageGroup = String(body.ageGroup || "scholar");
-    const ageBank = getAgeQuestionBank(body.chapterSlug, ageGroup);
+    const ageBank =
+      getAgeQuestionBank(body.chapterSlug, ageGroup) ||
+      buildGeneratedAgeQuestions(body.chapterSlug, ageGroup, chapters);
     const rawQuestions = (ageBank || questionsByChapter[body.chapterSlug] || []).slice(0, 10);
     const questionIndex = rawQuestions.findIndex((item) => item.id === body.questionId);
     if (questionIndex < 0) throw new Error("Question not found");
