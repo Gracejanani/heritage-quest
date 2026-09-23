@@ -10,11 +10,13 @@ A modern, responsive educational gaming prototype for exploring Indian civilizat
 - New **Heritage Quest** emblem/logo and favicon included.
 - **12 learning chapters**.
 - **10 questions per chapter** = **120 total questions**.
-- Questions are only **Medium** and **Advanced** difficulty.
-- Every question has four options, answer validation, a hint and a historical explanation.
-- Correct answers earn XP; advanced questions earn more XP.
-- Chapter completion, score, XP, coins, accuracy, review answers and progress saving are implemented.
-- Login and Sign Up pages are intentionally excluded.
+- **Supabase email/password registration and login** with student name and date of birth.
+- Date of birth automatically selects an age band: **1–5 Entry**, **6–9 Medium**, **10–16 Medium + Advanced**, with a 17+ testing fallback.
+- Every question has four mixed answer options, answer validation, a hint and a historical explanation.
+- New age-curated temple questions use the client-provided temple reference material.
+- English plus all **22 Scheduled Indian languages** are available in the language selector.
+- Student profile, quiz progress and gameplay activity are stored in Supabase with a local browser cache for resilience.
+- Completing a chapter automatically issues a personalised certificate that can be downloaded or printed and stored privately in Supabase Storage.
 
 ## Tech stack
 
@@ -23,7 +25,9 @@ A modern, responsive educational gaming prototype for exploring Indian civilizat
 - Icons: Lucide React
 - Animations: CSS + canvas-confetti
 - Backend: Node.js + Express
-- Persistence: localStorage + JSON-backed demo state on the Node server
+- Auth / Database / Storage: Supabase Auth + Postgres + Storage
+- Local resilience: per-user localStorage cache
+- Backend fallback: Node.js + Express
 
 ## Main routes
 
@@ -36,7 +40,8 @@ A modern, responsive educational gaming prototype for exploring Indian civilizat
 - `/play/puzzle` Monument puzzle
 - `/leaderboard` Leaderboard
 - `/achievements` Achievements
-- `/profile` Explorer profile
+- `/profile` Student profile and progress
+- `/certificate/:chapterSlug` Completion certificate
 - `/about` Mission / SIH concept reference
 
 ## Main API routes
@@ -56,6 +61,18 @@ A modern, responsive educational gaming prototype for exploring Indian civilizat
 - `GET /api/challenges/daily`
 - `GET /api/recommendations`
 - `GET /api/search?q=...`
+
+
+## Supabase setup
+
+The repository includes:
+
+- `supabase/schema.sql` — profiles, content tables, age-aware questions, progress, activity logs, certificates, RLS policies, secure quiz RPCs and certificate Storage policies.
+- `client/scripts/seed-supabase.mjs` — imports games, chapters, the existing question bank and the new age-curated temple banks.
+- `client/.env.example` — required frontend environment variable names.
+- `SUPABASE_SETUP.md` — full setup instructions.
+
+For the requested immediate register-and-enter flow, Supabase Email Auth should have **Confirm email** disabled. If it remains enabled, the student must verify the email before the first login.
 
 ## Run locally
 
@@ -105,14 +122,18 @@ npm start
 
 After `client/dist` exists, Express serves the production React build.
 
-## Question structure
+## Age-aware question structure
 
-Each chapter currently contains exactly **10 questions**, satisfying the client's 10–15 question requirement. The distribution is designed as approximately:
+The registered date of birth determines the student's question level automatically:
 
-- 6 Medium
-- 4 Advanced
+- **Ages 1–5 — Little Explorer:** entry-level questions.
+- **Ages 6–9 — Young Explorer:** medium-level questions.
+- **Ages 10–16 — Heritage Scholar:** medium questions with advanced questions mixed in.
+- **Age 17+ — Open Explorer:** full set for teachers, judges and adult testing.
 
-Questions focus on historical reasoning, evidence, comparison, context, causation and interpretation rather than only simple recall.
+For the scholar/open level, advanced questions are deliberately mixed into the quiz rather than grouped together, and answer positions are shuffled.
+
+The Indian Monuments module also includes dedicated age-curated temple questions built from the client-provided temple references.
 
 ## Chapters
 
