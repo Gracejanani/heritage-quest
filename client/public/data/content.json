@@ -10,7 +10,7 @@
       "difficulty": "Medium",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/mohenjo-daro.svg",
+      "image": "/assets/games/ancient-india.webp",
       "chapterSlug": "ancient-india",
       "learn": [
         "Sources & archaeology",
@@ -33,7 +33,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/mohenjo-daro.svg",
+      "image": "/assets/games/harappan-explorer.webp",
       "chapterSlug": "indus-valley-civilization",
       "learn": [
         "Urban planning",
@@ -56,7 +56,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/maurya.svg",
+      "image": "/assets/games/maurya-empire.webp",
       "chapterSlug": "maurya-empire",
       "learn": [
         "Ashokan edicts",
@@ -79,7 +79,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/gupta.svg",
+      "image": "/assets/games/gupta-golden.webp",
       "chapterSlug": "gupta-empire",
       "learn": [
         "Coins & inscriptions",
@@ -102,7 +102,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/chola.svg",
+      "image": "/assets/games/chola-empire.webp",
       "chapterSlug": "chola-dynasty",
       "learn": [
         "Administration",
@@ -125,7 +125,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/mughal.svg",
+      "image": "/assets/games/mughal-court.webp",
       "chapterSlug": "mughal-empire",
       "learn": [
         "Mansabdari",
@@ -148,7 +148,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/freedom.svg",
+      "image": "/assets/games/freedom-trail.webp",
       "chapterSlug": "indian-freedom-movement",
       "learn": [
         "Movements",
@@ -171,7 +171,7 @@
       "difficulty": "Medium",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/monument.svg",
+      "image": "/assets/games/monument-mania.webp",
       "chapterSlug": "indian-monuments",
       "learn": [
         "Architecture",
@@ -194,7 +194,7 @@
       "difficulty": "Medium",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/art-culture.svg",
+      "image": "/assets/games/art-culture-studio.webp",
       "chapterSlug": "indian-art-culture",
       "learn": [
         "Dance",
@@ -217,7 +217,7 @@
       "difficulty": "Medium",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/festival.svg",
+      "image": "/assets/games/festival-fiesta.webp",
       "chapterSlug": "indian-festivals",
       "learn": [
         "Seasonality",
@@ -240,7 +240,7 @@
       "difficulty": "Medium",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/states.svg",
+      "image": "/assets/games/state-map-sprint.webp",
       "chapterSlug": "states-of-india",
       "learn": [
         "Geography",
@@ -263,7 +263,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/people.svg",
+      "image": "/assets/games/people-shaped-india.webp",
       "chapterSlug": "famous-personalities",
       "learn": [
         "Reform",
@@ -283,7 +283,7 @@
       "title": "Ancient India",
       "era": "Foundations to c. 600 CE",
       "category": "History",
-      "image": "/assets/hero-heritage.jpg",
+      "image": "/assets/games/ancient-india.webp",
       "description": "Explore early settlements, Vedic traditions, states, ideas and evidence from archaeology and texts.",
       "learn": [
         "Early settlements and urbanization",
@@ -298,7 +298,7 @@
       "title": "Indus Valley Civilization",
       "era": "c. 2600–1900 BCE",
       "category": "Civilizations",
-      "image": "/assets/game-harappan.jpg",
+      "image": "/assets/games/harappan-explorer.webp",
       "description": "Investigate planned cities, craft production, trade, seals and the limits of archaeological interpretation.",
       "learn": [
         "Urban planning and drainage",
@@ -313,7 +313,7 @@
       "title": "Maurya Empire",
       "era": "c. 322–185 BCE",
       "category": "Dynasties",
-      "image": "/assets/game-map.jpg",
+      "image": "/assets/games/maurya-empire.webp",
       "description": "Study imperial expansion, administration, Ashokan inscriptions, dhamma and long-distance networks.",
       "learn": [
         "Imperial administration",
@@ -328,7 +328,7 @@
       "title": "Gupta Empire",
       "era": "c. 4th–6th century CE",
       "category": "Dynasties",
-      "image": "/assets/hero-heritage.jpg",
+      "image": "/assets/games/gupta-golden.webp",
       "description": "Explore political history alongside developments in literature, mathematics, astronomy, art and regional power.",
       "learn": [
         "Political structure",
@@ -343,7 +343,7 @@
       "title": "Chola Dynasty",
       "era": "c. 9th–13th century CE",
       "category": "Dynasties",
-      "image": "/assets/game-chola.jpg",
+      "image": "/assets/games/chola-empire.webp",
       "description": "Trace Chola administration, inscriptions, temples, bronze art, irrigation and Indian Ocean connections.",
       "learn": [
         "Local administration",
@@ -358,7 +358,7 @@
       "title": "Mughal Empire",
       "era": "16th–19th century CE",
       "category": "History",
-      "image": "/assets/game-taj.jpg",
+      "image": "/assets/games/mughal-court.webp",
       "description": "Study administration, court culture, architecture, revenue systems, regional politics and changing imperial power.",
       "learn": [
         "Mansabdari system",
@@ -373,7 +373,7 @@
       "title": "Indian Freedom Movement",
       "era": "19th–20th century",
       "category": "Freedom Struggle",
-      "image": "/assets/hero-heritage.jpg",
+      "image": "/assets/games/freedom-trail.webp",
       "description": "Build a chronology of organizations, mass movements, constitutional debates, revolutionary currents and independence.",
       "learn": [
         "National organizations",
@@ -388,7 +388,7 @@
       "title": "Indian Monuments",
       "era": "Across periods",
       "category": "Monuments",
-      "image": "/assets/game-taj.jpg",
+      "image": "/assets/games/monument-mania.webp",
       "description": "Compare architectural styles, patronage, materials and historical contexts behind major Indian monuments.",
       "learn": [
         "Architectural styles",
@@ -403,7 +403,7 @@
       "title": "Indian Art & Culture",
       "era": "Living heritage",
       "category": "Art & Culture",
-      "image": "/assets/game-festival.jpg",
+      "image": "/assets/games/art-culture-studio.webp",
       "description": "Explore classical and folk traditions in dance, music, painting, crafts and performance.",
       "learn": [
         "Classical dance traditions",
@@ -418,7 +418,7 @@
       "title": "Indian Festivals",
       "era": "Living heritage",
       "category": "Festivals",
-      "image": "/assets/game-festival.jpg",
+      "image": "/assets/games/festival-fiesta.webp",
       "description": "Understand regional, seasonal, agricultural and religious contexts behind diverse Indian festivals.",
       "learn": [
         "Seasonal cycles",
@@ -433,7 +433,7 @@
       "title": "States of India",
       "era": "Modern India",
       "category": "States of India",
-      "image": "/assets/game-map.jpg",
+      "image": "/assets/games/state-map-sprint.webp",
       "description": "Connect geography, languages, culture, history and landscapes across India's states and regions.",
       "learn": [
         "Physical geography",
@@ -448,7 +448,7 @@
       "title": "Famous Personalities",
       "era": "Across eras",
       "category": "Famous Personalities",
-      "image": "/assets/explorer-mobile.jpg",
+      "image": "/assets/games/people-shaped-india.webp",
       "description": "Match influential thinkers, rulers, reformers, scientists, artists and freedom leaders to their contributions.",
       "learn": [
         "Historical context",
