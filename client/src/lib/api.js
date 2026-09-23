@@ -1,3 +1,5 @@
+import { getAgeQuestionBank } from "../data/ageQuestionBanks";
+
 let contentPromise;
 
 async function getBundledContent() {
@@ -18,7 +20,7 @@ const CORRECT_POSITION_PATTERNS = [
   [0, 2, 1, 3, 2, 0, 3, 1, 0, 2],
 ];
 
-function prepareQuestion(question, index, chapterIndex = 0) {
+function prepareQuestion(question, index, chapterIndex = 0, ageGroup = "scholar") {
   const sourceAnswers = [...question.answers];
   const correctText = sourceAnswers[question.correct];
   const remaining = sourceAnswers.filter((_, answerIndex) => answerIndex !== question.correct);
@@ -35,9 +37,18 @@ function prepareQuestion(question, index, chapterIndex = 0) {
     );
   }
 
+  const difficulty =
+    ageGroup === "entry"
+      ? "Entry"
+      : ageGroup === "junior"
+        ? "Medium"
+        : ADVANCED_QUESTION_INDEXES.has(index)
+          ? "Advanced"
+          : "Medium";
+
   return {
     ...question,
-    difficulty: ADVANCED_QUESTION_INDEXES.has(index) ? "Advanced" : "Normal",
+    difficulty,
     answers,
     correct: desiredCorrectIndex,
   };
@@ -105,9 +116,14 @@ async function localApi(path, options = {}) {
     const chapter = chapters.find((item) => item.slug === slug);
     if (!chapter) throw new Error("Chapter not found");
     const chapterIndex = Math.max(0, chapters.findIndex((item) => item.slug === slug));
-    const questions = (questionsByChapter[slug] || [])
+    const ageGroup = String(params.get("ageGroup") || "scholar");
+    const ageBank = getAgeQuestionBank(slug, ageGroup);
+    const sourceQuestions = ageBank || questionsByChapter[slug] || [];
+    const questions = sourceQuestions
       .slice(0, 10)
-      .map((question, index) => prepareQuestion(question, index, chapterIndex));
+      .map((question, index) =>
+        prepareQuestion(question, index, chapterIndex, ageGroup),
+      );
     return {
       chapter: chapter.title,
       chapterSlug: slug,
@@ -129,7 +145,9 @@ async function localApi(path, options = {}) {
 
   if (method === "POST" && pathname === "/quiz/check-answer") {
     const body = JSON.parse(options.body || "{}");
-    const rawQuestions = (questionsByChapter[body.chapterSlug] || []).slice(0, 10);
+    const ageGroup = String(body.ageGroup || "scholar");
+    const ageBank = getAgeQuestionBank(body.chapterSlug, ageGroup);
+    const rawQuestions = (ageBank || questionsByChapter[body.chapterSlug] || []).slice(0, 10);
     const questionIndex = rawQuestions.findIndex((item) => item.id === body.questionId);
     if (questionIndex < 0) throw new Error("Question not found");
     const chapterIndex = Math.max(
@@ -140,6 +158,7 @@ async function localApi(path, options = {}) {
       rawQuestions[questionIndex],
       questionIndex,
       chapterIndex,
+      ageGroup,
     );
     const selected = Number(body.answerIndex);
     const correct = selected === question.correct;
