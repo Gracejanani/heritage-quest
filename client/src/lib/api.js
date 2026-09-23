@@ -1,4 +1,5 @@
 import { getAgeQuestionBank } from "../data/ageQuestionBanks";
+import { supabase, supabaseConfigured } from "./supabase";
 
 let contentPromise;
 
@@ -56,6 +57,113 @@ function prepareQuestion(question, index, chapterIndex = 0, ageGroup = "scholar"
 
 function publicQuestion({ correct, explanation, ...question }) {
   return question;
+}
+
+const CLOUD_ANSWER_PATTERNS = [
+  [2, 0, 3, 1],
+  [1, 3, 0, 2],
+  [3, 1, 2, 0],
+  [0, 2, 1, 3],
+];
+
+function simpleHash(value = "") {
+  return [...String(value)].reduce(
+    (total, character) => (total + character.charCodeAt(0)) % 997,
+    0,
+  );
+}
+
+function shuffleCloudAnswers(answers, questionIndex, chapterSlug) {
+  const source = Array.isArray(answers) ? answers : [];
+  if (source.length !== 4) return source;
+  const pattern =
+    CLOUD_ANSWER_PATTERNS[
+      (simpleHash(chapterSlug) + questionIndex) % CLOUD_ANSWER_PATTERNS.length
+    ];
+  return pattern.map((sourceIndex) => source[sourceIndex]);
+}
+
+async function cloudApi(path, options = {}) {
+  if (!supabaseConfigured || !supabase) {
+    throw new Error("Supabase unavailable");
+  }
+
+  const method = String(options.method || "GET").toUpperCase();
+  const [pathname, queryString = ""] = path.split("?");
+  const params = new URLSearchParams(queryString);
+
+  const questionMatch = pathname.match(/^\/chapters\/([^/]+)\/questions$/);
+  if (method === "GET" && questionMatch) {
+    const chapterSlug = decodeURIComponent(questionMatch[1]);
+    const ageGroup = String(params.get("ageGroup") || "scholar");
+
+    const { data, error } = await supabase.rpc("get_quiz_questions", {
+      p_chapter_slug: chapterSlug,
+      p_age_group: ageGroup,
+    });
+
+    if (error) throw error;
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error("Supabase question bank is empty");
+    }
+
+    const questions = data.map((row, index) => ({
+      id: row.id,
+      difficulty: row.difficulty,
+      question: row.question,
+      answers: shuffleCloudAnswers(row.answers, index, chapterSlug),
+      hint: row.hint || "",
+    }));
+
+    return {
+      chapterSlug,
+      totalQuestions: questions.length,
+      questions,
+      source: "supabase",
+    };
+  }
+
+  if (method === "POST" && pathname === "/quiz/check-answer") {
+    const body = JSON.parse(options.body || "{}");
+    const answerText =
+      body.answerText ??
+      (Array.isArray(body.answers)
+        ? body.answers[Number(body.answerIndex)]
+        : undefined);
+
+    if (!answerText) throw new Error("Selected answer is missing");
+
+    const { data, error } = await supabase.rpc("check_quiz_answer", {
+      p_chapter_slug: body.chapterSlug,
+      p_question_id: body.questionId,
+      p_age_group: String(body.ageGroup || "scholar"),
+      p_selected_answer: String(answerText),
+    });
+
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!row) throw new Error("Answer check returned no result");
+
+    const visibleAnswers = Array.isArray(body.answers) ? body.answers : [];
+    const correctIndex = visibleAnswers.findIndex(
+      (answer) => answer === row.correct_answer,
+    );
+
+    return {
+      correct: Boolean(row.correct),
+      correctIndex,
+      explanation: row.explanation || "",
+      difficulty: row.difficulty,
+      xp: Number(row.xp || 0),
+      source: "supabase",
+    };
+  }
+
+  if (pathname === "/progress") {
+    return { ok: true, mode: "supabase-profile" };
+  }
+
+  throw new Error(`No Supabase handler for ${method} ${pathname}`);
 }
 
 async function localApi(path, options = {}) {
@@ -235,6 +343,16 @@ async function localApi(path, options = {}) {
 }
 
 export async function api(path, options = {}) {
+  if (supabaseConfigured) {
+    try {
+      return await cloudApi(path, options);
+    } catch (cloudError) {
+      // During setup or if the Supabase content has not been seeded yet,
+      // continue to the Express/bundled fallback so the learning site remains usable.
+      console.warn("Supabase API fallback:", cloudError?.message || cloudError);
+    }
+  }
+
   try {
     const res = await fetch(`/api${path}`, {
       headers: {
@@ -246,14 +364,12 @@ export async function api(path, options = {}) {
 
     if (res.ok) return res.json();
 
-    // On the Vercel frontend-only prototype, /api is not deployed.
-    // Fall back to the bundled quiz/content data instead.
     if (res.status === 404 || res.status === 405 || res.status >= 500) {
       return localApi(path, options);
     }
 
     throw new Error(`API ${res.status}`);
-  } catch (error) {
+  } catch {
     return localApi(path, options);
   }
 }
