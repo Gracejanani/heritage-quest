@@ -4,6 +4,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { getAgeQuestionBank } from '../client/src/data/ageQuestionBanks.js'
+import { buildGeneratedAgeQuestions } from '../client/src/data/generatedAgeQuestions.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -118,7 +119,9 @@ app.get('/api/chapters/:slug/questions', (req, res) => {
   if (!chapter) return res.status(404).json({ error: 'Chapter not found' })
   const chapterIndex = Math.max(0, chapters.findIndex(item => item.slug === chapter.slug))
   const ageGroup = String(req.query.ageGroup || 'scholar')
-  const ageBank = getAgeQuestionBank(chapter.slug, ageGroup)
+  const ageBank =
+    getAgeQuestionBank(chapter.slug, ageGroup) ||
+    buildGeneratedAgeQuestions(chapter.slug, ageGroup, chapters)
   const sourceQuestions = ageBank || questionsByChapter[chapter.slug] || []
   const qs = sourceQuestions
     .slice(0, 10)
@@ -128,7 +131,9 @@ app.get('/api/chapters/:slug/questions', (req, res) => {
 
 app.post('/api/quiz/check-answer', (req, res) => {
   const { chapterSlug, questionId, answerIndex, ageGroup = 'scholar' } = req.body || {}
-  const ageBank = getAgeQuestionBank(chapterSlug, String(ageGroup))
+  const ageBank =
+    getAgeQuestionBank(chapterSlug, String(ageGroup)) ||
+    buildGeneratedAgeQuestions(chapterSlug, String(ageGroup), chapters)
   const rawQuestions = ageBank || questionsByChapter[chapterSlug]
   if (!rawQuestions) return res.status(404).json({ error: 'Chapter not found' })
   const questionIndex = rawQuestions.slice(0, 10).findIndex(item => item.id === questionId)
