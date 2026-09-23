@@ -374,7 +374,7 @@ export function LanguageProvider({ children }) {
     setLanguageState(next);
   };
 
-   const translateText = useCallback(
+  const translateText = useCallback(
     async (text, target = language) => {
       if (!text || target === "en") return text;
 
@@ -455,7 +455,7 @@ export function LanguageProvider({ children }) {
 
   const value = useMemo(
     () => ({ language, setLanguage, languages, t, localizeTopic, translateText }),
-    [language, translateText],
+    [language, translateText, dynamicUi],
   );
 
   return (
