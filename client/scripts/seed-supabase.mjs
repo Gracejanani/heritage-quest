@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 import { ageQuestionBanks } from "../src/data/ageQuestionBanks.js";
+import { buildGeneratedAgeQuestions } from "../src/data/generatedAgeQuestions.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const contentPath = path.resolve(here, "../public/data/content.json");
@@ -79,6 +80,34 @@ for (const [chapterSlug, groups] of Object.entries(ageQuestionBanks)) {
         source_label: "Client-provided temple reference materials",
       });
     });
+  }
+}
+
+for (const chapter of content.chapters || []) {
+  if (ageQuestionBanks[chapter.slug]) continue;
+
+  for (const ageGroup of ["entry", "junior"]) {
+    const generated = buildGeneratedAgeQuestions(
+      chapter.slug,
+      ageGroup,
+      content.chapters || [],
+    );
+
+    for (const [index, question] of (generated || []).entries()) {
+      questionRows.push({
+        id: String(question.id),
+        chapter_slug: chapter.slug,
+        age_group: ageGroup,
+        difficulty: question.difficulty,
+        question: question.question,
+        answers: question.answers,
+        correct_index: Number(question.correct),
+        explanation: question.explanation || null,
+        hint: question.hint || null,
+        sort_order: index + 1,
+        source_label: "Generated from Heritage Quest chapter learning content",
+      });
+    }
   }
 }
 
