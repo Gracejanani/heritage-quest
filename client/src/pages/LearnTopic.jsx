@@ -13,10 +13,14 @@ import {
 import { games, learningTopics } from "../data/content";
 import { Badge, Button } from "../components/ui";
 import { useLanguage } from "../context/LanguageContext";
+import { usePlayer } from "../context/PlayerContext";
+import { AGE_GROUPS } from "../lib/age";
 
 export default function LearnTopic() {
   const { slug } = useParams();
   const { t, localizeTopic } = useLanguage();
+  const { player } = usePlayer();
+  const ageInfo = AGE_GROUPS[player?.ageGroup] || AGE_GROUPS.scholar;
   const baseTopic =
     learningTopics.find((item) => item.slug === slug) || learningTopics[0];
   const topic = localizeTopic(baseTopic);
@@ -45,7 +49,9 @@ export default function LearnTopic() {
               {topic.studyOnly ? (
                 <Badge tone="orange">{t("studyMaterial")}</Badge>
               ) : (
-                <Badge tone="orange">10 · {t("normalAdvanced")}</Badge>
+                <Badge tone="orange">
+                  {ageInfo.label} · {ageInfo.range}
+                </Badge>
               )}
             </div>
             <h1 className="mt-3 font-display text-4xl font-extrabold sm:text-5xl">
@@ -102,10 +108,10 @@ export default function LearnTopic() {
                   <Lightbulb className="h-5 w-5" /> {t("learningApproach")}
                 </div>
                 <p className="mt-2 text-sm leading-6 text-sky-900/70">
-                  Every chapter uses 10 questions: seven normal-level questions
-                  and three advanced questions. The advanced questions are mixed
-                  into the chapter rather than grouped together, and answer
-                  options are deliberately mixed.
+                  Heritage Quest automatically uses your registered date of birth
+                  to choose the appropriate question level. {ageInfo.description}
+                  Answer choices are deliberately mixed so the correct option is
+                  not always in the same position.
                 </p>
               </div>
             )}
@@ -139,8 +145,9 @@ export default function LearnTopic() {
                 Ready for the chapter challenge?
               </h2>
               <p className="mt-2 text-sm leading-6 text-white/65">
-                Answer 10 questions: seven normal and three advanced. Normal
-                answers earn 20 XP; advanced answers earn 30 XP.
+                Your challenge is prepared for {ageInfo.label} learners
+                ({ageInfo.range}). Entry, medium and advanced questions use
+                different rewards based on their difficulty.
               </p>
               <div className="mt-5 overflow-hidden rounded-2xl bg-white/10">
                 <img
@@ -156,7 +163,7 @@ export default function LearnTopic() {
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-100">
-                <HelpCircle className="h-4 w-4" /> {t("normalAdvanced")}
+                <HelpCircle className="h-4 w-4" /> {ageInfo.label} · {ageInfo.range}
               </div>
               <Button
                 as={Link}
