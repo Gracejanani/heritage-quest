@@ -15,7 +15,7 @@ import { AGE_GROUPS, calculateAge, getAgeGroup } from "../lib/age";
 
 export default function AuthGate({ children }) {
   const { user, profile, loading, configured, signIn, signUp } = useAuth();
-  const { language, setLanguage, languages } = useLanguage();
+  const { language, setLanguage, languages, t } = useLanguage();
   const [mode, setMode] = useState("login");
   const [form, setForm] = useState({
     name: "",
@@ -125,8 +125,8 @@ export default function AuthGate({ children }) {
 
           <div className="mt-8 grid grid-cols-2 rounded-2xl bg-slate-100 p-1">
             {[
-              ["login", "Login"],
-              ["register", "Register"],
+              ["login", t("login")],
+              ["register", t("register")],
             ].map(([value, label]) => (
               <button
                 key={value}
@@ -148,12 +148,10 @@ export default function AuthGate({ children }) {
           </div>
 
           <h1 className="mt-7 font-display text-4xl font-extrabold text-heritage-brown">
-            {mode === "register" ? "Create your explorer account" : "Welcome back"}
+            {mode === "register" ? t("createExplorerAccount") : t("welcomeBack")}
           </h1>
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            {mode === "register"
-              ? "Register once with email, password and date of birth. Your age automatically chooses the right question level."
-              : "Use the same email and password you registered with to continue your saved learning journey."}
+            {mode === "register" ? t("registerCopy") : t("loginCopy")}
           </p>
 
           {!configured && (
@@ -167,7 +165,7 @@ export default function AuthGate({ children }) {
             {mode === "register" && (
               <Field
                 icon={UserRound}
-                label="Student name"
+                label={t("studentName")}
                 value={form.name}
                 onChange={update("name")}
                 placeholder="e.g. Aarav Sharma"
@@ -177,7 +175,7 @@ export default function AuthGate({ children }) {
 
             <Field
               icon={Mail}
-              label="Email"
+              label={t("email")}
               type="email"
               value={form.email}
               onChange={update("email")}
@@ -186,7 +184,7 @@ export default function AuthGate({ children }) {
             />
 
             <div>
-              <label className="text-sm font-extrabold text-slate-800">Password</label>
+              <label className="text-sm font-extrabold text-slate-800">{t("password")}</label>
               <div className="relative mt-2">
                 <LockKeyhole className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
                 <input
@@ -194,7 +192,7 @@ export default function AuthGate({ children }) {
                   value={form.password}
                   onChange={update("password")}
                   autoComplete={mode === "register" ? "new-password" : "current-password"}
-                  placeholder="Minimum 6 characters"
+                  placeholder={t("passwordHint")}
                   className="focus-ring h-12 w-full rounded-2xl border border-slate-200 bg-white pl-12 pr-12 font-semibold outline-none"
                 />
                 <button
@@ -240,10 +238,10 @@ export default function AuthGate({ children }) {
               className="focus-ring inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-heritage-green px-5 font-extrabold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {busy
-                ? "Please wait…"
+                ? t("pleaseWait")
                 : mode === "register"
-                  ? "Register & Enter"
-                  : "Login & Continue"}
+                  ? t("registerEnter")
+                  : t("loginContinue")}
               {!busy && <ArrowRight className="h-4 w-4" />}
             </button>
 
