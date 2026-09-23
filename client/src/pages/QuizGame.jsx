@@ -220,6 +220,15 @@ export default function QuizGame() {
         ...a,
         { question: q, selected: i, ...data, gainedScore, gainedCoins },
       ]);
+      logActivity("question_answered", {
+        chapterSlug,
+        questionId: q.id,
+        difficulty: q.difficulty,
+        selectedAnswer: i,
+        correct: Boolean(data.correct),
+        xpEarned: Number(data.xp || 0),
+        ageGroup,
+      });
       if (data.correct)
         confetti({ particleCount: 45, spread: 50, origin: { y: 0.72 } });
     } catch {
