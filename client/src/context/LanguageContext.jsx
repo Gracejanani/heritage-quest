@@ -85,6 +85,21 @@ const ui = {
     rewards: "Rewards",
     translating: "Translating...",
     correctAnswer: "Correct answer",
+    login: "Login",
+    register: "Register",
+    createExplorerAccount: "Create your explorer account",
+    welcomeBack: "Welcome back",
+    registerCopy:
+      "Register once with email, password and date of birth. Your age automatically chooses the right question level.",
+    loginCopy:
+      "Use the same email and password you registered with to continue your saved learning journey.",
+    studentName: "Student name",
+    email: "Email",
+    password: "Password",
+    passwordHint: "Minimum 6 characters",
+    registerEnter: "Register & Enter",
+    loginContinue: "Login & Continue",
+    pleaseWait: "Please wait…",
   },
   ta: {
     home: "முகப்பு",
@@ -136,6 +151,21 @@ const ui = {
     rewards: "வெகுமதிகள்",
     translating: "மொழிபெயர்க்கப்படுகிறது...",
     correctAnswer: "சரியான பதில்",
+    login: "உள்நுழை",
+    register: "பதிவு செய்",
+    createExplorerAccount: "உங்கள் பயனர் கணக்கை உருவாக்குங்கள்",
+    welcomeBack: "மீண்டும் வரவேற்கிறோம்",
+    registerCopy:
+      "மின்னஞ்சல், கடவுச்சொல் மற்றும் பிறந்த தேதியுடன் ஒருமுறை பதிவு செய்யுங்கள். உங்கள் வயதுக்கு ஏற்ற கேள்வி நிலை தானாகத் தேர்ந்தெடுக்கப்படும்.",
+    loginCopy:
+      "நீங்கள் பதிவு செய்த அதே மின்னஞ்சல் மற்றும் கடவுச்சொல்லைப் பயன்படுத்தி சேமிக்கப்பட்ட கற்றல் பயணத்தைத் தொடருங்கள்.",
+    studentName: "மாணவர் பெயர்",
+    email: "மின்னஞ்சல்",
+    password: "கடவுச்சொல்",
+    passwordHint: "குறைந்தது 6 எழுத்துகள்",
+    registerEnter: "பதிவு செய்து நுழை",
+    loginContinue: "உள்நுழைந்து தொடரு",
+    pleaseWait: "தயவுசெய்து காத்திருக்கவும்…",
   },
   hi: {
     home: "होम",
@@ -187,6 +217,21 @@ const ui = {
     rewards: "रिवॉर्ड्स",
     translating: "अनुवाद हो रहा है...",
     correctAnswer: "सही उत्तर",
+    login: "लॉग इन",
+    register: "रजिस्टर",
+    createExplorerAccount: "अपना एक्सप्लोरर अकाउंट बनाएँ",
+    welcomeBack: "वापसी पर स्वागत है",
+    registerCopy:
+      "ईमेल, पासवर्ड और जन्मतिथि के साथ एक बार रजिस्टर करें। आपकी उम्र के अनुसार सही प्रश्न स्तर अपने आप चुना जाएगा।",
+    loginCopy:
+      "अपनी सेव की हुई सीखने की यात्रा जारी रखने के लिए वही ईमेल और पासवर्ड इस्तेमाल करें जिससे आपने रजिस्टर किया था।",
+    studentName: "विद्यार्थी का नाम",
+    email: "ईमेल",
+    password: "पासवर्ड",
+    passwordHint: "कम से कम 6 अक्षर",
+    registerEnter: "रजिस्टर करें और प्रवेश करें",
+    loginContinue: "लॉग इन करके जारी रखें",
+    pleaseWait: "कृपया प्रतीक्षा करें…",
   },
 };
 
