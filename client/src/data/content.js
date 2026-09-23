@@ -53,7 +53,7 @@ export const games = [
     difficulty: "Medium",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/mohenjo-daro.svg",
+    image: "/assets/games/ancient-india.webp",
     chapterSlug: "ancient-india",
     learn: [
       "Sources & archaeology",
@@ -74,7 +74,7 @@ export const games = [
     difficulty: "Advanced",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/mohenjo-daro.svg",
+    image: "/assets/games/harappan-explorer.webp",
     chapterSlug: "indus-valley-civilization",
     learn: [
       "Urban planning",
@@ -95,7 +95,7 @@ export const games = [
     difficulty: "Advanced",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/maurya.svg",
+    image: "/assets/games/maurya-empire.webp",
     chapterSlug: "maurya-empire",
     learn: [
       "Ashokan edicts",
@@ -116,7 +116,7 @@ export const games = [
     difficulty: "Advanced",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/gupta.svg",
+    image: "/assets/games/gupta-golden.webp",
     chapterSlug: "gupta-empire",
     learn: ["Coins & inscriptions", "Science", "Literature", "Temple art"],
     achievements: ["Knowledge Keeper", "Gupta Scholar"],
@@ -132,7 +132,7 @@ export const games = [
     difficulty: "Advanced",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/chola.svg",
+    image: "/assets/games/chola-empire.webp",
     chapterSlug: "chola-dynasty",
     learn: ["Administration", "Maritime trade", "Temples", "Bronze art"],
     achievements: ["Chola Explorer", "Ocean Trader"],
@@ -148,7 +148,7 @@ export const games = [
     difficulty: "Advanced",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/mughal.svg",
+    image: "/assets/games/mughal-court.webp",
     chapterSlug: "mughal-empire",
     learn: ["Mansabdari", "Revenue", "Architecture", "Regional politics"],
     achievements: ["Court Chronicler", "Imperial Analyst"],
@@ -164,7 +164,7 @@ export const games = [
     difficulty: "Advanced",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/freedom.svg",
+    image: "/assets/games/freedom-trail.webp",
     chapterSlug: "indian-freedom-movement",
     learn: [
       "Movements",
@@ -185,7 +185,7 @@ export const games = [
     difficulty: "Medium",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/monument.svg",
+    image: "/assets/games/monument-mania.webp",
     chapterSlug: "indian-monuments",
     learn: ["Architecture", "Patronage", "Conservation", "Historical layers"],
     achievements: ["Monument Scholar", "Heritage Keeper"],
@@ -201,7 +201,7 @@ export const games = [
     difficulty: "Medium",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/art-culture.svg",
+    image: "/assets/games/art-culture-studio.webp",
     chapterSlug: "indian-art-culture",
     learn: ["Dance", "Music", "Painting", "Craft"],
     achievements: ["Culture Champ", "Pattern Pro"],
@@ -217,7 +217,7 @@ export const games = [
     difficulty: "Medium",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/festival.svg",
+    image: "/assets/games/festival-fiesta.webp",
     chapterSlug: "indian-festivals",
     learn: ["Seasonality", "Regional traditions", "Food", "Living heritage"],
     achievements: ["Festival Friend", "Tradition Tracker"],
@@ -233,7 +233,7 @@ export const games = [
     difficulty: "Medium",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/states.svg",
+    image: "/assets/games/state-map-sprint.webp",
     chapterSlug: "states-of-india",
     learn: ["Geography", "State formation", "Languages", "Regional diversity"],
     achievements: ["Map Ace", "Regional Explorer"],
@@ -249,7 +249,7 @@ export const games = [
     difficulty: "Advanced",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/people.svg",
+    image: "/assets/games/people-shaped-india.webp",
     chapterSlug: "famous-personalities",
     learn: ["Reform", "Science", "Politics", "Historical memory"],
     achievements: ["Biography Buff", "Legacy Analyst"],
@@ -263,7 +263,7 @@ export const learningTopics = [
     era: "Foundations to c. 600 CE",
     description:
       "Explore early settlements, Vedic traditions, states, ideas and evidence from archaeology and texts.",
-    image: "/assets/hero-heritage.jpg",
+    image: "/assets/games/ancient-india.webp",
     tag: "History",
     learn: [
       "Early settlements and urbanization",
@@ -280,7 +280,7 @@ export const learningTopics = [
     era: "c. 2600–1900 BCE",
     description:
       "Investigate planned cities, craft production, trade, seals and the limits of archaeological interpretation.",
-    image: "/assets/game-harappan.jpg",
+    image: "/assets/games/harappan-explorer.webp",
     tag: "Civilizations",
     learn: [
       "Urban planning and drainage",
@@ -297,7 +297,7 @@ export const learningTopics = [
     era: "c. 322–185 BCE",
     description:
       "Study imperial expansion, administration, Ashokan inscriptions, dhamma and long-distance networks.",
-    image: "/assets/game-map.jpg",
+    image: "/assets/games/maurya-empire.webp",
     tag: "Dynasties",
     learn: [
       "Imperial administration",
@@ -314,7 +314,7 @@ export const learningTopics = [
     era: "c. 4th–6th century CE",
     description:
       "Explore political history alongside developments in literature, mathematics, astronomy, art and regional power.",
-    image: "/assets/hero-heritage.jpg",
+    image: "/assets/games/gupta-golden.webp",
     tag: "Dynasties",
     learn: [
       "Political structure",
@@ -331,7 +331,7 @@ export const learningTopics = [
     era: "c. 9th–13th century CE",
     description:
       "Trace Chola administration, inscriptions, temples, bronze art, irrigation and Indian Ocean connections.",
-    image: "/assets/game-chola.jpg",
+    image: "/assets/games/chola-empire.webp",
     tag: "Dynasties",
     learn: [
       "Local administration",
@@ -348,7 +348,7 @@ export const learningTopics = [
     era: "16th–19th century CE",
     description:
       "Study administration, court culture, architecture, revenue systems, regional politics and changing imperial power.",
-    image: "/assets/game-taj.jpg",
+    image: "/assets/games/mughal-court.webp",
     tag: "History",
     learn: [
       "Mansabdari system",
@@ -365,7 +365,7 @@ export const learningTopics = [
     era: "19th–20th century",
     description:
       "Build a chronology of organizations, mass movements, constitutional debates, revolutionary currents and independence.",
-    image: "/assets/hero-heritage.jpg",
+    image: "/assets/games/freedom-trail.webp",
     tag: "Freedom Struggle",
     learn: [
       "National organizations",
@@ -382,7 +382,7 @@ export const learningTopics = [
     era: "Across periods",
     description:
       "Compare architectural styles, patronage, materials and historical contexts behind major Indian monuments.",
-    image: "/assets/game-taj.jpg",
+    image: "/assets/games/monument-mania.webp",
     tag: "Monuments",
     learn: [
       "Architectural styles",
@@ -399,7 +399,7 @@ export const learningTopics = [
     era: "Living heritage",
     description:
       "Explore classical and folk traditions in dance, music, painting, crafts and performance.",
-    image: "/assets/game-festival.jpg",
+    image: "/assets/games/art-culture-studio.webp",
     tag: "Art & Culture",
     learn: [
       "Classical dance traditions",
@@ -416,7 +416,7 @@ export const learningTopics = [
     era: "Living heritage",
     description:
       "Understand regional, seasonal, agricultural and religious contexts behind diverse Indian festivals.",
-    image: "/assets/game-festival.jpg",
+    image: "/assets/games/festival-fiesta.webp",
     tag: "Festivals",
     learn: [
       "Seasonal cycles",
@@ -433,7 +433,7 @@ export const learningTopics = [
     era: "Modern India",
     description:
       "Connect geography, languages, culture, history and landscapes across India's states and regions.",
-    image: "/assets/game-map.jpg",
+    image: "/assets/games/state-map-sprint.webp",
     tag: "States of India",
     learn: [
       "Physical geography",
@@ -450,7 +450,7 @@ export const learningTopics = [
     era: "Across eras",
     description:
       "Match influential thinkers, rulers, reformers, scientists, artists and freedom leaders to their contributions.",
-    image: "/assets/explorer-mobile.jpg",
+    image: "/assets/games/people-shaped-india.webp",
     tag: "Famous Personalities",
     learn: [
       "Historical context",
