@@ -172,14 +172,38 @@ export default function Certificate() {
       1015,
     );
 
-    canvas.toBlob((blob) => {
+    canvas.toBlob(async (blob) => {
       if (!blob) return;
+
+      if (supabase && player?.id) {
+        try {
+          const storagePath = `${player.id}/${chapterSlug}.png`;
+          const { error: uploadError } = await supabase.storage
+            .from("certificates")
+            .upload(storagePath, blob, {
+              contentType: "image/png",
+              upsert: true,
+            });
+
+          if (uploadError) throw uploadError;
+
+          if (certificate?.id) {
+            await supabase
+              .from("certificates")
+              .update({ storage_path: storagePath })
+              .eq("id", certificate.id);
+          }
+        } catch (uploadError) {
+          console.error("Could not save certificate file to Supabase", uploadError);
+        }
+      }
+
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
       anchor.download = `Heritage-Quest-${chapterSlug}-certificate.png`;
       anchor.click();
-      URL.revokeObjectURL(url);
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
     }, "image/png");
   };
 
