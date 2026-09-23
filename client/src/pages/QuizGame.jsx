@@ -22,6 +22,7 @@ import { usePlayer } from "../context/PlayerContext";
 import { useLanguage } from "../context/LanguageContext";
 import { Badge, Button, ProgressBar, useToast } from "../components/ui";
 import { AGE_GROUPS } from "../lib/age";
+import { issueCertificate } from "../lib/certificates";
 
 export default function QuizGame() {
   const { chapterSlug = "ancient-india" } = useParams();
@@ -261,6 +262,15 @@ export default function QuizGame() {
       accuracy,
       ageGroup,
     });
+
+    issueCertificate({
+      userId: player?.id,
+      chapterSlug,
+      taskName: topic.title,
+    }).catch((certificateError) => {
+      console.error("Could not issue cloud certificate", certificateError);
+    });
+
     confetti({ particleCount: 150, spread: 85, origin: { y: 0.65 } });
     try {
       await api("/progress", {
