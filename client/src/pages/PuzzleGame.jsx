@@ -132,7 +132,7 @@ export default function PuzzleGame() {
                     onDrop={() => swap(pos)}
                     className={`focus-ring relative border border-white/70 bg-cover bg-no-repeat transition ${good ? "ring-2 ring-inset ring-emerald-400" : ""}`}
                     style={{
-                      backgroundImage: "url('/assets/game-taj.jpg')",
+                      backgroundImage: "url('/assets/games/monument-mania.webp')",
                       backgroundSize: "300% 300%",
                       backgroundPosition: `${x}% ${y}%`,
                     }}
@@ -196,7 +196,7 @@ export default function PuzzleGame() {
         title="Puzzle Hint"
       >
         <img
-          src="/assets/game-taj.jpg"
+          src="/assets/games/monument-mania.webp"
           alt="Completed Taj Mahal puzzle reference"
           className="w-full rounded-2xl object-cover"
         />
