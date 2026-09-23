@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -18,12 +18,61 @@ import { AGE_GROUPS } from "../lib/age";
 
 export default function LearnTopic() {
   const { slug } = useParams();
-  const { t, localizeTopic } = useLanguage();
+  const { language, t, localizeTopic, translateText } = useLanguage();
   const { player } = usePlayer();
   const ageInfo = AGE_GROUPS[player?.ageGroup] || AGE_GROUPS.scholar;
   const baseTopic =
     learningTopics.find((item) => item.slug === slug) || learningTopics[0];
-  const topic = localizeTopic(baseTopic);
+  const staticTopic = localizeTopic(baseTopic);
+  const [runtimeTopic, setRuntimeTopic] = useState(null);
+
+  useEffect(() => {
+    let active = true;
+
+    if (["en", "ta", "hi"].includes(language)) {
+      setRuntimeTopic(null);
+      return () => {
+        active = false;
+      };
+    }
+
+    const translateTopic = async () => {
+      const translatedLearn = await Promise.all(
+        (baseTopic.learn || []).map((item) => translateText(item, language)),
+      );
+
+      const translatedSections = await Promise.all(
+        (baseTopic.sections || []).map(async (section) => ({
+          ...section,
+          title: await translateText(section.title, language),
+          body: await translateText(section.body, language),
+        })),
+      );
+
+      const nextTopic = {
+        ...baseTopic,
+        title: await translateText(baseTopic.title, language),
+        description: await translateText(baseTopic.description, language),
+        era: await translateText(baseTopic.era || "", language),
+        tag: await translateText(baseTopic.tag || "", language),
+        learn: translatedLearn,
+        sections: translatedSections,
+      };
+
+      if (active) setRuntimeTopic(nextTopic);
+    };
+
+    translateTopic();
+
+    return () => {
+      active = false;
+    };
+  }, [baseTopic.slug, language, translateText]);
+
+  const topic = useMemo(
+    () => runtimeTopic || staticTopic,
+    [runtimeTopic, staticTopic],
+  );
   const related = games.find((g) => g.chapterSlug === baseTopic.slug) || games[0];
 
   return (
