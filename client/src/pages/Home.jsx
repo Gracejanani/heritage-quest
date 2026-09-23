@@ -321,27 +321,28 @@ export default function Home() {
       <Modal
         open={videoOpen}
         onClose={() => setVideoOpen(false)}
-        title="Heritage Quest — Product Preview"
+        title="Welcome to Heritage Quest"
       >
-        <div className="overflow-hidden rounded-2xl bg-heritage-forest p-8 text-white">
-          <div className="mx-auto grid h-20 w-20 place-items-center rounded-full bg-white/15">
-            <Play className="h-9 w-9 fill-white" />
-          </div>
-          <p className="mt-6 text-center text-sm leading-6 text-white/75">
-            Video integration is ready for your final product trailer,
-            walkthrough or presentation clip.
-          </p>
-          <div className="mt-6 flex justify-center">
-            <Button
-              onClick={() => {
-                setVideoOpen(false);
-                navigate("/games");
-              }}
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-black shadow-sm">
+          <div className="aspect-video w-full bg-black">
+            <video
+              controls
+              autoPlay
+              playsInline
+              preload="metadata"
+              className="h-full w-full object-contain"
             >
-              Explore the live demo
-            </Button>
+              <source
+                src="/videos/heritage-quest-intro.mp4"
+                type="video/mp4"
+              />
+              Your browser does not support video playback.
+            </video>
           </div>
         </div>
+        <p className="mt-4 text-center text-sm leading-6 text-slate-500">
+          See how to explore, learn and play with Heritage Quest.
+        </p>
       </Modal>
     </div>
   );
