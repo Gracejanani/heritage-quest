@@ -174,9 +174,9 @@ export function PlayerProvider({ children }) {
   const getProgress = useCallback(
     (key, fallback = null) => {
       if (!user?.id) return fallback;
-      return progressMap[key] ?? readLocal(user.id, key, fallback);
+      return readLocal(user.id, key, fallback);
     },
-    [user?.id, progressMap],
+    [user?.id],
   );
 
   const logActivity = useCallback(
