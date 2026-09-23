@@ -14,8 +14,9 @@ import Achievements from "./pages/Achievements";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
-import PlayerGate from "./components/PlayerGate";
+import AuthGate from "./components/AuthGate";
 import { PlayerProvider } from "./context/PlayerContext";
+import { AuthProvider } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
 
 export default function App() {
@@ -54,11 +55,13 @@ export default function App() {
   return (
     <ToastProvider>
       <LanguageProvider>
-        <PlayerProvider>
-          <PlayerGate>
-            {immersive ? content : <Layout>{content}</Layout>}
-          </PlayerGate>
-        </PlayerProvider>
+        <AuthProvider>
+          <PlayerProvider>
+            <AuthGate>
+              {immersive ? content : <Layout>{content}</Layout>}
+            </AuthGate>
+          </PlayerProvider>
+        </AuthProvider>
       </LanguageProvider>
     </ToastProvider>
   );
