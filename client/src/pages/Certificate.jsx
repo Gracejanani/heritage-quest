@@ -5,6 +5,7 @@ import { learningTopics } from "../data/content";
 import { Button } from "../components/ui";
 import { usePlayer } from "../context/PlayerContext";
 import { supabase } from "../lib/supabase";
+import { issueCertificate } from "../lib/certificates";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("en-IN", {
@@ -34,25 +35,16 @@ export default function Certificate() {
     let active = true;
     if (!progressReady || !player?.id || !completed || !supabase) return () => {};
 
-    supabase
-      .from("certificates")
-      .upsert(
-        {
-          user_id: player.id,
-          chapter_slug: chapterSlug,
-          task_name: topic.title,
-        },
-        { onConflict: "user_id,chapter_slug" },
-      )
-      .select("*")
-      .single()
-      .then(({ data, error: certificateError }) => {
-        if (!active) return;
-        if (certificateError) {
-          setError(certificateError.message);
-          return;
-        }
-        setCertificate(data);
+    issueCertificate({
+      userId: player.id,
+      chapterSlug,
+      taskName: topic.title,
+    })
+      .then((data) => {
+        if (active) setCertificate(data);
+      })
+      .catch((certificateError) => {
+        if (active) setError(certificateError?.message || "Could not save certificate.");
       });
 
     return () => {
