@@ -11,10 +11,14 @@ import {
 import { games, learningTopics } from "../data/content";
 import { Badge, Button, SearchBar } from "../components/ui";
 import { useLanguage } from "../context/LanguageContext";
+import { usePlayer } from "../context/PlayerContext";
+import { AGE_GROUPS } from "../lib/age";
 
 export default function Learn() {
   const [query, setQuery] = useState("");
   const { language, t, localizeTopic } = useLanguage();
+  const { player } = usePlayer();
+  const ageInfo = AGE_GROUPS[player?.ageGroup] || AGE_GROUPS.scholar;
 
   const localizedTopics = useMemo(
     () => learningTopics.map((topic) => localizeTopic(topic)),
@@ -103,7 +107,7 @@ export default function Learn() {
                   ) : (
                     <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">
                       <HelpCircle className="h-3.5 w-3.5" />
-                      10 · {t("normalAdvanced")}
+                      {ageInfo.label} · {ageInfo.range}
                     </div>
                   )}
 
@@ -149,8 +153,8 @@ export default function Learn() {
                 From Harappa to the Freedom Movement
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">
-                Build chronology and context with a mix of seven normal and
-                three advanced questions in every chapter.
+                Your quiz level is selected automatically from your date of
+                birth. {ageInfo.label} learners receive {ageInfo.description.toLowerCase()}
               </p>
             </div>
             <Button
