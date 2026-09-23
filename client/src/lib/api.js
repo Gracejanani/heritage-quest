@@ -167,7 +167,13 @@ async function localApi(path, options = {}) {
       correctIndex: question.correct,
       explanation: question.explanation,
       difficulty: question.difficulty,
-      xp: correct ? (question.difficulty === "Advanced" ? 30 : 20) : 0,
+      xp: correct
+        ? question.difficulty === "Advanced"
+          ? 30
+          : question.difficulty === "Entry"
+            ? 10
+            : 20
+        : 0,
     };
   }
 
@@ -221,8 +227,8 @@ async function localApi(path, options = {}) {
   }
 
   if (pathname === "/progress") {
-    // Prototype progress is stored per explorer in localStorage by PlayerContext.
-    return { ok: true, mode: "local-prototype" };
+    // PlayerContext persists real progress to Supabase and keeps a local cache.
+    return { ok: true, mode: "supabase-profile" };
   }
 
   throw new Error(`No local fallback for ${method} ${pathname}`);
