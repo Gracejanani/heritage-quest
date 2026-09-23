@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { supabase } from "../lib/supabase";
 
 const LanguageContext = createContext(null);
 const STORAGE_KEY = "heritageQuest:language";
@@ -372,6 +373,23 @@ export function LanguageProvider({ children }) {
     const next = languages.some((item) => item.code === code) ? code : "en";
     localStorage.setItem(STORAGE_KEY, next);
     setLanguageState(next);
+
+    if (supabase) {
+      supabase.auth.getUser().then(({ data }) => {
+        const userId = data?.user?.id;
+        if (!userId) return;
+        supabase
+          .from("profiles")
+          .update({
+            preferred_language: next,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("user_id", userId)
+          .then(({ error }) => {
+            if (error) console.error("Could not save preferred language", error);
+          });
+      });
+    }
   };
 
   const translateText = useCallback(
