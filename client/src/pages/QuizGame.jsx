@@ -196,6 +196,8 @@ export default function QuizGame() {
           chapterSlug,
           questionId: q.id,
           answerIndex: i,
+          answerText: q.answers[i],
+          answers: q.answers,
           ageGroup,
         }),
       });
