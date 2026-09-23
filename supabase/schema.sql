@@ -402,3 +402,214 @@ with check (
   bucket_id = 'certificates'
   and (storage.foldername(name))[1] = auth.uid()::text
 );
+
+
+-- Security hardening and optimized RLS
+revoke all on function public.handle_new_user() from public;
+revoke all on function public.handle_new_user() from anon;
+revoke all on function public.handle_new_user() from authenticated;
+
+create or replace function public.get_quiz_questions(
+  p_chapter_slug text,
+  p_age_group text default 'scholar'
+)
+returns table (
+  id text,
+  difficulty text,
+  question text,
+  answers jsonb,
+  hint text,
+  sort_order integer
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if (select auth.uid()) is null then
+    raise exception 'Authentication required';
+  end if;
+
+  if exists (
+    select 1
+    from public.questions q
+    where q.chapter_slug = p_chapter_slug
+      and q.age_group = p_age_group
+  ) then
+    return query
+      select
+        q.id,
+        case
+          when p_age_group = 'entry' then 'Entry'
+          when p_age_group = 'junior' then 'Medium'
+          when q.sort_order in (4, 7, 10) then 'Advanced'
+          else 'Medium'
+        end,
+        q.question,
+        q.answers,
+        q.hint,
+        q.sort_order
+      from public.questions q
+      where q.chapter_slug = p_chapter_slug
+        and q.age_group = p_age_group
+      order by q.sort_order
+      limit 10;
+  else
+    return query
+      select
+        q.id,
+        case
+          when p_age_group = 'entry' then 'Entry'
+          when p_age_group = 'junior' then 'Medium'
+          when q.sort_order in (4, 7, 10) then 'Advanced'
+          else 'Medium'
+        end,
+        q.question,
+        q.answers,
+        q.hint,
+        q.sort_order
+      from public.questions q
+      where q.chapter_slug = p_chapter_slug
+        and q.age_group = 'all'
+      order by q.sort_order
+      limit 10;
+  end if;
+end;
+$$;
+
+create or replace function public.check_quiz_answer(
+  p_chapter_slug text,
+  p_question_id text,
+  p_age_group text,
+  p_selected_answer text
+)
+returns table (
+  correct boolean,
+  correct_answer text,
+  explanation text,
+  difficulty text,
+  xp integer
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  q public.questions%rowtype;
+  v_correct boolean;
+  v_difficulty text;
+begin
+  if (select auth.uid()) is null then
+    raise exception 'Authentication required';
+  end if;
+
+  select *
+  into q
+  from public.questions
+  where chapter_slug = p_chapter_slug
+    and id = p_question_id
+    and age_group = p_age_group
+  limit 1;
+
+  if not found then
+    select *
+    into q
+    from public.questions
+    where chapter_slug = p_chapter_slug
+      and id = p_question_id
+      and age_group = 'all'
+    limit 1;
+  end if;
+
+  if not found then
+    raise exception 'Question not found';
+  end if;
+
+  v_difficulty := case
+    when p_age_group = 'entry' then 'Entry'
+    when p_age_group = 'junior' then 'Medium'
+    when q.sort_order in (4, 7, 10) then 'Advanced'
+    else 'Medium'
+  end;
+
+  v_correct := p_selected_answer = (q.answers ->> q.correct_index);
+
+  return query
+  select
+    v_correct,
+    q.answers ->> q.correct_index,
+    q.explanation,
+    v_difficulty,
+    case
+      when not v_correct then 0
+      when v_difficulty = 'Advanced' then 30
+      when v_difficulty = 'Entry' then 10
+      else 20
+    end;
+end;
+$$;
+
+revoke all on function public.get_quiz_questions(text,text) from public;
+revoke all on function public.get_quiz_questions(text,text) from anon;
+grant execute on function public.get_quiz_questions(text,text) to authenticated;
+
+revoke all on function public.check_quiz_answer(text,text,text,text) from public;
+revoke all on function public.check_quiz_answer(text,text,text,text) from anon;
+grant execute on function public.check_quiz_answer(text,text,text,text) to authenticated;
+
+drop policy if exists "profiles_select_own" on public.profiles;
+create policy "profiles_select_own"
+on public.profiles for select
+to authenticated
+using ((select auth.uid()) = user_id);
+
+drop policy if exists "profiles_insert_own" on public.profiles;
+create policy "profiles_insert_own"
+on public.profiles for insert
+to authenticated
+with check ((select auth.uid()) = user_id);
+
+drop policy if exists "profiles_update_own" on public.profiles;
+create policy "profiles_update_own"
+on public.profiles for update
+to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
+
+drop policy if exists "progress_own_all" on public.quiz_progress;
+create policy "progress_own_all"
+on public.quiz_progress for all
+to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
+
+drop policy if exists "activity_select_own" on public.activity_log;
+create policy "activity_select_own"
+on public.activity_log for select
+to authenticated
+using ((select auth.uid()) = user_id);
+
+drop policy if exists "activity_insert_own" on public.activity_log;
+create policy "activity_insert_own"
+on public.activity_log for insert
+to authenticated
+with check ((select auth.uid()) = user_id);
+
+drop policy if exists "certificates_select_own" on public.certificates;
+create policy "certificates_select_own"
+on public.certificates for select
+to authenticated
+using ((select auth.uid()) = user_id);
+
+drop policy if exists "certificates_insert_own" on public.certificates;
+create policy "certificates_insert_own"
+on public.certificates for insert
+to authenticated
+with check ((select auth.uid()) = user_id);
+
+drop policy if exists "certificates_update_own" on public.certificates;
+create policy "certificates_update_own"
+on public.certificates for update
+to authenticated
+using ((select auth.uid()) = user_id)
+with check ((select auth.uid()) = user_id);
