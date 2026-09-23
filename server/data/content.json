@@ -10,7 +10,7 @@
       "difficulty": "Medium",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/hero-heritage.jpg",
+      "image": "/assets/games/mohenjo-daro.svg",
       "chapterSlug": "ancient-india",
       "learn": [
         "Sources & archaeology",
@@ -33,7 +33,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/game-harappan.jpg",
+      "image": "/assets/games/mohenjo-daro.svg",
       "chapterSlug": "indus-valley-civilization",
       "learn": [
         "Urban planning",
@@ -56,7 +56,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/game-map.jpg",
+      "image": "/assets/games/maurya.svg",
       "chapterSlug": "maurya-empire",
       "learn": [
         "Ashokan edicts",
@@ -79,7 +79,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/hero-heritage.jpg",
+      "image": "/assets/games/gupta.svg",
       "chapterSlug": "gupta-empire",
       "learn": [
         "Coins & inscriptions",
@@ -102,7 +102,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/game-chola.jpg",
+      "image": "/assets/games/chola.svg",
       "chapterSlug": "chola-dynasty",
       "learn": [
         "Administration",
@@ -125,7 +125,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/game-taj.jpg",
+      "image": "/assets/games/mughal.svg",
       "chapterSlug": "mughal-empire",
       "learn": [
         "Mansabdari",
@@ -148,7 +148,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/hero-heritage.jpg",
+      "image": "/assets/games/freedom.svg",
       "chapterSlug": "indian-freedom-movement",
       "learn": [
         "Movements",
@@ -171,7 +171,7 @@
       "difficulty": "Medium",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/game-taj.jpg",
+      "image": "/assets/games/monument.svg",
       "chapterSlug": "indian-monuments",
       "learn": [
         "Architecture",
@@ -194,7 +194,7 @@
       "difficulty": "Medium",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/game-festival.jpg",
+      "image": "/assets/games/art-culture.svg",
       "chapterSlug": "indian-art-culture",
       "learn": [
         "Dance",
@@ -217,7 +217,7 @@
       "difficulty": "Medium",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/game-festival.jpg",
+      "image": "/assets/games/festival.svg",
       "chapterSlug": "indian-festivals",
       "learn": [
         "Seasonality",
@@ -240,7 +240,7 @@
       "difficulty": "Medium",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/game-map.jpg",
+      "image": "/assets/games/states.svg",
       "chapterSlug": "states-of-india",
       "learn": [
         "Geography",
@@ -263,7 +263,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/explorer-mobile.jpg",
+      "image": "/assets/games/people.svg",
       "chapterSlug": "famous-personalities",
       "learn": [
         "Reform",
