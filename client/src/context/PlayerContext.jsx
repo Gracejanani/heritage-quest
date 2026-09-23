@@ -1,145 +1,225 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { useAuth } from "./AuthContext";
+import { supabase } from "../lib/supabase";
+import { calculateAge, getAgeGroup } from "../lib/age";
 
 const PlayerContext = createContext(null);
-const PROFILES_KEY = "heritageQuest:profiles";
-const ACTIVE_KEY = "heritageQuest:activePlayer";
 
-function normalizeName(value = "") {
-  return value.trim().replace(/\s+/g, " ");
+function localKey(userId, key) {
+  return userId ? `heritageQuest:user:${userId}:${key}` : null;
 }
 
-function makePlayerId(name, dob) {
-  return encodeURIComponent(
-    `${normalizeName(name).toLocaleLowerCase("en-IN")}::${dob}`,
-  );
-}
-
-function readProfiles() {
+function readLocal(userId, key, fallback = null) {
+  const keyName = localKey(userId, key);
+  if (!keyName) return fallback;
   try {
-    return JSON.parse(localStorage.getItem(PROFILES_KEY) || "{}");
+    const raw = localStorage.getItem(keyName);
+    return raw ? JSON.parse(raw) : fallback;
   } catch {
-    return {};
-  }
-}
-
-function readSessionPlayer() {
-  try {
-    const id = sessionStorage.getItem(ACTIVE_KEY);
-    if (!id) return null;
-    const profiles = readProfiles();
-    const profile = profiles[id] || null;
-    return profile?.dob ? profile : null;
-  } catch {
-    return null;
+    return fallback;
   }
 }
 
 export function PlayerProvider({ children }) {
-  const [player, setPlayer] = useState(() => readSessionPlayer());
-  const [profiles, setProfiles] = useState(() => readProfiles());
+  const { user, profile, signOut } = useAuth();
+  const [progressMap, setProgressMap] = useState({});
+  const [progressReady, setProgressReady] = useState(false);
 
-  const startPlayer = useCallback((rawName, rawDob) => {
-    const name = normalizeName(rawName);
-    const dob = String(rawDob || "").trim();
-    if (name.length < 2 || name.length > 40) {
-      return { ok: false, message: "Please enter a name between 2 and 40 characters." };
-    }
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(dob)) {
-      return { ok: false, message: "Please select your date of birth." };
-    }
-    const dobDate = new Date(`${dob}T00:00:00`);
-    if (Number.isNaN(dobDate.getTime()) || dobDate >= new Date()) {
-      return { ok: false, message: "Please enter a valid date of birth." };
-    }
+  const player = useMemo(() => {
+    if (!user) return null;
+    const dob = profile?.dob || user.user_metadata?.dob || "";
+    const name =
+      profile?.full_name ||
+      user.user_metadata?.full_name ||
+      user.email?.split("@")[0] ||
+      "Explorer";
 
-    const id = makePlayerId(name, dob);
-    const now = new Date().toISOString();
-    const next = {
-      ...profiles,
-      [id]: {
-        id,
-        name,
-        dob,
-        createdAt: profiles[id]?.createdAt || now,
-        lastSeenAt: now,
-      },
+    return {
+      id: user.id,
+      name,
+      email: user.email,
+      dob,
+      age: calculateAge(dob),
+      ageGroup: profile?.age_group || getAgeGroup(dob),
+      preferredLanguage:
+        profile?.preferred_language ||
+        user.user_metadata?.preferred_language ||
+        "en",
     };
+  }, [user, profile]);
 
-    localStorage.setItem(PROFILES_KEY, JSON.stringify(next));
-    sessionStorage.setItem(ACTIVE_KEY, id);
-    setProfiles(next);
-    setPlayer(next[id]);
-    return { ok: true, player: next[id], returning: Boolean(profiles[id]) };
-  }, [profiles]);
+  useEffect(() => {
+    let active = true;
+    setProgressReady(false);
+    setProgressMap({});
 
-  const switchPlayer = useCallback(() => {
-    sessionStorage.removeItem(ACTIVE_KEY);
-    setPlayer(null);
-  }, []);
-
-  const scopedKey = useCallback((key) => {
-    if (!player) return null;
-    return `heritageQuest:player:${player.id}:${key}`;
-  }, [player]);
-
-  const saveProgress = useCallback((key, value) => {
-    const storageKey = scopedKey(key);
-    if (!storageKey) return;
-    localStorage.setItem(
-      storageKey,
-      JSON.stringify({ ...value, updatedAt: new Date().toISOString() }),
-    );
-  }, [scopedKey]);
-
-  const getProgress = useCallback((key, fallback = null) => {
-    const storageKey = scopedKey(key);
-    if (!storageKey) return fallback;
-    try {
-      const raw = localStorage.getItem(storageKey);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch {
-      return fallback;
-    }
-  }, [scopedKey]);
-
-  const getSummary = useCallback(() => {
-    if (!player) {
-      return {
-        completed: 0,
-        xp: 0,
-        coins: 50,
-        badges: 0,
-        overallProgress: 0,
-        latestChapter: "ancient-india",
+    if (!user?.id) {
+      setProgressReady(true);
+      return () => {
+        active = false;
       };
     }
 
-    const prefix = `heritageQuest:player:${player.id}:quiz:`;
-    const records = [];
+    const hydrate = async () => {
+      const next = {};
 
-    for (let i = 0; i < localStorage.length; i += 1) {
-      const key = localStorage.key(i);
-      if (!key || !key.startsWith(prefix)) continue;
       try {
-        const value = JSON.parse(localStorage.getItem(key) || "{}");
-        records.push({
-          chapterSlug: key.slice(prefix.length),
-          ...value,
-        });
-      } catch {
-        // Ignore malformed local entries.
-      }
-    }
+        if (supabase) {
+          const { data, error } = await supabase
+            .from("quiz_progress")
+            .select("*")
+            .eq("user_id", user.id);
 
-    const completed = records.filter((r) => r.finished).length;
-    const xp = records.reduce((sum, r) => sum + Number(r.xp || 0), 0);
-    const coins = 50 + records.reduce(
-      (sum, r) => sum + Math.max(0, Number(r.coins || 50) - 50),
-      0,
+          if (error) throw error;
+
+          for (const row of data || []) {
+            const key = `quiz:${row.chapter_slug}`;
+            next[key] = {
+              index: Number(row.current_index || 0),
+              score: Number(row.score || 0),
+              xp: Number(row.xp || 0),
+              coins: Number(row.coins ?? 50),
+              finished: Boolean(row.finished),
+              answers: Array.isArray(row.answers) ? row.answers : [],
+              updatedAt: row.updated_at,
+            };
+            try {
+              localStorage.setItem(
+                localKey(user.id, key),
+                JSON.stringify(next[key]),
+              );
+            } catch {
+              // Browser cache is only a fallback.
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Could not hydrate cloud progress", error);
+      }
+
+      if (Object.keys(next).length === 0) {
+        try {
+          const prefix = `heritageQuest:user:${user.id}:quiz:`;
+          for (let index = 0; index < localStorage.length; index += 1) {
+            const storageKey = localStorage.key(index);
+            if (!storageKey?.startsWith(prefix)) continue;
+            const chapterSlug = storageKey.slice(prefix.length);
+            const value = JSON.parse(localStorage.getItem(storageKey) || "{}");
+            next[`quiz:${chapterSlug}`] = value;
+          }
+        } catch {
+          // Ignore malformed local data.
+        }
+      }
+
+      if (active) {
+        setProgressMap(next);
+        setProgressReady(true);
+      }
+    };
+
+    hydrate();
+
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
+
+  const saveProgress = useCallback(
+    (key, value) => {
+      if (!user?.id) return;
+      const payload = { ...value, updatedAt: new Date().toISOString() };
+
+      setProgressMap((current) => ({ ...current, [key]: payload }));
+
+      try {
+        localStorage.setItem(localKey(user.id, key), JSON.stringify(payload));
+      } catch {
+        // Cloud save below remains the source of truth.
+      }
+
+      if (!supabase || !key.startsWith("quiz:")) return;
+      const chapterSlug = key.slice("quiz:".length);
+
+      supabase
+        .from("quiz_progress")
+        .upsert(
+          {
+            user_id: user.id,
+            chapter_slug: chapterSlug,
+            current_index: Number(payload.index || 0),
+            score: Number(payload.score || 0),
+            xp: Number(payload.xp || 0),
+            coins: Number(payload.coins ?? 50),
+            finished: Boolean(payload.finished),
+            answers: Array.isArray(payload.answers) ? payload.answers : [],
+            updated_at: payload.updatedAt,
+          },
+          { onConflict: "user_id,chapter_slug" },
+        )
+        .then(({ error }) => {
+          if (error) console.error("Could not save quiz progress", error);
+        });
+    },
+    [user?.id],
+  );
+
+  const getProgress = useCallback(
+    (key, fallback = null) => {
+      if (!user?.id) return fallback;
+      return progressMap[key] ?? readLocal(user.id, key, fallback);
+    },
+    [user?.id, progressMap],
+  );
+
+  const logActivity = useCallback(
+    (activityType, details = {}) => {
+      if (!user?.id || !supabase) return;
+      supabase
+        .from("activity_log")
+        .insert({
+          user_id: user.id,
+          activity_type: activityType,
+          chapter_slug: details.chapterSlug || null,
+          details,
+        })
+        .then(({ error }) => {
+          if (error) console.error("Could not log activity", error);
+        });
+    },
+    [user?.id],
+  );
+
+  const getSummary = useCallback(() => {
+    const records = Object.entries(progressMap)
+      .filter(([key]) => key.startsWith("quiz:"))
+      .map(([key, value]) => ({
+        chapterSlug: key.slice("quiz:".length),
+        ...value,
+      }));
+
+    const completed = records.filter((record) => record.finished).length;
+    const xp = records.reduce((sum, record) => sum + Number(record.xp || 0), 0);
+    const coins =
+      50 +
+      records.reduce(
+        (sum, record) => sum + Math.max(0, Number(record.coins || 50) - 50),
+        0,
+      );
+    const badges = Math.min(
+      6,
+      Math.floor(completed / 2) + (completed > 0 ? 1 : 0),
     );
-    const badges = Math.min(6, Math.floor(completed / 2) + (completed > 0 ? 1 : 0));
-    const latest = [...records]
-      .sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")))[0];
+    const latest = [...records].sort((a, b) =>
+      String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")),
+    )[0];
 
     return {
       completed,
@@ -149,32 +229,37 @@ export function PlayerProvider({ children }) {
       overallProgress: Math.min(100, Math.round((completed / 12) * 100)),
       latestChapter: latest?.chapterSlug || "ancient-india",
     };
-  }, [player]);
+  }, [progressMap]);
 
-  const knownProfiles = useMemo(
-    () =>
-      Object.values(profiles)
-        .filter((profile) => profile?.dob)
-        .sort((a, b) =>
-          String(b.lastSeenAt || "").localeCompare(String(a.lastSeenAt || "")),
-        ),
-    [profiles],
-  );
+  const switchPlayer = useCallback(() => {
+    signOut();
+  }, [signOut]);
 
   const value = useMemo(
     () => ({
       player,
-      knownProfiles,
-      startPlayer,
-      switchPlayer,
+      knownProfiles: [],
+      progressReady,
       saveProgress,
       getProgress,
       getSummary,
+      logActivity,
+      switchPlayer,
     }),
-    [player, knownProfiles, startPlayer, switchPlayer, saveProgress, getProgress, getSummary],
+    [
+      player,
+      progressReady,
+      saveProgress,
+      getProgress,
+      getSummary,
+      logActivity,
+      switchPlayer,
+    ],
   );
 
-  return <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>;
+  return (
+    <PlayerContext.Provider value={value}>{children}</PlayerContext.Provider>
+  );
 }
 
 export function usePlayer() {
