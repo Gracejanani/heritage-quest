@@ -179,11 +179,6 @@ to authenticated
 using (true);
 
 drop policy if exists "content_questions_read" on public.questions;
-create policy "content_questions_read"
-on public.questions for select
-to authenticated
-using (true);
-
 drop policy if exists "progress_own_all" on public.quiz_progress;
 create policy "progress_own_all"
 on public.quiz_progress for all
@@ -231,6 +226,146 @@ create index if not exists activity_log_user_created_idx
 create index if not exists questions_chapter_age_idx
   on public.questions (chapter_slug, age_group, sort_order);
 
+
+
+
+-- Secure quiz delivery: students can read question text/options without the answer key.
+create or replace function public.get_quiz_questions(
+  p_chapter_slug text,
+  p_age_group text default 'scholar'
+)
+returns table (
+  id text,
+  difficulty text,
+  question text,
+  answers jsonb,
+  hint text,
+  sort_order integer
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if exists (
+    select 1
+    from public.questions q
+    where q.chapter_slug = p_chapter_slug
+      and q.age_group = p_age_group
+  ) then
+    return query
+      select
+        q.id,
+        case
+          when p_age_group = 'entry' then 'Entry'
+          when p_age_group = 'junior' then 'Medium'
+          when q.sort_order in (4, 7, 10) then 'Advanced'
+          else 'Medium'
+        end as difficulty,
+        q.question,
+        q.answers,
+        q.hint,
+        q.sort_order
+      from public.questions q
+      where q.chapter_slug = p_chapter_slug
+        and q.age_group = p_age_group
+      order by q.sort_order
+      limit 10;
+  else
+    return query
+      select
+        q.id,
+        case
+          when p_age_group = 'entry' then 'Entry'
+          when p_age_group = 'junior' then 'Medium'
+          when q.sort_order in (4, 7, 10) then 'Advanced'
+          else 'Medium'
+        end as difficulty,
+        q.question,
+        q.answers,
+        q.hint,
+        q.sort_order
+      from public.questions q
+      where q.chapter_slug = p_chapter_slug
+        and q.age_group = 'all'
+      order by q.sort_order
+      limit 10;
+  end if;
+end;
+$$;
+
+create or replace function public.check_quiz_answer(
+  p_chapter_slug text,
+  p_question_id text,
+  p_age_group text,
+  p_selected_answer text
+)
+returns table (
+  correct boolean,
+  correct_answer text,
+  explanation text,
+  difficulty text,
+  xp integer
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  q public.questions%rowtype;
+  v_correct boolean;
+  v_difficulty text;
+begin
+  select *
+  into q
+  from public.questions
+  where chapter_slug = p_chapter_slug
+    and id = p_question_id
+    and age_group = p_age_group
+  limit 1;
+
+  if not found then
+    select *
+    into q
+    from public.questions
+    where chapter_slug = p_chapter_slug
+      and id = p_question_id
+      and age_group = 'all'
+    limit 1;
+  end if;
+
+  if not found then
+    raise exception 'Question not found';
+  end if;
+
+  v_difficulty := case
+    when p_age_group = 'entry' then 'Entry'
+    when p_age_group = 'junior' then 'Medium'
+    when q.sort_order in (4, 7, 10) then 'Advanced'
+    else 'Medium'
+  end;
+
+  v_correct := p_selected_answer = (q.answers ->> q.correct_index);
+
+  return query
+  select
+    v_correct,
+    q.answers ->> q.correct_index,
+    q.explanation,
+    v_difficulty,
+    case
+      when not v_correct then 0
+      when v_difficulty = 'Advanced' then 30
+      when v_difficulty = 'Entry' then 10
+      else 20
+    end;
+end;
+$$;
+
+revoke all on function public.get_quiz_questions(text, text) from public;
+revoke all on function public.check_quiz_answer(text, text, text, text) from public;
+grant execute on function public.get_quiz_questions(text, text) to authenticated;
+grant execute on function public.check_quiz_answer(text, text, text, text) to authenticated;
 
 -- Private certificate files. Each user can only access files in their own folder.
 insert into storage.buckets (id, name, public)
