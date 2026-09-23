@@ -78,9 +78,13 @@ create table if not exists public.certificates (
   chapter_slug text not null,
   task_name text not null,
   verification_code text not null unique default upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 12)),
+  storage_path text,
   issued_at timestamptz not null default now(),
   unique (user_id, chapter_slug)
 );
+
+alter table public.certificates
+  add column if not exists storage_path text;
 
 create or replace function public.handle_new_user()
 returns trigger
@@ -226,3 +230,40 @@ create index if not exists activity_log_user_created_idx
 
 create index if not exists questions_chapter_age_idx
   on public.questions (chapter_slug, age_group, sort_order);
+
+
+-- Private certificate files. Each user can only access files in their own folder.
+insert into storage.buckets (id, name, public)
+values ('certificates', 'certificates', false)
+on conflict (id) do nothing;
+
+drop policy if exists "certificate_files_select_own" on storage.objects;
+create policy "certificate_files_select_own"
+on storage.objects for select
+to authenticated
+using (
+  bucket_id = 'certificates'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "certificate_files_insert_own" on storage.objects;
+create policy "certificate_files_insert_own"
+on storage.objects for insert
+to authenticated
+with check (
+  bucket_id = 'certificates'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
+
+drop policy if exists "certificate_files_update_own" on storage.objects;
+create policy "certificate_files_update_own"
+on storage.objects for update
+to authenticated
+using (
+  bucket_id = 'certificates'
+  and (storage.foldername(name))[1] = auth.uid()::text
+)
+with check (
+  bucket_id = 'certificates'
+  and (storage.foldername(name))[1] = auth.uid()::text
+);
