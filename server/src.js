@@ -3,6 +3,7 @@ import cors from 'cors'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getAgeQuestionBank } from '../client/src/data/ageQuestionBanks.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -46,7 +47,7 @@ const CORRECT_POSITION_PATTERNS = [
   [0, 2, 1, 3, 2, 0, 3, 1, 0, 2],
 ]
 
-function prepareQuestion(question, index, chapterIndex = 0) {
+function prepareQuestion(question, index, chapterIndex = 0, ageGroup = 'scholar') {
   const sourceAnswers = [...question.answers]
   const correctText = sourceAnswers[question.correct]
   const remaining = sourceAnswers.filter((_, answerIndex) => answerIndex !== question.correct)
@@ -63,9 +64,18 @@ function prepareQuestion(question, index, chapterIndex = 0) {
     )
   }
 
+  const difficulty =
+    ageGroup === 'entry'
+      ? 'Entry'
+      : ageGroup === 'junior'
+        ? 'Medium'
+        : ADVANCED_QUESTION_INDEXES.has(index)
+          ? 'Advanced'
+          : 'Medium'
+
   return {
     ...question,
-    difficulty: ADVANCED_QUESTION_INDEXES.has(index) ? 'Advanced' : 'Normal',
+    difficulty,
     answers,
     correct: desiredCorrectIndex,
   }
@@ -107,23 +117,33 @@ app.get('/api/chapters/:slug/questions', (req, res) => {
   const chapter = chapters.find(c => c.slug === req.params.slug)
   if (!chapter) return res.status(404).json({ error: 'Chapter not found' })
   const chapterIndex = Math.max(0, chapters.findIndex(item => item.slug === chapter.slug))
-  const qs = (questionsByChapter[chapter.slug] || [])
+  const ageGroup = String(req.query.ageGroup || 'scholar')
+  const ageBank = getAgeQuestionBank(chapter.slug, ageGroup)
+  const sourceQuestions = ageBank || questionsByChapter[chapter.slug] || []
+  const qs = sourceQuestions
     .slice(0, 10)
-    .map((question, index) => prepareQuestion(question, index, chapterIndex))
+    .map((question, index) => prepareQuestion(question, index, chapterIndex, ageGroup))
   res.json({ chapter: chapter.title, chapterSlug: chapter.slug, totalQuestions: qs.length, questions: qs.map(publicQuestion) })
 })
 
 app.post('/api/quiz/check-answer', (req, res) => {
-  const { chapterSlug, questionId, answerIndex } = req.body || {}
-  const rawQuestions = questionsByChapter[chapterSlug]
+  const { chapterSlug, questionId, answerIndex, ageGroup = 'scholar' } = req.body || {}
+  const ageBank = getAgeQuestionBank(chapterSlug, String(ageGroup))
+  const rawQuestions = ageBank || questionsByChapter[chapterSlug]
   if (!rawQuestions) return res.status(404).json({ error: 'Chapter not found' })
   const questionIndex = rawQuestions.slice(0, 10).findIndex(item => item.id === questionId)
   if (questionIndex < 0) return res.status(404).json({ error: 'Question not found' })
   const chapterIndex = Math.max(0, chapters.findIndex(item => item.slug === chapterSlug))
-  const q = prepareQuestion(rawQuestions[questionIndex], questionIndex, chapterIndex)
+  const q = prepareQuestion(rawQuestions[questionIndex], questionIndex, chapterIndex, String(ageGroup))
   const selected = Number(answerIndex)
   const isCorrect = selected === q.correct
-  const xp = isCorrect ? (q.difficulty === 'Advanced' ? 30 : 20) : 0
+  const xp = isCorrect
+    ? q.difficulty === 'Advanced'
+      ? 30
+      : q.difficulty === 'Entry'
+        ? 10
+        : 20
+    : 0
   res.json({
     correct: isCorrect,
     correctIndex: q.correct,
