@@ -76,8 +76,8 @@ export function Navbar() {
           type="button"
           onClick={switchPlayer}
           className="focus-ring hidden rounded-xl p-2 text-slate-500 hover:bg-white hover:text-heritage-saffron sm:block"
-          aria-label="Switch explorer"
-          title="Switch explorer"
+          aria-label="Log out"
+          title="Log out"
         >
           <LogOut className="h-5 w-5" />
         </button>
