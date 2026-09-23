@@ -23,6 +23,36 @@ async function fetchProfile(userId) {
   return data;
 }
 
+async function ensureProfile(user) {
+  if (!supabase || !user?.id) return null;
+
+  const existing = await fetchProfile(user.id);
+  if (existing) return existing;
+
+  const metadata = user.user_metadata || {};
+  if (!metadata.dob) return null;
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .upsert(
+      {
+        user_id: user.id,
+        full_name:
+          metadata.full_name || user.email?.split("@")[0] || "Explorer",
+        dob: metadata.dob,
+        age_group: metadata.age_group || getAgeGroup(metadata.dob),
+        preferred_language: metadata.preferred_language || "en",
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "user_id" },
+    )
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
@@ -59,7 +89,7 @@ export function AuthProvider({ children }) {
       setSession(nextSession);
       if (nextSession?.user?.id) {
         try {
-          const nextProfile = await fetchProfile(nextSession.user.id);
+          const nextProfile = await ensureProfile(nextSession.user);
           if (active) setProfile(nextProfile);
         } catch (error) {
           console.error(error);
@@ -80,7 +110,7 @@ export function AuthProvider({ children }) {
 
       setLoading(true);
       setTimeout(() => {
-        fetchProfile(nextSession.user.id)
+        ensureProfile(nextSession.user)
           .then((nextProfile) => {
             if (active) setProfile(nextProfile);
           })
