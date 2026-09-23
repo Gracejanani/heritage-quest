@@ -16,10 +16,12 @@ import {
 } from "lucide-react";
 import { Button, ProgressBar } from "../components/ui";
 import { usePlayer } from "../context/PlayerContext";
+import { AGE_GROUPS } from "../lib/age";
 
 export default function Profile() {
   const { player, switchPlayer, getSummary } = usePlayer();
   const summary = getSummary();
+  const ageInfo = AGE_GROUPS[player?.ageGroup] || AGE_GROUPS.scholar;
   const rows = [
     ["My Achievements", Award, "/achievements"],
     ["Game History", Gamepad2, "/games"],
@@ -43,9 +45,13 @@ export default function Profile() {
           <p className="mt-1 text-sm font-semibold text-slate-500">
             Proud to Explore India’s Heritage 🇮🇳
           </p>
-          <p className="mt-2 text-xs font-bold text-slate-400">
-            Date of birth: {player?.dob || "—"}
-          </p>
+          <div className="mt-3 space-y-1 text-xs font-bold text-slate-400">
+            <p>{player?.email || "—"}</p>
+            <p>Date of birth: {player?.dob || "—"}</p>
+            <p>
+              Age: {player?.age ?? "—"} · {ageInfo.label} ({ageInfo.range})
+            </p>
+          </div>
           <div className="mt-6 grid grid-cols-3 gap-2">
             <Stat n={summary.completed} l="Chapters" />
             <Stat n={summary.badges} l="Badges" />
@@ -72,7 +78,7 @@ export default function Profile() {
             onClick={switchPlayer}
             className="focus-ring mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-extrabold text-slate-500 hover:bg-orange-50 hover:text-heritage-saffron"
           >
-            <LogOut className="h-4 w-4" /> Switch Explorer
+            <LogOut className="h-4 w-4" /> Log out
           </button>
         </aside>
 
@@ -89,8 +95,9 @@ export default function Profile() {
                     : `Welcome, ${player?.name}. Your quest starts here.`}
                 </h2>
                 <p className="mt-2 max-w-xl text-sm leading-6 text-white/65">
-                  Every score, unfinished chapter and reward on this browser is
-                  saved separately using your name and date of birth.
+                  Your profile, quiz progress, activity and rewards are linked
+                  to your account. Supabase keeps the cloud record so you can
+                  continue the same learning journey after logging in again.
                 </p>
               </div>
               <div className="rounded-2xl bg-white/10 p-4 text-center">
