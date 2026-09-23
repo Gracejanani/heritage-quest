@@ -1,13 +1,37 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 const LanguageContext = createContext(null);
 const STORAGE_KEY = "heritageQuest:language";
 
 export const languages = [
-  { code: "en", label: "English" },
-  { code: "ta", label: "தமிழ்" },
-  { code: "hi", label: "हिन्दी" },
+  { code: "en", label: "English", translationCode: "en" },
+  { code: "as", label: "অসমীয়া", english: "Assamese", translationCode: "as" },
+  { code: "bn", label: "বাংলা", english: "Bengali", translationCode: "bn" },
+  { code: "brx", label: "बड़ो", english: "Bodo", translationCode: "brx" },
+  { code: "doi", label: "डोगरी", english: "Dogri", translationCode: "doi" },
+  { code: "gu", label: "ગુજરાતી", english: "Gujarati", translationCode: "gu" },
+  { code: "hi", label: "हिन्दी", english: "Hindi", translationCode: "hi" },
+  { code: "kn", label: "ಕನ್ನಡ", english: "Kannada", translationCode: "kn" },
+  { code: "ks", label: "کٲشُر", english: "Kashmiri", translationCode: "ks" },
+  { code: "gom", label: "कोंकणी", english: "Konkani", translationCode: "gom" },
+  { code: "mai", label: "मैथिली", english: "Maithili", translationCode: "mai" },
+  { code: "ml", label: "മലയാളം", english: "Malayalam", translationCode: "ml" },
+  { code: "mni", label: "মৈতৈলোন", english: "Manipuri", translationCode: "mni" },
+  { code: "mr", label: "मराठी", english: "Marathi", translationCode: "mr" },
+  { code: "ne", label: "नेपाली", english: "Nepali", translationCode: "ne" },
+  { code: "or", label: "ଓଡ଼ିଆ", english: "Odia", translationCode: "or" },
+  { code: "pa", label: "ਪੰਜਾਬੀ", english: "Punjabi", translationCode: "pa" },
+  { code: "sa", label: "संस्कृतम्", english: "Sanskrit", translationCode: "sa" },
+  { code: "sat", label: "ᱥᱟᱱᱛᱟᱲᱤ", english: "Santali", translationCode: "sat" },
+  { code: "sd", label: "سنڌي", english: "Sindhi", translationCode: "sd" },
+  { code: "ta", label: "தமிழ்", english: "Tamil", translationCode: "ta" },
+  { code: "te", label: "తెలుగు", english: "Telugu", translationCode: "te" },
+  { code: "ur", label: "اردو", english: "Urdu", translationCode: "ur" },
 ];
+
+const languageCodeMap = Object.fromEntries(
+  languages.map((item) => [item.code, item.translationCode || item.code]),
+);
 
 const ui = {
   en: {
@@ -342,24 +366,25 @@ export function LanguageProvider({ children }) {
     return languages.some((item) => item.code === saved) ? saved : "en";
   });
 
+  const [dynamicUi, setDynamicUi] = useState({});
+
   const setLanguage = (code) => {
     const next = languages.some((item) => item.code === code) ? code : "en";
     localStorage.setItem(STORAGE_KEY, next);
     setLanguageState(next);
   };
 
-  const t = (key) => ui[language]?.[key] || ui.en[key] || key;
-
-  const translateText = useCallback(
+   const translateText = useCallback(
     async (text, target = language) => {
       if (!text || target === "en") return text;
 
+      const targetCode = languageCodeMap[target] || target;
       const sourceText = String(text);
       let hash = 0;
       for (let i = 0; i < sourceText.length; i += 1) {
         hash = (hash * 31 + sourceText.charCodeAt(i)) >>> 0;
       }
-      const cacheKey = `heritageQuest:translation:${target}:${hash}`;
+      const cacheKey = `heritageQuest:translation:${targetCode}:${hash}`;
 
       try {
         const cached = localStorage.getItem(cacheKey);
@@ -373,7 +398,7 @@ export function LanguageProvider({ children }) {
           "https://api.mymemory.translated.net/get?q=" +
           encodeURIComponent(sourceText.slice(0, 450)) +
           "&langpair=en|" +
-          encodeURIComponent(target);
+          encodeURIComponent(targetCode);
         const response = await fetch(url);
         if (!response.ok) throw new Error("Translation request failed");
         const data = await response.json();
@@ -396,6 +421,31 @@ export function LanguageProvider({ children }) {
     },
     [language],
   );
+
+  useEffect(() => {
+    let active = true;
+
+    if (ui[language]) {
+      setDynamicUi({});
+      return () => {
+        active = false;
+      };
+    }
+
+    const entries = Object.entries(ui.en);
+    Promise.all(
+      entries.map(async ([key, value]) => [key, await translateText(value, language)]),
+    ).then((translatedEntries) => {
+      if (active) setDynamicUi(Object.fromEntries(translatedEntries));
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [language, translateText]);
+
+  const t = (key) =>
+    ui[language]?.[key] || dynamicUi[key] || ui.en[key] || key;
 
   const localizeTopic = (topic) => {
     if (language === "en") return topic;
