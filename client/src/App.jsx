@@ -13,6 +13,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Achievements from "./pages/Achievements";
 import Profile from "./pages/Profile";
 import About from "./pages/About";
+import Certificate from "./pages/Certificate";
 import NotFound from "./pages/NotFound";
 import AuthGate from "./components/AuthGate";
 import { PlayerProvider } from "./context/PlayerContext";
@@ -45,6 +46,8 @@ export default function App() {
       <Route path="/achievements" element={<Achievements />} />
 
       <Route path="/profile" element={<Profile />} />
+
+      <Route path="/certificate/:chapterSlug" element={<Certificate />} />
 
       <Route path="/about" element={<About />} />
 
