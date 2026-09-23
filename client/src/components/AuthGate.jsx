@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   CalendarDays,
@@ -34,6 +34,19 @@ export default function AuthGate({ children }) {
     const group = getAgeGroup(form.dob);
     return { age, group, ...AGE_GROUPS[group] };
   }, [form.dob]);
+
+  useEffect(() => {
+    if (!user?.id || !profile?.preferred_language) return;
+    const savedLanguage = profile.preferred_language;
+    if (
+      savedLanguage !== language &&
+      languages.some((item) => item.code === savedLanguage)
+    ) {
+      setLanguage(savedLanguage);
+    }
+    // Run when a different authenticated profile is loaded.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, profile?.preferred_language]);
 
   if (loading) {
     return (
