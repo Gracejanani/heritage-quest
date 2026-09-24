@@ -9,11 +9,13 @@ import {
   Trophy,
   UserRound,
   LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import Logo from "./Logo";
 import { SearchBar } from "./ui";
 import { usePlayer } from "../context/PlayerContext";
 import { useLanguage } from "../context/LanguageContext";
+import { supabase } from "../lib/supabase";
 const links = [
   ["home", "/"],
   ["games", "/games"],
@@ -28,7 +30,25 @@ export function Navbar() {
   const location = useLocation();
   const { player, switchPlayer } = usePlayer();
   const { language, setLanguage, languages, t } = useLanguage();
+  const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => setOpen(false), [location.pathname]);
+
+  useEffect(() => {
+    let active = true;
+    if (!player?.id || !supabase) {
+      setIsAdmin(false);
+      return undefined;
+    }
+
+    supabase.rpc("is_admin").then(({ data, error }) => {
+      if (!active) return;
+      setIsAdmin(!error && Boolean(data));
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [player?.id]);
   const submit = (e) => {
     e.preventDefault();
     const q = search.trim();
@@ -66,6 +86,14 @@ export function Navbar() {
             </option>
           ))}
         </select>
+        {isAdmin && (
+          <Link
+            to="/admin"
+            className="focus-ring hidden items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-2.5 text-sm font-bold text-heritage-green shadow-sm hover:bg-emerald-50 xl:inline-flex"
+          >
+            <ShieldCheck className="h-4 w-4" /> Admin
+          </Link>
+        )}
         <Link
           to="/profile"
           className="focus-ring hidden rounded-2xl bg-heritage-green px-4 py-2.5 text-sm font-bold text-white shadow-soft hover:bg-emerald-700 sm:inline-flex"
@@ -145,6 +173,14 @@ export function Navbar() {
               >
                 {t("achievements")}
               </NavLink>
+              {isAdmin && (
+                <NavLink
+                  to="/admin"
+                  className="rounded-xl px-4 py-3 font-bold text-heritage-green hover:bg-emerald-50"
+                >
+                  Admin Dashboard
+                </NavLink>
+              )}
               <NavLink
                 to="/profile"
                 className="rounded-xl px-4 py-3 font-bold text-heritage-green hover:bg-emerald-50"
