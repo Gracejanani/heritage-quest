@@ -886,3 +886,20 @@ create index if not exists admin_audit_admin_user_idx
 
 create index if not exists site_settings_updated_by_idx
   on public.site_settings (updated_by);
+
+
+-- Certificate medal tiers based on quiz marks.
+alter table public.certificates
+  add column if not exists correct_answers integer not null default 0,
+  add column if not exists total_questions integer not null default 10,
+  add column if not exists award_tier text not null default 'bronze';
+
+alter table public.certificates
+  drop constraint if exists certificates_award_tier_check;
+
+alter table public.certificates
+  add constraint certificates_award_tier_check
+  check (award_tier in ('bronze','silver','gold'));
+
+create index if not exists certificates_award_tier_idx
+  on public.certificates (award_tier);
