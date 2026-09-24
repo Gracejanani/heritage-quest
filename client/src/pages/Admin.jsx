@@ -982,14 +982,34 @@ export default function Admin() {
         <section className="mt-6">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
+              <button
+                type="button"
+                onClick={() => setTab("games")}
+                className="focus-ring mb-2 inline-flex items-center gap-2 rounded-xl px-2 py-2 text-sm font-bold text-slate-500 hover:text-heritage-green"
+              >
+                ← Back to game modes
+              </button>
               <h2 className="text-2xl font-extrabold">Heritage Word Quest manager</h2>
               <p className="mt-1 text-sm text-slate-500">
                 Manage the age-based clues and answers used in the mixed-letter word game.
               </p>
             </div>
-            <Button onClick={() => openWordPuzzle()}>
-              <Plus className="h-4 w-4" /> Add word puzzle
-            </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  const wordGame = games.find(
+                    (item) => item.slug === "heritage-word-quest",
+                  );
+                  if (wordGame) openGame(wordGame);
+                }}
+              >
+                <Settings className="h-4 w-4" /> Edit card & video
+              </Button>
+              <Button onClick={() => openWordPuzzle()}>
+                <Plus className="h-4 w-4" /> Add word puzzle
+              </Button>
+            </div>
           </div>
 
           <div className="mt-5 max-w-xs">
@@ -1062,37 +1082,102 @@ export default function Admin() {
 
       {tab === "games" && (
         <section className="mt-6">
-          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-            <div>
-              <h2 className="text-2xl font-extrabold">Game manager</h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Change existing games or create a completely new game.
-              </p>
-            </div>
-            <Button onClick={createGame}>
-              <Plus className="h-4 w-4" /> Create new game
-            </Button>
+          <div>
+            <h2 className="text-2xl font-extrabold">Game manager</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Choose which game mode you want to manage.
+            </p>
           </div>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {games.map((game) => (
-              <button
-                key={game.id}
-                onClick={() => openGame(game)}
-                className="group overflow-hidden rounded-3xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-card"
-              >
-                <img
-                  src={game.payload?.image || "/assets/hero-heritage.jpg"}
-                  alt=""
-                  className="h-40 w-full object-cover"
-                />
-                <div className="p-5">
-                  <div className="font-extrabold text-slate-950">{game.title}</div>
-                  <div className="mt-1 text-xs text-slate-500">
-                    {game.category} · {game.difficulty}
+
+          <div className="mt-5 grid gap-4 lg:grid-cols-2">
+            <div className="overflow-hidden rounded-[2rem] border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-heritage-cream p-6">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <Badge tone="green">GAME MODE 1</Badge>
+                  <h3 className="mt-3 font-display text-3xl font-extrabold text-slate-950">
+                    Quiz Challenges
+                  </h3>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
+                    Manage the normal chapter quiz cards, images, descriptions,
+                    videos and other game metadata.
+                  </p>
+                </div>
+                <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-heritage-green text-white">
+                  <Gamepad2 className="h-7 w-7" />
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-wrap items-center gap-2">
+                <Badge tone="gray">
+                  {games.filter((item) => item.slug !== "heritage-word-quest").length} quiz games
+                </Badge>
+                <Button onClick={createGame} size="sm">
+                  <Plus className="h-4 w-4" /> Create new quiz game
+                </Button>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setTab("word-puzzles")}
+              className="group overflow-hidden rounded-[2rem] border-2 border-sky-200 bg-gradient-to-br from-sky-50 via-white to-blue-100 p-6 text-left transition hover:-translate-y-1 hover:shadow-card"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <Badge tone="blue">GAME MODE 2</Badge>
+                  <h3 className="mt-3 font-display text-3xl font-extrabold text-slate-950">
+                    Heritage Word Quest
+                  </h3>
+                  <p className="mt-2 max-w-xl text-sm leading-6 text-slate-600">
+                    Manage mixed-letter puzzles, age groups, answers, hints,
+                    explanations and the Word Quest introduction video.
+                  </p>
+                  <div className="mt-5 inline-flex items-center gap-2 font-extrabold text-sky-700">
+                    Open Word Quest manager →
                   </div>
                 </div>
-              </button>
-            ))}
+                <div className="h-20 w-28 shrink-0 overflow-hidden rounded-2xl border border-sky-200 bg-white">
+                  <img
+                    src="/assets/games/word-quest.svg"
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </div>
+            </button>
+          </div>
+
+          <div className="mt-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+            <div>
+              <h3 className="text-xl font-extrabold">Quiz game cards</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Click a quiz card below to edit it.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {games
+              .filter((game) => game.slug !== "heritage-word-quest")
+              .map((game) => (
+                <button
+                  key={game.id}
+                  onClick={() => openGame(game)}
+                  className="group overflow-hidden rounded-3xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-card"
+                >
+                  <img
+                    src={game.payload?.image || "/assets/hero-heritage.jpg"}
+                    alt=""
+                    className="h-40 w-full object-cover"
+                  />
+                  <div className="p-5">
+                    <div className="font-extrabold text-slate-950">{game.title}</div>
+                    <div className="mt-1 text-xs text-slate-500">
+                      {game.category} · {game.difficulty}
+                    </div>
+                  </div>
+                </button>
+              ))}
           </div>
         </section>
       )}
