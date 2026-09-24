@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -24,6 +24,8 @@ import {
 import { games, categories } from "../data/content";
 import GameCard from "../components/GameCard";
 import { Button, Modal, ProgressBar, useToast } from "../components/ui";
+import { usePlayer } from "../context/PlayerContext";
+import { supabase } from "../lib/supabase";
 
 const featureItems = [
   {
@@ -66,6 +68,97 @@ export default function Home() {
   const [videoOpen, setVideoOpen] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
+  const { player, getSummary } = usePlayer();
+  const summary = getSummary();
+  const [todayStats, setTodayStats] = useState({
+    answered: 0,
+    correct: 0,
+    loading: true,
+  });
+
+  const journeyDays = useMemo(() => {
+    if (!player?.createdAt) return 1;
+    const registered = new Date(player.createdAt);
+    if (Number.isNaN(registered.getTime())) return 1;
+
+    const registeredDay = new Date(
+      registered.getFullYear(),
+      registered.getMonth(),
+      registered.getDate(),
+    );
+    const today = new Date();
+    const todayStart = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate(),
+    );
+
+    return Math.max(
+      1,
+      Math.floor((todayStart - registeredDay) / 86400000) + 1,
+    );
+  }, [player?.createdAt]);
+
+  useEffect(() => {
+    let active = true;
+
+    if (!player?.id || !supabase) {
+      setTodayStats({ answered: 0, correct: 0, loading: false });
+      return () => {
+        active = false;
+      };
+    }
+
+    const loadTodayPerformance = async () => {
+      const now = new Date();
+      const start = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+      );
+      const end = new Date(start);
+      end.setDate(end.getDate() + 1);
+
+      const { data, error } = await supabase
+        .from("activity_log")
+        .select("details, created_at")
+        .eq("user_id", player.id)
+        .eq("activity_type", "question_answered")
+        .gte("created_at", start.toISOString())
+        .lt("created_at", end.toISOString());
+
+      if (!active) return;
+
+      if (error) {
+        console.error("Could not load today's challenge progress", error);
+        setTodayStats({ answered: 0, correct: 0, loading: false });
+        return;
+      }
+
+      const rows = data || [];
+      setTodayStats({
+        answered: rows.length,
+        correct: rows.filter((row) => Boolean(row.details?.correct)).length,
+        loading: false,
+      });
+    };
+
+    loadTodayPerformance();
+
+    return () => {
+      active = false;
+    };
+  }, [player?.id]);
+
+  const todayProgress = Math.min(
+    100,
+    Math.round((todayStats.answered / 5) * 100),
+  );
+  const todayAccuracy = todayStats.answered
+    ? Math.round((todayStats.correct / todayStats.answered) * 100)
+    : 0;
+  const challengeComplete = todayStats.answered >= 5;
+  const challengeSlug = summary.latestChapter || "ancient-india";
   const goCategory = (name) =>
     navigate(`/games?category=${encodeURIComponent(name)}`);
   return (
@@ -261,8 +354,12 @@ export default function Home() {
                 streak
               </div>
               <div className="mt-2 flex items-end gap-2">
-                <span className="text-3xl font-extrabold">4</span>
-                <span className="pb-1 text-sm text-slate-500">days</span>
+                <span className="text-3xl font-extrabold">
+                  {journeyDays}
+                </span>
+                <span className="pb-1 text-sm text-slate-500">
+                  {journeyDays === 1 ? "day" : "days"}
+                </span>
               </div>
             </div>
           </div>
@@ -285,17 +382,37 @@ export default function Home() {
               </div>
             </div>
             <p className="mt-3 text-slate-600">
-              Complete five mixed questions to earn <strong>+100 XP</strong> and
-              keep your streak alive.
+              Complete five questions today. Your progress updates from your
+              real quiz activity in Supabase.
             </p>
-            <ProgressBar value={40} label="Today’s progress" className="mt-6" />
+            <ProgressBar
+              value={todayProgress}
+              label={
+                todayStats.loading
+                  ? "Loading today’s progress…"
+                  : `Today’s progress · ${Math.min(todayStats.answered, 5)}/5 answered`
+              }
+              className="mt-6"
+            />
+            {!todayStats.loading && (
+              <p className="mt-3 text-sm font-semibold text-slate-500">
+                {todayStats.answered > 0
+                  ? `${todayStats.correct} correct · ${todayAccuracy}% accuracy today`
+                  : "No questions answered yet today."}
+              </p>
+            )}
             <Button
               as={Link}
-              to="/play/quiz/ancient-india"
+              to={
+                challengeComplete
+                  ? "/learn"
+                  : `/play/quiz/${challengeSlug}`
+              }
               variant="secondary"
               className="mt-6"
             >
-              Start challenge <ArrowRight className="h-4 w-4" />
+              {challengeComplete ? "Challenge completed" : "Continue challenge"}
+              <ArrowRight className="h-4 w-4" />
             </Button>
           </div>
           <div className="rounded-3xl bg-orange-50 p-6 ring-1 ring-orange-100">
