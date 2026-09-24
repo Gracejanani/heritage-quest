@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import {
   Award,
   BookOpen,
-  Camera,
   ChevronRight,
   CircleHelp,
   Gamepad2,
@@ -14,38 +13,23 @@ import {
   Coins,
   Flame,
   LogOut,
-  Trash2,
-  Upload,
 } from "lucide-react";
-import { Button, ProgressBar, useToast } from "../components/ui";
+import { Button, ProgressBar } from "../components/ui";
 import { usePlayer } from "../context/PlayerContext";
-import { useAuth } from "../context/AuthContext";
 import { AGE_GROUPS } from "../lib/age";
 import { supabase } from "../lib/supabase";
 
-const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
-const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
-
-function extensionFor(file) {
-  if (file.type === "image/png") return "png";
-  if (file.type === "image/webp") return "webp";
-  return "jpg";
-}
-
 export default function Profile() {
   const { player, switchPlayer, getSummary } = usePlayer();
-  const { refreshProfile } = useAuth();
-  const toast = useToast();
   const summary = getSummary();
   const ageInfo = AGE_GROUPS[player?.ageGroup] || AGE_GROUPS.scholar;
   const [avatarUrl, setAvatarUrl] = useState("");
-  const [avatarBusy, setAvatarBusy] = useState(false);
 
   const rows = [
     ["My Achievements", Award, "/achievements"],
     ["Game History", Gamepad2, "/games"],
     ["Learning Progress", BookOpen, "/learn"],
-    ["Settings", Settings, "#"],
+    ["Settings", Settings, "/settings"],
     ["Help & Support", CircleHelp, "#"],
   ];
 
@@ -80,172 +64,16 @@ export default function Profile() {
     };
   }, [player?.avatarPath]);
 
-  const uploadAvatar = async (file) => {
-    if (!file || !player?.id || !supabase) return;
-
-    if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
-      toast("Please choose a JPG, PNG or WebP image.", "error");
-      return;
-    }
-
-    if (file.size > MAX_AVATAR_SIZE) {
-      toast("Profile picture must be smaller than 5 MB.", "error");
-      return;
-    }
-
-    setAvatarBusy(true);
-
-    try {
-      const extension = extensionFor(file);
-      const path = `${player.id}/profile-${Date.now()}.${extension}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("profile-pictures")
-        .upload(path, file, {
-          contentType: file.type,
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (uploadError) throw uploadError;
-
-      const previousPath = player.avatarPath || null;
-
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          avatar_path: path,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", player.id);
-
-      if (profileError) {
-        await supabase.storage.from("profile-pictures").remove([path]);
-        throw profileError;
-      }
-
-      if (previousPath && previousPath !== path) {
-        await supabase.storage
-          .from("profile-pictures")
-          .remove([previousPath]);
-      }
-
-      await refreshProfile(player.id);
-      toast("Profile picture updated.");
-    } catch (error) {
-      console.error(error);
-      toast(error?.message || "Could not upload profile picture.", "error");
-    } finally {
-      setAvatarBusy(false);
-    }
-  };
-
-  const removeAvatar = async () => {
-    if (!player?.id || !player?.avatarPath || !supabase) return;
-    if (!window.confirm("Remove your profile picture?")) return;
-
-    setAvatarBusy(true);
-
-    try {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .update({
-          avatar_path: null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("user_id", player.id);
-
-      if (profileError) throw profileError;
-
-      const { error: storageError } = await supabase.storage
-        .from("profile-pictures")
-        .remove([player.avatarPath]);
-
-      if (storageError) {
-        console.error("Profile row updated, but old image could not be removed", storageError);
-      }
-
-      setAvatarUrl("");
-      await refreshProfile(player.id);
-      toast("Profile picture removed.");
-    } catch (error) {
-      console.error(error);
-      toast(error?.message || "Could not remove profile picture.", "error");
-    } finally {
-      setAvatarBusy(false);
-    }
-  };
-
   return (
     <div className="container-app py-12 sm:py-16">
       <div className="grid gap-6 lg:grid-cols-[360px_1fr]">
         <aside className="rounded-[2rem] border border-slate-200 bg-white p-7 text-center shadow-card">
-          <div className="relative mx-auto h-28 w-28">
-            <div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full bg-heritage-cream ring-4 ring-emerald-100">
-              <img
-                src={avatarUrl || "/assets/explorer-mobile.jpg"}
-                alt={`${player?.name || "Explorer"} profile`}
-                className="h-full w-full object-cover"
-              />
-            </div>
-
-            <label
-              className={`focus-ring absolute bottom-0 right-0 grid h-10 w-10 cursor-pointer place-items-center rounded-full border-4 border-white bg-heritage-green text-white shadow-lg transition hover:bg-emerald-700 ${
-                avatarBusy ? "pointer-events-none opacity-60" : ""
-              }`}
-              title={player?.avatarPath ? "Change profile picture" : "Add profile picture"}
-              aria-label={player?.avatarPath ? "Change profile picture" : "Add profile picture"}
-            >
-              <Camera className="h-5 w-5" />
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                disabled={avatarBusy}
-                onChange={async (event) => {
-                  const file = event.target.files?.[0];
-                  if (file) await uploadAvatar(file);
-                  event.target.value = "";
-                }}
-              />
-            </label>
-          </div>
-
-          <div className="mt-4 flex flex-wrap justify-center gap-2">
-            <label
-              className={`focus-ring inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-extrabold text-slate-600 hover:bg-emerald-50 hover:text-heritage-green ${
-                avatarBusy ? "pointer-events-none opacity-60" : ""
-              }`}
-            >
-              <Upload className="h-4 w-4" />
-              {avatarBusy
-                ? "Uploading…"
-                : player?.avatarPath
-                  ? "Change photo"
-                  : "Add photo"}
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                disabled={avatarBusy}
-                onChange={async (event) => {
-                  const file = event.target.files?.[0];
-                  if (file) await uploadAvatar(file);
-                  event.target.value = "";
-                }}
-              />
-            </label>
-
-            {player?.avatarPath && (
-              <button
-                type="button"
-                onClick={removeAvatar}
-                disabled={avatarBusy}
-                className="focus-ring inline-flex items-center gap-2 rounded-xl border border-rose-100 bg-rose-50 px-3 py-2 text-xs font-extrabold text-rose-600 hover:bg-rose-100 disabled:opacity-50"
-              >
-                <Trash2 className="h-4 w-4" /> Remove
-              </button>
-            )}
+          <div className="mx-auto grid h-28 w-28 place-items-center overflow-hidden rounded-full bg-heritage-cream ring-4 ring-emerald-100">
+            <img
+              src={avatarUrl || "/assets/explorer-mobile.jpg"}
+              alt={`${player?.name || "Explorer"} profile`}
+              className="h-full w-full object-cover"
+            />
           </div>
 
           <h1 className="mt-5 font-display text-3xl font-extrabold">{player?.name}</h1>
