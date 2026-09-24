@@ -248,10 +248,6 @@ export default function Profile() {
             )}
           </div>
 
-          <p className="mt-2 text-[11px] font-semibold text-slate-400">
-            JPG, PNG or WebP · maximum 5 MB
-          </p>
-
           <h1 className="mt-5 font-display text-3xl font-extrabold">{player?.name}</h1>
           <p className="mt-1 text-sm font-semibold text-slate-500">
             Proud to Explore India’s Heritage 🇮🇳
