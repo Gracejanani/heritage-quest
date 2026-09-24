@@ -5,7 +5,7 @@ import { Badge } from "./ui";
 
 export default function GameCard({ game, compact = false }) {
   return (
-    <article className="group overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-card">
+    <article className="group overflow-hidden rounded-3xl border border-slate-200/90 bg-gradient-to-b from-slate-50 to-white shadow-none transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.015] hover:bg-white hover:shadow-[0_22px_45px_rgba(15,23,42,0.20)] focus-within:-translate-y-2 focus-within:scale-[1.015] focus-within:bg-white focus-within:shadow-[0_22px_45px_rgba(15,23,42,0.20)] active:-translate-y-2 active:scale-[1.015] active:bg-white active:shadow-[0_22px_45px_rgba(15,23,42,0.20)]">
       <Link to={`/games/${game.slug}`} className="block overflow-hidden">
         <img
           src={game.image}
