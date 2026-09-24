@@ -5,7 +5,10 @@ import { learningTopics } from "../data/content";
 import { Button } from "../components/ui";
 import { usePlayer } from "../context/PlayerContext";
 import { supabase } from "../lib/supabase";
-import { issueCertificate } from "../lib/certificates";
+import {
+  getCertificateAwardTier,
+  issueCertificate,
+} from "../lib/certificates";
 
 function formatDate(value) {
   return new Intl.DateTimeFormat("en-IN", {
@@ -14,6 +17,36 @@ function formatDate(value) {
     year: "numeric",
   }).format(value ? new Date(value) : new Date());
 }
+
+const AWARD_STYLES = {
+  bronze: {
+    label: "BRONZE",
+    iconClass: "bg-orange-100 text-amber-800",
+    sealClass:
+      "border-amber-900 bg-gradient-to-br from-orange-200 via-amber-500 to-orange-700 text-amber-950",
+    canvasFill: "#b87333",
+    canvasStroke: "#7c2d12",
+    canvasText: "#4a250b",
+  },
+  silver: {
+    label: "SILVER",
+    iconClass: "bg-slate-200 text-slate-600",
+    sealClass:
+      "border-slate-500 bg-gradient-to-br from-slate-100 via-slate-300 to-slate-500 text-slate-800",
+    canvasFill: "#c7cbd1",
+    canvasStroke: "#64748b",
+    canvasText: "#334155",
+  },
+  gold: {
+    label: "GOLD",
+    iconClass: "bg-amber-100 text-amber-600",
+    sealClass:
+      "border-amber-700 bg-gradient-to-br from-yellow-200 via-amber-400 to-yellow-600 text-amber-950",
+    canvasFill: "#d9a62e",
+    canvasStroke: "#8b5e13",
+    canvasText: "#5d3a0d",
+  },
+};
 
 export default function Certificate() {
   const { chapterSlug = "ancient-india" } = useParams();
@@ -31,6 +64,13 @@ export default function Certificate() {
   const progress = getProgress(`quiz:${chapterSlug}`, null);
   const completed = Boolean(progress?.finished);
 
+  const progressAnswers = Array.isArray(progress?.answers) ? progress.answers : [];
+  const correctCount = progressAnswers.filter((answer) => answer?.correct).length;
+  const totalQuestions = Math.max(1, progressAnswers.length || 10);
+  const awardTier =
+    certificate?.award_tier || getCertificateAwardTier(correctCount);
+  const award = AWARD_STYLES[awardTier] || AWARD_STYLES.bronze;
+
   useEffect(() => {
     let active = true;
     if (!progressReady || !player?.id || !completed || !supabase) return () => {};
@@ -39,6 +79,8 @@ export default function Certificate() {
       userId: player.id,
       chapterSlug,
       taskName: topic.title,
+      correctAnswers: correctCount,
+      totalQuestions,
     })
       .then((data) => {
         if (active) setCertificate(data);
@@ -50,7 +92,15 @@ export default function Certificate() {
     return () => {
       active = false;
     };
-  }, [chapterSlug, completed, player?.id, progressReady, topic.title]);
+  }, [
+    chapterSlug,
+    completed,
+    correctCount,
+    player?.id,
+    progressReady,
+    topic.title,
+    totalQuestions,
+  ]);
 
   const issuedDate = certificate?.issued_at || progress?.updatedAt || new Date();
 
@@ -126,21 +176,23 @@ export default function Certificate() {
     ctx.font = "29px Arial, sans-serif";
     ctx.fillText("including the quiz and learning challenge.", 800, 700);
 
-    // Gold achievement seal.
-    ctx.fillStyle = "#d9a62e";
+    // Achievement seal changes by quiz result: bronze, silver or gold.
+    ctx.fillStyle = award.canvasFill;
     ctx.beginPath();
     ctx.arc(800, 825, 86, 0, Math.PI * 2);
     ctx.fill();
-    ctx.strokeStyle = "#8b5e13";
+    ctx.strokeStyle = award.canvasStroke;
     ctx.lineWidth = 6;
     ctx.stroke();
-    ctx.fillStyle = "#5d3a0d";
+    ctx.fillStyle = award.canvasText;
     ctx.font = "700 22px Arial, sans-serif";
     ctx.fillText("HERITAGE QUEST", 800, 805);
-    ctx.font = "700 40px Georgia, serif";
-    ctx.fillText("★", 800, 850);
+    ctx.font = "700 36px Georgia, serif";
+    ctx.fillText("★", 800, 842);
     ctx.font = "700 20px Arial, sans-serif";
-    ctx.fillText("ACHIEVER", 800, 880);
+    ctx.fillText(`${award.label} ACHIEVER`, 800, 872);
+    ctx.font = "700 17px Arial, sans-serif";
+    ctx.fillText(`${correctCount}/${totalQuestions} CORRECT`, 800, 896);
 
     ctx.textAlign = "left";
     ctx.fillStyle = "#1f2937";
@@ -242,7 +294,10 @@ export default function Certificate() {
               <div className="font-display text-2xl font-extrabold tracking-[.08em] text-heritage-brown sm:text-4xl">
                 HERITAGE QUEST INDIA
               </div>
-              <div className="mx-auto mt-5 grid h-16 w-16 place-items-center rounded-2xl bg-heritage-green/10 text-heritage-green">
+              <div
+                className={`mx-auto mt-5 grid h-16 w-16 place-items-center rounded-2xl ${award.iconClass}`}
+                title={`${award.label} award · ${correctCount}/${totalQuestions} correct`}
+              >
                 <Award className="h-9 w-9" />
               </div>
               <h1 className="mt-6 font-display text-3xl font-extrabold text-heritage-green sm:text-5xl">
@@ -264,11 +319,18 @@ export default function Certificate() {
                 including the quiz and learning challenge.
               </p>
 
-              <div className="mx-auto mt-8 grid h-28 w-28 place-items-center rounded-full border-4 border-amber-700 bg-gradient-to-br from-yellow-300 to-amber-500 font-display font-extrabold text-amber-950 shadow-lg">
+              <div className="mt-5 inline-flex items-center rounded-full bg-white/70 px-4 py-2 text-sm font-extrabold text-slate-700">
+                Score: {correctCount}/{totalQuestions} · {award.label} AWARD
+              </div>
+
+              <div
+                className={`mx-auto mt-6 grid h-28 w-28 place-items-center rounded-full border-4 font-display font-extrabold shadow-lg ${award.sealClass}`}
+              >
                 <div>
-                  <div className="text-xs">HERITAGE QUEST</div>
+                  <div className="text-[10px]">HERITAGE QUEST</div>
                   <div className="text-3xl">★</div>
-                  <div className="text-xs">ACHIEVER</div>
+                  <div className="text-xs">{award.label}</div>
+                  <div className="text-[10px]">{correctCount}/{totalQuestions} CORRECT</div>
                 </div>
               </div>
 
