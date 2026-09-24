@@ -7,6 +7,7 @@ import Games from "./pages/Games";
 import GameDetails from "./pages/GameDetails";
 import QuizGame from "./pages/QuizGame";
 import PuzzleGame from "./pages/PuzzleGame";
+import WordQuestGame from "./pages/WordQuestGame";
 import Learn from "./pages/Learn";
 import LearnTopic from "./pages/LearnTopic";
 import Leaderboard from "./pages/Leaderboard";
@@ -39,6 +40,8 @@ export default function App() {
       <Route path="/play/quiz" element={<QuizGame />} />
 
       <Route path="/play/puzzle" element={<PuzzleGame />} />
+
+      <Route path="/play/word-quest" element={<WordQuestGame />} />
 
       <Route path="/learn" element={<Learn />} />
 
