@@ -903,3 +903,59 @@ alter table public.certificates
 
 create index if not exists certificates_award_tier_idx
   on public.certificates (award_tier);
+
+
+-- Private student profile pictures.
+alter table public.profiles
+  add column if not exists avatar_path text;
+
+insert into storage.buckets (id, name, public)
+values ('profile-pictures', 'profile-pictures', false)
+on conflict (id) do update set public = false;
+
+drop policy if exists "profile_pictures_select_own" on storage.objects;
+create policy "profile_pictures_select_own"
+on storage.objects for select
+to authenticated
+using (
+  bucket_id = 'profile-pictures'
+  and (
+    (storage.foldername(name))[1] = (select auth.uid())::text
+    or public.is_admin()
+  )
+);
+
+drop policy if exists "profile_pictures_insert_own" on storage.objects;
+create policy "profile_pictures_insert_own"
+on storage.objects for insert
+to authenticated
+with check (
+  bucket_id = 'profile-pictures'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+drop policy if exists "profile_pictures_update_own" on storage.objects;
+create policy "profile_pictures_update_own"
+on storage.objects for update
+to authenticated
+using (
+  bucket_id = 'profile-pictures'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+)
+with check (
+  bucket_id = 'profile-pictures'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+drop policy if exists "profile_pictures_delete_own" on storage.objects;
+create policy "profile_pictures_delete_own"
+on storage.objects for delete
+to authenticated
+using (
+  bucket_id = 'profile-pictures'
+  and (storage.foldername(name))[1] = (select auth.uid())::text
+);
+
+create index if not exists profiles_avatar_path_idx
+  on public.profiles (avatar_path)
+  where avatar_path is not null;
