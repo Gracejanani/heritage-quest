@@ -109,8 +109,16 @@ export function useLiveTopics() {
 
   return useMemo(() => {
     if (!rows?.length) return fallbackTopics;
+
     const liveBySlug = new Map(rows.map((row) => [row.slug, mergeTopic(row)]));
-    return fallbackTopics.map((topic) => liveBySlug.get(topic.slug) || topic);
+    const knownSlugs = new Set(fallbackTopics.map((topic) => topic.slug));
+
+    return [
+      ...fallbackTopics.map((topic) => liveBySlug.get(topic.slug) || topic),
+      ...rows
+        .filter((row) => !knownSlugs.has(row.slug))
+        .map((row) => mergeTopic(row)),
+    ];
   }, [rows]);
 }
 
