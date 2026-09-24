@@ -33,7 +33,7 @@
       "difficulty": "Advanced",
       "players": "Single Player",
       "time": "12–15 min",
-      "image": "/assets/games/harappan-explorer.webp",
+      "image": "/assets/games/mohenjo-daro.svg",
       "chapterSlug": "indus-valley-civilization",
       "learn": [
         "Urban planning",
@@ -298,7 +298,7 @@
       "title": "Indus Valley Civilization",
       "era": "c. 2600–1900 BCE",
       "category": "Civilizations",
-      "image": "/assets/games/harappan-explorer.webp",
+      "image": "/assets/games/mohenjo-daro.svg",
       "description": "Investigate planned cities, craft production, trade, seals and the limits of archaeological interpretation.",
       "learn": [
         "Urban planning and drainage",
