@@ -58,6 +58,15 @@ function safeFileName(name) {
     .replace(/-+/g, "-");
 }
 
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-+/g, "-");
+}
+
 export default function Admin() {
   const { user } = useAuth();
   const toast = useToast();
@@ -350,11 +359,50 @@ export default function Admin() {
       time: payload.time || "5–10 min",
       learnText: textLines(payload.learn),
       achievementsText: textLines(payload.achievements),
+      isExisting: true,
+    });
+  };
+
+  const createGame = () => {
+    setGameForm({
+      id: "",
+      slug: "",
+      title: "",
+      category: "History",
+      difficulty: "Medium",
+      chapterSlug: chapters[0]?.slug || "",
+      description: "",
+      longDescription: "",
+      image: "",
+      players: "1 Player",
+      time: "5–10 min",
+      learnText: "",
+      achievementsText: "",
+      isExisting: false,
     });
   };
 
   const saveGame = async () => {
     if (!gameForm) return;
+
+    const id = slugify(gameForm.id || gameForm.title);
+    const slug = slugify(gameForm.slug || gameForm.title);
+
+    if (!id || !slug || !gameForm.title.trim()) {
+      toast("Game title, ID and URL slug are required.", "error");
+      return;
+    }
+
+    if (!gameForm.isExisting) {
+      const duplicate = games.some(
+        (item) => item.id === id || item.slug === slug,
+      );
+      if (duplicate) {
+        toast("A game with this ID or URL slug already exists.", "error");
+        return;
+      }
+    }
+
     setSaving(true);
     const current = games.find((item) => item.id === gameForm.id);
     const payload = {
@@ -369,24 +417,35 @@ export default function Admin() {
       achievements: lines(gameForm.achievementsText),
     };
 
-    const { error } = await supabase
-      .from("games")
-      .update({
-        title: gameForm.title,
-        category: gameForm.category,
-        difficulty: gameForm.difficulty,
-        payload,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", gameForm.id);
+    const gameRecord = {
+      id,
+      slug,
+      title: gameForm.title.trim(),
+      category: gameForm.category,
+      difficulty: gameForm.difficulty,
+      payload,
+      updated_at: new Date().toISOString(),
+    };
+
+    const query = gameForm.isExisting
+      ? supabase.from("games").update(gameRecord).eq("id", gameForm.id)
+      : supabase.from("games").insert(gameRecord);
+
+    const { error } = await query;
 
     setSaving(false);
     if (error) {
       toast(error.message, "error");
       return;
     }
-    await audit("update", "game", gameForm.id);
-    toast("Game updated.");
+
+    await audit(
+      gameForm.isExisting ? "update" : "create",
+      "game",
+      id,
+      { slug },
+    );
+    toast(gameForm.isExisting ? "Game updated." : "New game created.");
     setGameForm(null);
     await refreshAll();
   };
@@ -398,11 +457,41 @@ export default function Admin() {
       image: payload.image || "",
       learnText: textLines(payload.learn),
       sectionsJson: JSON.stringify(payload.sections || [], null, 2),
+      isExisting: true,
+    });
+  };
+
+  const createChapter = () => {
+    setChapterForm({
+      slug: "",
+      title: "",
+      description: "",
+      era: "",
+      tag: "Heritage",
+      image: "",
+      learnText: "",
+      sectionsJson: "[]",
+      isExisting: false,
     });
   };
 
   const saveChapter = async () => {
     if (!chapterForm) return;
+
+    const slug = slugify(chapterForm.slug || chapterForm.title);
+    if (!slug || !chapterForm.title.trim()) {
+      toast("Chapter title and slug are required.", "error");
+      return;
+    }
+
+    if (
+      !chapterForm.isExisting &&
+      chapters.some((item) => item.slug === slug)
+    ) {
+      toast("A chapter with this slug already exists.", "error");
+      return;
+    }
+
     let sections = [];
     try {
       sections = chapterForm.sectionsJson.trim()
@@ -422,17 +511,24 @@ export default function Admin() {
       sections,
     };
 
-    const { error } = await supabase
-      .from("chapters")
-      .update({
-        title: chapterForm.title,
-        description: chapterForm.description,
-        era: chapterForm.era,
-        tag: chapterForm.tag,
-        payload,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("slug", chapterForm.slug);
+    const chapterRecord = {
+      slug,
+      title: chapterForm.title.trim(),
+      description: chapterForm.description,
+      era: chapterForm.era,
+      tag: chapterForm.tag,
+      payload,
+      updated_at: new Date().toISOString(),
+    };
+
+    const query = chapterForm.isExisting
+      ? supabase
+          .from("chapters")
+          .update(chapterRecord)
+          .eq("slug", chapterForm.slug)
+      : supabase.from("chapters").insert(chapterRecord);
+
+    const { error } = await query;
 
     setSaving(false);
     if (error) {
@@ -440,8 +536,14 @@ export default function Admin() {
       return;
     }
 
-    await audit("update", "chapter", chapterForm.slug);
-    toast("Chapter updated.");
+    await audit(
+      chapterForm.isExisting ? "update" : "create",
+      "chapter",
+      slug,
+    );
+    toast(
+      chapterForm.isExisting ? "Chapter updated." : "New chapter created.",
+    );
     setChapterForm(null);
     await refreshAll();
   };
@@ -765,10 +867,17 @@ export default function Admin() {
 
       {tab === "games" && (
         <section className="mt-6">
-          <h2 className="text-2xl font-extrabold">Game manager</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Change game titles, images, descriptions, learning points and metadata.
-          </p>
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <h2 className="text-2xl font-extrabold">Game manager</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Change existing games or create a completely new game.
+              </p>
+            </div>
+            <Button onClick={createGame}>
+              <Plus className="h-4 w-4" /> Create new game
+            </Button>
+          </div>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {games.map((game) => (
               <button
@@ -795,10 +904,17 @@ export default function Admin() {
 
       {tab === "chapters" && (
         <section className="mt-6">
-          <h2 className="text-2xl font-extrabold">Learning chapter manager</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Modify chapter names, descriptions, era labels, learning points, sections and images.
-          </p>
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <h2 className="text-2xl font-extrabold">Learning chapter manager</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Modify existing chapters or create a new learning chapter.
+              </p>
+            </div>
+            <Button onClick={createChapter}>
+              <Plus className="h-4 w-4" /> Create new chapter
+            </Button>
+          </div>
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {chapters.map((chapter) => (
               <button
@@ -1183,10 +1299,57 @@ export default function Admin() {
       )}
 
       {gameForm && (
-        <EditorModal title={`Edit game · ${gameForm.title}`} onClose={() => setGameForm(null)}>
+        <EditorModal
+          title={gameForm.isExisting ? `Edit game · ${gameForm.title}` : "Create new game"}
+          onClose={() => setGameForm(null)}
+        >
           <div className="grid gap-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <label><span className={labelClass}>Title</span><input className={inputClass} value={gameForm.title} onChange={(e) => setGameForm({ ...gameForm, title: e.target.value })} /></label>
+              <label>
+                <span className={labelClass}>Title</span>
+                <input
+                  className={inputClass}
+                  value={gameForm.title}
+                  onChange={(e) => {
+                    const title = e.target.value;
+                    const generated = slugify(title);
+                    setGameForm((current) => ({
+                      ...current,
+                      title,
+                      ...(!current.isExisting
+                        ? {
+                            id: current.id || generated,
+                            slug: current.slug || generated,
+                          }
+                        : {}),
+                    }));
+                  }}
+                />
+              </label>
+              <label>
+                <span className={labelClass}>Game ID</span>
+                <input
+                  className={inputClass}
+                  value={gameForm.id || ""}
+                  disabled={gameForm.isExisting}
+                  onChange={(e) =>
+                    setGameForm({ ...gameForm, id: slugify(e.target.value) })
+                  }
+                  placeholder="example: temple-trail"
+                />
+              </label>
+              <label>
+                <span className={labelClass}>URL slug</span>
+                <input
+                  className={inputClass}
+                  value={gameForm.slug || ""}
+                  disabled={gameForm.isExisting}
+                  onChange={(e) =>
+                    setGameForm({ ...gameForm, slug: slugify(e.target.value) })
+                  }
+                  placeholder="example: temple-trail"
+                />
+              </label>
               <label><span className={labelClass}>Category</span><input className={inputClass} value={gameForm.category || ""} onChange={(e) => setGameForm({ ...gameForm, category: e.target.value })} /></label>
               <label><span className={labelClass}>Difficulty</span><select className={inputClass} value={gameForm.difficulty || "Medium"} onChange={(e) => setGameForm({ ...gameForm, difficulty: e.target.value })}>{["Medium","Advanced"].map((item) => <option key={item}>{item}</option>)}</select></label>
               <label><span className={labelClass}>Chapter slug</span><input className={inputClass} value={gameForm.chapterSlug || ""} onChange={(e) => setGameForm({ ...gameForm, chapterSlug: e.target.value })} /></label>
@@ -1212,17 +1375,50 @@ export default function Admin() {
             </label>
             <label><span className={labelClass}>Learning points · one per line</span><textarea className={`${inputClass} min-h-28`} value={gameForm.learnText} onChange={(e) => setGameForm({ ...gameForm, learnText: e.target.value })} /></label>
             <label><span className={labelClass}>Achievements · one per line</span><textarea className={`${inputClass} min-h-24`} value={gameForm.achievementsText} onChange={(e) => setGameForm({ ...gameForm, achievementsText: e.target.value })} /></label>
-            <Button onClick={saveGame} loading={saving}><Save className="h-4 w-4" /> Save game</Button>
+            <Button onClick={saveGame} loading={saving}>
+              {gameForm.isExisting ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {gameForm.isExisting ? "Save game" : "Create game"}
+            </Button>
           </div>
         </EditorModal>
       )}
 
       {chapterForm && (
-        <EditorModal title={`Edit chapter · ${chapterForm.title}`} onClose={() => setChapterForm(null)}>
+        <EditorModal
+          title={chapterForm.isExisting ? `Edit chapter · ${chapterForm.title}` : "Create new chapter"}
+          onClose={() => setChapterForm(null)}
+        >
           <div className="grid gap-4">
             <div className="grid gap-4 sm:grid-cols-2">
-              <label><span className={labelClass}>Title</span><input className={inputClass} value={chapterForm.title} onChange={(e) => setChapterForm({ ...chapterForm, title: e.target.value })} /></label>
-              <label><span className={labelClass}>Slug</span><input className={inputClass} value={chapterForm.slug} disabled /></label>
+              <label>
+                <span className={labelClass}>Title</span>
+                <input
+                  className={inputClass}
+                  value={chapterForm.title}
+                  onChange={(e) => {
+                    const title = e.target.value;
+                    setChapterForm((current) => ({
+                      ...current,
+                      title,
+                      ...(!current.isExisting && !current.slug
+                        ? { slug: slugify(title) }
+                        : {}),
+                    }));
+                  }}
+                />
+              </label>
+              <label>
+                <span className={labelClass}>Slug</span>
+                <input
+                  className={inputClass}
+                  value={chapterForm.slug}
+                  disabled={chapterForm.isExisting}
+                  onChange={(e) =>
+                    setChapterForm({ ...chapterForm, slug: slugify(e.target.value) })
+                  }
+                  placeholder="example: temple-architecture"
+                />
+              </label>
               <label><span className={labelClass}>Era</span><input className={inputClass} value={chapterForm.era || ""} onChange={(e) => setChapterForm({ ...chapterForm, era: e.target.value })} /></label>
               <label><span className={labelClass}>Tag / category</span><input className={inputClass} value={chapterForm.tag || ""} onChange={(e) => setChapterForm({ ...chapterForm, tag: e.target.value })} /></label>
             </div>
@@ -1244,7 +1440,10 @@ export default function Admin() {
             </label>
             <label><span className={labelClass}>Learning points · one per line</span><textarea className={`${inputClass} min-h-32`} value={chapterForm.learnText} onChange={(e) => setChapterForm({ ...chapterForm, learnText: e.target.value })} /></label>
             <label><span className={labelClass}>Sections JSON</span><textarea className={`${inputClass} min-h-48 font-mono text-xs`} value={chapterForm.sectionsJson} onChange={(e) => setChapterForm({ ...chapterForm, sectionsJson: e.target.value })} /></label>
-            <Button onClick={saveChapter} loading={saving}><Save className="h-4 w-4" /> Save chapter</Button>
+            <Button onClick={saveChapter} loading={saving}>
+              {chapterForm.isExisting ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+              {chapterForm.isExisting ? "Save chapter" : "Create chapter"}
+            </Button>
           </div>
         </EditorModal>
       )}
