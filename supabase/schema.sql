@@ -613,3 +613,90 @@ on public.certificates for update
 to authenticated
 using ((select auth.uid()) = user_id)
 with check ((select auth.uid()) = user_id);
+
+
+-- Dynamic leaderboard from real student quiz progress.
+create or replace function public.get_dynamic_leaderboard(
+  p_period text default 'Weekly'
+)
+returns table (
+  rank bigint,
+  user_id uuid,
+  name text,
+  points bigint,
+  badges bigint,
+  registered_days integer,
+  is_current boolean
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if (select auth.uid()) is null then
+    raise exception 'Authentication required';
+  end if;
+
+  return query
+  with scored as (
+    select
+      p.user_id,
+      p.full_name as name,
+      greatest(1, (current_date - p.created_at::date) + 1)::integer as registered_days,
+      coalesce(
+        sum(
+          case
+            when lower(p_period) = 'daily'
+              and qp.updated_at >= now() - interval '24 hours'
+              then qp.score
+            when lower(p_period) = 'weekly'
+              and qp.updated_at >= now() - interval '7 days'
+              then qp.score
+            when lower(p_period) in ('all time','all-time','all_time')
+              then qp.score
+            else 0
+          end
+        ),
+        0
+      )::bigint as points,
+      (
+        select count(*)::bigint
+        from public.certificates c
+        where c.user_id = p.user_id
+      ) as badges
+    from public.profiles p
+    left join public.quiz_progress qp on qp.user_id = p.user_id
+    group by p.user_id, p.full_name, p.created_at
+  ),
+  ranked as (
+    select
+      row_number() over (order by s.points desc, s.name asc)::bigint as rank,
+      s.user_id,
+      s.name,
+      s.points,
+      s.badges,
+      s.registered_days
+    from scored s
+  )
+  select
+    r.rank,
+    r.user_id,
+    r.name,
+    r.points,
+    r.badges,
+    r.registered_days,
+    (r.user_id = (select auth.uid())) as is_current
+  from ranked r
+  order by r.rank;
+end;
+$$;
+
+revoke all on function public.get_dynamic_leaderboard(text) from public;
+revoke all on function public.get_dynamic_leaderboard(text) from anon;
+grant execute on function public.get_dynamic_leaderboard(text) to authenticated;
+
+create index if not exists quiz_progress_updated_idx
+  on public.quiz_progress (updated_at desc);
+
+create index if not exists certificates_user_idx
+  on public.certificates (user_id);
