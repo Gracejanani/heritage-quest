@@ -284,6 +284,8 @@ export default function QuizGame() {
       userId: player?.id,
       chapterSlug,
       taskName: topic.title,
+      correctAnswers: totalCorrect,
+      totalQuestions: questions.length,
     }).catch((certificateError) => {
       console.error("Could not issue cloud certificate", certificateError);
     });
