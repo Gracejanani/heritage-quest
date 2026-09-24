@@ -700,3 +700,181 @@ create index if not exists quiz_progress_updated_idx
 
 create index if not exists certificates_user_idx
   on public.certificates (user_id);
+
+
+-- Admin CMS roles, settings and content permissions
+create table if not exists public.admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  role text not null default 'admin' check (role in ('owner','admin','editor')),
+  created_at timestamptz not null default now()
+);
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.admin_users a
+    where a.user_id = (select auth.uid())
+  );
+$$;
+
+revoke all on function public.is_admin() from public;
+grant execute on function public.is_admin() to authenticated;
+
+create table if not exists public.site_settings (
+  id text primary key default 'main',
+  payload jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  updated_by uuid references auth.users(id) on delete set null
+);
+
+insert into public.site_settings (id, payload)
+values (
+  'main',
+  jsonb_build_object(
+    'heroEyebrow','GAMES FOR A GREATER TOMORROW',
+    'heroTitle','Discover India',
+    'heroAccent','Through Play!',
+    'heroDescription','Fun games. Real stories. Our incredible heritage. Explore India’s history, culture, monuments and civilizations through interactive learning adventures.',
+    'heroImage','/assets/hero-heritage.jpg',
+    'featuredTitle','Learn India. Understand India.',
+    'featuredAccent','Preserve India’s Heritage.',
+    'featuredDescription','Discover people, places, events and traditions through 12 quiz chapters, 2 additional study materials and 120 mixed normal-and-advanced questions.',
+    'featuredImage','/assets/hero-heritage.jpg',
+    'introVideo','/videos/heritage-quest-intro.mp4',
+    'dailyChallengeQuestions',5,
+    'weeklyGoalPoints',700
+  )
+)
+on conflict (id) do nothing;
+
+create table if not exists public.admin_audit_log (
+  id bigint generated always as identity primary key,
+  admin_user_id uuid references auth.users(id) on delete set null,
+  action text not null,
+  entity_type text not null,
+  entity_id text,
+  details jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+alter table public.admin_users enable row level security;
+alter table public.site_settings enable row level security;
+alter table public.admin_audit_log enable row level security;
+
+drop policy if exists "admin_users_self_read" on public.admin_users;
+create policy "admin_users_self_read"
+on public.admin_users for select
+to authenticated
+using (user_id = (select auth.uid()) or public.is_admin());
+
+drop policy if exists "site_settings_read" on public.site_settings;
+create policy "site_settings_read"
+on public.site_settings for select
+to authenticated
+using (true);
+
+drop policy if exists "site_settings_admin_all" on public.site_settings;
+create policy "site_settings_admin_all"
+on public.site_settings for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "admin_audit_read" on public.admin_audit_log;
+create policy "admin_audit_read"
+on public.admin_audit_log for select
+to authenticated
+using (public.is_admin());
+
+drop policy if exists "admin_audit_insert" on public.admin_audit_log;
+create policy "admin_audit_insert"
+on public.admin_audit_log for insert
+to authenticated
+with check (public.is_admin() and admin_user_id = (select auth.uid()));
+
+drop policy if exists "games_admin_all" on public.games;
+create policy "games_admin_all"
+on public.games for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "chapters_admin_all" on public.chapters;
+create policy "chapters_admin_all"
+on public.chapters for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "questions_admin_all" on public.questions;
+create policy "questions_admin_all"
+on public.questions for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "profiles_admin_all" on public.profiles;
+create policy "profiles_admin_all"
+on public.profiles for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "progress_admin_all" on public.quiz_progress;
+create policy "progress_admin_all"
+on public.quiz_progress for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "activity_admin_all" on public.activity_log;
+create policy "activity_admin_all"
+on public.activity_log for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+drop policy if exists "certificates_admin_all" on public.certificates;
+create policy "certificates_admin_all"
+on public.certificates for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+insert into storage.buckets (id, name, public)
+values ('game-images', 'game-images', true)
+on conflict (id) do update set public = true;
+
+drop policy if exists "game_images_admin_select" on storage.objects;
+create policy "game_images_admin_select"
+on storage.objects for select
+to authenticated
+using (bucket_id = 'game-images' and public.is_admin());
+
+drop policy if exists "game_images_admin_insert" on storage.objects;
+create policy "game_images_admin_insert"
+on storage.objects for insert
+to authenticated
+with check (bucket_id = 'game-images' and public.is_admin());
+
+drop policy if exists "game_images_admin_update" on storage.objects;
+create policy "game_images_admin_update"
+on storage.objects for update
+to authenticated
+using (bucket_id = 'game-images' and public.is_admin())
+with check (bucket_id = 'game-images' and public.is_admin());
+
+drop policy if exists "game_images_admin_delete" on storage.objects;
+create policy "game_images_admin_delete"
+on storage.objects for delete
+to authenticated
+using (bucket_id = 'game-images' and public.is_admin());
+
+create index if not exists admin_audit_created_idx
+  on public.admin_audit_log (created_at desc);
