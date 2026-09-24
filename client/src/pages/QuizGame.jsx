@@ -195,6 +195,7 @@ export default function QuizGame() {
       return () => {};
     }
 
+    setTranslatedQuestion(null);
     setTranslating(true);
     translateQuestionBundle(q, language)
       .then((bundle) => {
