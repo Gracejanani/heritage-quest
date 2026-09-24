@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Heritage Word Quest</title>
+  <desc id="desc">Blue letter tiles forming heritage words with Indian monument silhouettes.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e0f2fe"/>
+      <stop offset="0.5" stop-color="#f8fbff"/>
+      <stop offset="1" stop-color="#dbeafe"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#0284c7"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#0f172a" flood-opacity=".18"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="760" rx="48" fill="url(#bg)"/>
+  <circle cx="1040" cy="100" r="180" fill="#bae6fd" opacity=".55"/>
+  <circle cx="170" cy="650" r="210" fill="#dbeafe" opacity=".8"/>
+
+  <g opacity=".14" fill="#075985">
+    <path d="M85 590h1030v22H85z"/>
+    <path d="M190 590v-150h120v150zm20-126h80l-40-58z"/>
+    <path d="M420 590v-190h90v190zm17-155h56l-28-62z"/>
+    <path d="M785 590v-165h145v165zm22-136h101l-50-58z"/>
+  </g>
+
+  <g filter="url(#shadow)" transform="translate(190 170)">
+    <g>
+      <rect x="0" y="0" width="150" height="170" rx="24" fill="url(#tile)"/>
+      <rect x="170" y="0" width="150" height="170" rx="24" fill="url(#tile)"/>
+      <rect x="340" y="0" width="150" height="170" rx="24" fill="url(#tile)"/>
+      <rect x="510" y="0" width="150" height="170" rx="24" fill="url(#tile)"/>
+      <rect x="680" y="0" width="150" height="170" rx="24" fill="url(#tile)"/>
+    </g>
+    <g fill="#fff" font-family="Arial, sans-serif" font-size="92" font-weight="700" text-anchor="middle">
+      <text x="75" y="112">T</text>
+      <text x="245" y="112">A</text>
+      <text x="415" y="112">J</text>
+      <text x="585" y="112">I</text>
+      <text x="755" y="112">N</text>
+    </g>
+  </g>
+
+  <g transform="translate(330 405)">
+    <rect width="540" height="135" rx="30" fill="#fff" stroke="#7dd3fc" stroke-width="5"/>
+    <g stroke="#0284c7" stroke-width="5" stroke-linecap="round">
+      <line x1="42" y1="95" x2="122" y2="95"/>
+      <line x1="148" y1="95" x2="228" y2="95"/>
+      <line x1="254" y1="95" x2="334" y2="95"/>
+      <line x1="374" y1="95" x2="454" y2="95"/>
+      <line x1="480" y1="95" x2="520" y2="95"/>
+    </g>
+    <text x="270" y="56" text-anchor="middle" font-family="Georgia, serif" font-size="34" font-weight="700" fill="#0c4a6e">BUILD THE HERITAGE WORD</text>
+  </g>
+
+  <g transform="translate(105 86)">
+    <rect width="370" height="72" rx="36" fill="#0c4a6e"/>
+    <text x="185" y="47" text-anchor="middle" font-family="Arial, sans-serif" font-size="27" font-weight="700" fill="#fff">HERITAGE WORD QUEST</text>
+  </g>
+</svg>
