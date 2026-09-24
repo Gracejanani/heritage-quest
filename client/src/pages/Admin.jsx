@@ -107,7 +107,7 @@ export default function Admin() {
   const loadAssets = async () => {
     if (!supabase) return;
 
-    const folders = ["", "admin", "games", "chapters", "site"];
+    const folders = ["", "admin", "games", "chapters", "site", "test-videos"];
     const results = await Promise.all(
       folders.map(async (folder) => {
         const { data, error } = await supabase.storage
@@ -455,6 +455,7 @@ export default function Admin() {
     setChapterForm({
       ...row,
       image: payload.image || "",
+      testVideo: payload.testVideo || "",
       learnText: textLines(payload.learn),
       sectionsJson: JSON.stringify(payload.sections || [], null, 2),
       isExisting: true,
@@ -469,6 +470,7 @@ export default function Admin() {
       era: "",
       tag: "Heritage",
       image: "",
+      testVideo: "",
       learnText: "",
       sectionsJson: "[]",
       isExisting: false,
@@ -507,6 +509,7 @@ export default function Admin() {
     const payload = {
       ...(current?.payload || {}),
       image: chapterForm.image,
+      testVideo: chapterForm.testVideo || "",
       learn: lines(chapterForm.learnText),
       sections,
     };
@@ -937,7 +940,14 @@ export default function Admin() {
                   <div className="text-xs font-extrabold uppercase tracking-wide text-heritage-saffron">
                   {chapter.era || "Heritage"}
                 </div>
-                <div className="mt-2 text-xl font-extrabold">{chapter.title}</div>
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <div className="text-xl font-extrabold">{chapter.title}</div>
+                  {chapter.payload?.testVideo ? (
+                    <Badge tone="green">Video ready</Badge>
+                  ) : (
+                    <Badge tone="gray">No test video</Badge>
+                  )}
+                </div>
                 <div className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">
                   {chapter.description}
                 </div>
@@ -1048,7 +1058,7 @@ export default function Admin() {
             <div>
               <h2 className="text-2xl font-extrabold">Images & files</h2>
               <p className="mt-1 text-sm text-slate-500">
-                Upload website images to Supabase Storage and use them in games, chapters or site settings.
+                Upload website images and lesson videos to Supabase Storage and use them in games, chapters or site settings.
               </p>
             </div>
             <label className="focus-ring inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-heritage-green px-5 py-3 text-sm font-bold text-white">
@@ -1526,6 +1536,103 @@ export default function Admin() {
                 />
               </details>
             </div>
+
+            <div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-4">
+              <div className="flex flex-col gap-4">
+                <div>
+                  <div className="text-sm font-extrabold text-slate-900">
+                    Pre-test learning video
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Students will see this video before the chapter test. They can
+                    watch it for better understanding or use “Skip & go to test”.
+                  </p>
+                </div>
+
+                {chapterForm.testVideo ? (
+                  <video
+                    src={chapterForm.testVideo}
+                    controls
+                    preload="metadata"
+                    className="aspect-video w-full rounded-2xl bg-black object-contain"
+                  />
+                ) : (
+                  <div className="grid min-h-44 place-items-center rounded-2xl border-2 border-dashed border-amber-200 bg-white p-6 text-center">
+                    <div>
+                      <FileImage className="mx-auto h-8 w-8 text-amber-300" />
+                      <div className="mt-2 font-bold text-slate-700">
+                        No pre-test video added yet
+                      </div>
+                      <div className="mt-1 text-xs text-slate-500">
+                        The student screen will still allow them to continue to the test.
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-2">
+                  <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-heritage-saffron px-4 py-2.5 text-sm font-extrabold text-white hover:bg-orange-600">
+                    <ImagePlus className="h-4 w-4" />
+                    {chapterForm.testVideo ? "Replace test video" : "Upload test video"}
+                    <input
+                      type="file"
+                      accept="video/mp4,video/webm,video/ogg"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const url = await uploadAsset(file, "test-videos");
+                          setChapterForm((current) => ({
+                            ...current,
+                            testVideo: url,
+                          }));
+                          toast(
+                            "Test video uploaded. Press Save chapter to publish it.",
+                          );
+                        } catch (error) {
+                          toast(error.message || "Video upload failed.", "error");
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+
+                  {chapterForm.testVideo && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setChapterForm((current) => ({
+                          ...current,
+                          testVideo: "",
+                        }))
+                      }
+                      className="rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-extrabold text-rose-600 hover:bg-rose-50"
+                    >
+                      Remove video
+                    </button>
+                  )}
+                </div>
+
+                <details>
+                  <summary className="cursor-pointer text-xs font-extrabold uppercase tracking-wide text-slate-500">
+                    Advanced · video URL
+                  </summary>
+                  <input
+                    className={`${inputClass} mt-2`}
+                    value={chapterForm.testVideo || ""}
+                    onChange={(e) =>
+                      setChapterForm({
+                        ...chapterForm,
+                        testVideo: e.target.value,
+                      })
+                    }
+                    placeholder="https://.../lesson.mp4"
+                  />
+                </details>
+              </div>
+            </div>
+
             <label><span className={labelClass}>Learning points · one per line</span><textarea className={`${inputClass} min-h-32`} value={chapterForm.learnText} onChange={(e) => setChapterForm({ ...chapterForm, learnText: e.target.value })} /></label>
             <label><span className={labelClass}>Sections JSON</span><textarea className={`${inputClass} min-h-48 font-mono text-xs`} value={chapterForm.sectionsJson} onChange={(e) => setChapterForm({ ...chapterForm, sectionsJson: e.target.value })} /></label>
             <Button onClick={saveChapter} loading={saving}>
