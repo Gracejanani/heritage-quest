@@ -53,12 +53,18 @@ export default function Certificate() {
   const { player, getProgress, progressReady } = usePlayer();
   const [certificate, setCertificate] = useState(null);
   const [error, setError] = useState("");
+  const isWordQuest = chapterSlug === "heritage-word-quest";
 
   const topic = useMemo(
     () =>
-      learningTopics.find((item) => item.slug === chapterSlug) ||
-      learningTopics[0],
-    [chapterSlug],
+      isWordQuest
+        ? {
+            slug: "heritage-word-quest",
+            title: "Heritage Word Quest",
+          }
+        : learningTopics.find((item) => item.slug === chapterSlug) ||
+          learningTopics[0],
+    [chapterSlug, isWordQuest],
   );
 
   const progress = getProgress(`quiz:${chapterSlug}`, null);
@@ -112,21 +118,40 @@ export default function Certificate() {
     canvas.height = 1100;
     const ctx = canvas.getContext("2d");
 
-    ctx.fillStyle = "#f8efd9";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (isWordQuest) {
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, "#eff9ff");
+      gradient.addColorStop(0.5, "#ffffff");
+      gradient.addColorStop(1, "#dbeafe");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Soft parchment texture.
-    ctx.globalAlpha = 0.06;
-    for (let i = 0; i < 700; i += 1) {
-      const x = Math.random() * canvas.width;
-      const y = Math.random() * canvas.height;
-      const r = 1 + Math.random() * 5;
-      ctx.fillStyle = i % 2 ? "#8b5a2b" : "#d97706";
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.globalAlpha = 0.08;
+      for (let i = 0; i < 90; i += 1) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const size = 8 + Math.random() * 18;
+        ctx.fillStyle = i % 2 ? "#38bdf8" : "#2563eb";
+        ctx.fillRect(x, y, size, size);
+      }
+      ctx.globalAlpha = 1;
+    } else {
+      ctx.fillStyle = "#f8efd9";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Soft parchment texture.
+      ctx.globalAlpha = 0.06;
+      for (let i = 0; i < 700; i += 1) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const r = 1 + Math.random() * 5;
+        ctx.fillStyle = i % 2 ? "#8b5a2b" : "#d97706";
+        ctx.beginPath();
+        ctx.arc(x, y, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
     }
-    ctx.globalAlpha = 1;
 
     const border = (inset, color, width) => {
       ctx.strokeStyle = color;
@@ -134,17 +159,24 @@ export default function Certificate() {
       ctx.strokeRect(inset, inset, canvas.width - inset * 2, canvas.height - inset * 2);
     };
 
-    border(30, "#155e3d", 22);
-    border(58, "#d97706", 10);
-    border(78, "#b8872c", 4);
-    border(96, "#155e3d", 3);
+    if (isWordQuest) {
+      border(30, "#0f4c81", 22);
+      border(58, "#38bdf8", 10);
+      border(78, "#93c5fd", 4);
+      border(96, "#1d4ed8", 3);
+    } else {
+      border(30, "#155e3d", 22);
+      border(58, "#d97706", 10);
+      border(78, "#b8872c", 4);
+      border(96, "#155e3d", 3);
+    }
 
     ctx.textAlign = "center";
-    ctx.fillStyle = "#7c3f1d";
+    ctx.fillStyle = isWordQuest ? "#0f3d66" : "#7c3f1d";
     ctx.font = "700 64px Georgia, serif";
     ctx.fillText("HERITAGE QUEST INDIA", 800, 175);
 
-    ctx.fillStyle = "#166534";
+    ctx.fillStyle = isWordQuest ? "#0369a1" : "#166534";
     ctx.font = "700 58px Georgia, serif";
     ctx.fillText("CERTIFICATE OF COMPLETION", 800, 300);
 
@@ -152,11 +184,11 @@ export default function Certificate() {
     ctx.font = "36px Arial, sans-serif";
     ctx.fillText("This certificate is awarded to", 800, 380);
 
-    ctx.fillStyle = "#166534";
+    ctx.fillStyle = isWordQuest ? "#075985" : "#166534";
     ctx.font = "700 78px Georgia, serif";
     ctx.fillText(player.name, 800, 485);
 
-    ctx.strokeStyle = "#b8872c";
+    ctx.strokeStyle = isWordQuest ? "#7dd3fc" : "#b8872c";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(390, 515);
@@ -167,14 +199,20 @@ export default function Certificate() {
     ctx.font = "34px Arial, sans-serif";
     ctx.fillText("For successfully completing the learning task:", 800, 585);
 
-    ctx.fillStyle = "#7c3f1d";
+    ctx.fillStyle = isWordQuest ? "#0f4c81" : "#7c3f1d";
     ctx.font = "700 42px Georgia, serif";
     const task = String(topic.title).toUpperCase();
     ctx.fillText(`“${task}”`, 800, 650);
 
     ctx.fillStyle = "#475569";
     ctx.font = "29px Arial, sans-serif";
-    ctx.fillText("including the quiz and learning challenge.", 800, 700);
+    ctx.fillText(
+      isWordQuest
+        ? "including the age-based heritage word challenge."
+        : "including the quiz and learning challenge.",
+      800,
+      700,
+    );
 
     // Achievement seal changes by quiz result: bronze, silver or gold.
     ctx.fillStyle = award.canvasFill;
@@ -268,10 +306,14 @@ export default function Certificate() {
             Complete the task first
           </h1>
           <p className="mt-3 text-slate-600">
-            Finish the {topic.title} quiz to unlock your personalised certificate.
+            Finish the {topic.title} activity to unlock your personalised certificate.
           </p>
-          <Button as={Link} to={`/play/quiz/${chapterSlug}`} className="mt-6">
-            Go to the quiz
+          <Button
+            as={Link}
+            to={isWordQuest ? "/play/word-quest" : `/play/quiz/${chapterSlug}`}
+            className="mt-6"
+          >
+            {isWordQuest ? "Go to Word Quest" : "Go to the quiz"}
           </Button>
         </div>
       </div>
@@ -288,10 +330,28 @@ export default function Certificate() {
       </Link>
 
       <div className="mx-auto mt-5 max-w-5xl">
-        <div className="relative overflow-hidden rounded-[2rem] border-[10px] border-heritage-green bg-[#fbf2dc] p-3 shadow-2xl sm:p-5">
-          <div className="rounded-[1.3rem] border-4 border-orange-500 p-2">
-            <div className="rounded-xl border-2 border-amber-500 px-5 py-10 text-center sm:px-12 sm:py-14">
-              <div className="font-display text-2xl font-extrabold tracking-[.08em] text-heritage-brown sm:text-4xl">
+        <div
+          className={`relative overflow-hidden rounded-[2rem] border-[10px] p-3 shadow-2xl sm:p-5 ${
+            isWordQuest
+              ? "border-sky-800 bg-gradient-to-br from-sky-50 via-white to-blue-100"
+              : "border-heritage-green bg-[#fbf2dc]"
+          }`}
+        >
+          <div
+            className={`rounded-[1.3rem] border-4 p-2 ${
+              isWordQuest ? "border-sky-400" : "border-orange-500"
+            }`}
+          >
+            <div
+              className={`rounded-xl border-2 px-5 py-10 text-center sm:px-12 sm:py-14 ${
+                isWordQuest ? "border-sky-200 bg-white/70" : "border-amber-500"
+              }`}
+            >
+              <div
+                className={`font-display text-2xl font-extrabold tracking-[.08em] sm:text-4xl ${
+                  isWordQuest ? "text-sky-950" : "text-heritage-brown"
+                }`}
+              >
                 HERITAGE QUEST INDIA
               </div>
               <div
@@ -300,23 +360,39 @@ export default function Certificate() {
               >
                 <Award className="h-9 w-9" />
               </div>
-              <h1 className="mt-6 font-display text-3xl font-extrabold text-heritage-green sm:text-5xl">
+              <h1
+                className={`mt-6 font-display text-3xl font-extrabold sm:text-5xl ${
+                  isWordQuest ? "text-sky-700" : "text-heritage-green"
+                }`}
+              >
                 CERTIFICATE OF COMPLETION
               </h1>
               <p className="mt-6 text-lg text-slate-700">
                 This certificate is awarded to
               </p>
-              <div className="mx-auto mt-2 max-w-3xl border-b-2 border-amber-500 pb-3 font-display text-4xl font-extrabold text-heritage-green sm:text-6xl">
+              <div
+                className={`mx-auto mt-2 max-w-3xl border-b-2 pb-3 font-display text-4xl font-extrabold sm:text-6xl ${
+                  isWordQuest
+                    ? "border-sky-300 text-sky-800"
+                    : "border-amber-500 text-heritage-green"
+                }`}
+              >
                 {player?.name}
               </div>
               <p className="mt-6 text-lg text-slate-700">
                 For successfully completing the task:
               </p>
-              <h2 className="mt-2 font-display text-2xl font-extrabold uppercase text-heritage-brown sm:text-3xl">
+              <h2
+                className={`mt-2 font-display text-2xl font-extrabold uppercase sm:text-3xl ${
+                  isWordQuest ? "text-sky-950" : "text-heritage-brown"
+                }`}
+              >
                 “{topic.title}”
               </h2>
               <p className="mt-2 text-slate-600">
-                including the quiz and learning challenge.
+                {isWordQuest
+                  ? "including the age-based heritage word challenge."
+                  : "including the quiz and learning challenge."}
               </p>
 
               <div className="mt-5 inline-flex items-center rounded-full bg-white/70 px-4 py-2 text-sm font-extrabold text-slate-700">
