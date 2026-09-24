@@ -22,8 +22,7 @@ import {
   Compass,
 } from "lucide-react";
 import { categories } from "../data/content";
-import { useLiveGames, useSiteSettings } from "../lib/liveContent";
-import GameCard from "../components/GameCard";
+import { useSiteSettings } from "../lib/liveContent";
 import { Button, Modal, ProgressBar, useToast } from "../components/ui";
 import { usePlayer } from "../context/PlayerContext";
 import { supabase } from "../lib/supabase";
@@ -66,7 +65,6 @@ const iconMap = {
 };
 
 export default function Home() {
-  const games = useLiveGames();
   const site = useSiteSettings();
   const [videoOpen, setVideoOpen] = useState(false);
   const navigate = useNavigate();
@@ -267,25 +265,79 @@ export default function Home() {
         </div>
       </section>
       <section className="container-app py-16">
-        <div className="mb-7 flex items-end justify-between gap-4">
-          <div>
-            <h2 className="section-title">Popular Games</h2>
-            <p className="section-copy !mt-2">
-              Evidence-based history challenges with explanations after every
-              answer.
-            </p>
+        <div className="mb-7">
+          <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-heritage-green">
+            <Gamepad2 className="h-4 w-4" /> PLAY & PRACTICE
           </div>
-          <Link
-            to="/games"
-            className="focus-ring hidden items-center gap-2 rounded-xl px-3 py-2 text-sm font-extrabold text-heritage-green hover:bg-emerald-50 sm:inline-flex"
-          >
-            View All Games <ArrowRight className="h-4 w-4" />
-          </Link>
+          <h2 className="section-title mt-4">Choose your game mode</h2>
+          <p className="section-copy !mt-2">
+            Start immediately from the home page — choose a quiz challenge or
+            build heritage answers from mixed letters.
+          </p>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {games.slice(0, 5).map((g) => (
-            <GameCard key={g.id} game={g} compact />
-          ))}
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <Link
+            to="/games?mode=quiz"
+            className="focus-ring group overflow-hidden rounded-[2rem] border border-emerald-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-card"
+          >
+            <div className="relative h-64 overflow-hidden sm:h-72">
+              <img
+                src={site.homeQuizModeImage}
+                alt={site.homeQuizModeTitle}
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/85 via-emerald-950/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white sm:p-8">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-extrabold backdrop-blur">
+                  <Gamepad2 className="h-4 w-4" /> QUIZ MODE
+                </div>
+                <h3 className="mt-3 font-display text-3xl font-extrabold sm:text-4xl">
+                  {site.homeQuizModeTitle}
+                </h3>
+              </div>
+            </div>
+            <div className="p-6 sm:p-7">
+              <p className="text-sm leading-6 text-slate-600 sm:text-base">
+                {site.homeQuizModeDescription}
+              </p>
+              <div className="mt-5 inline-flex items-center gap-2 font-extrabold text-heritage-green">
+                Open Quiz Challenges
+                <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
+              </div>
+            </div>
+          </Link>
+
+          <Link
+            to="/play/word-quest"
+            className="focus-ring group overflow-hidden rounded-[2rem] border border-sky-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-card"
+          >
+            <div className="relative h-64 overflow-hidden bg-sky-50 sm:h-72">
+              <img
+                src={site.homeWordModeImage}
+                alt={site.homeWordModeTitle}
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-sky-950/85 via-sky-950/25 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white sm:p-8">
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-extrabold backdrop-blur">
+                  <Sparkles className="h-4 w-4" /> WORD MODE
+                </div>
+                <h3 className="mt-3 font-display text-3xl font-extrabold sm:text-4xl">
+                  {site.homeWordModeTitle}
+                </h3>
+              </div>
+            </div>
+            <div className="p-6 sm:p-7">
+              <p className="text-sm leading-6 text-slate-600 sm:text-base">
+                {site.homeWordModeDescription}
+              </p>
+              <div className="mt-5 inline-flex items-center gap-2 font-extrabold text-sky-700">
+                Play Heritage Word Quest
+                <ArrowRight className="h-5 w-5 transition group-hover:translate-x-1" />
+              </div>
+            </div>
+          </Link>
         </div>
       </section>
       <section className="border-y border-slate-200 bg-white py-16">
