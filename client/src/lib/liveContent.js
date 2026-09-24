@@ -20,6 +20,14 @@ const defaultSettings = {
   introVideo: "/videos/heritage-quest-intro.mp4",
   dailyChallengeQuestions: 5,
   weeklyGoalPoints: 700,
+  homeQuizModeTitle: "Quiz Challenges",
+  homeQuizModeDescription:
+    "Choose a heritage chapter and answer age-appropriate questions with hints, explanations, XP and certificates.",
+  homeQuizModeImage: "/assets/games/ancient-india.webp",
+  homeWordModeTitle: "Heritage Word Quest",
+  homeWordModeDescription:
+    "Read a heritage clue, then tap the shuffled letters in the correct order to build the answer.",
+  homeWordModeImage: "/assets/games/word-quest.svg",
 };
 
 function mergeGame(row) {
