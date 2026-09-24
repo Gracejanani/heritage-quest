@@ -207,7 +207,10 @@ export function PlayerProvider({ children }) {
         ...value,
       }));
 
-    const completed = records.filter((record) => record.finished).length;
+    const chapterRecords = records.filter(
+      (record) => record.chapterSlug !== "heritage-word-quest",
+    );
+    const completed = chapterRecords.filter((record) => record.finished).length;
     const xp = records.reduce((sum, record) => sum + Number(record.xp || 0), 0);
     const coins =
       50 +
@@ -219,7 +222,7 @@ export function PlayerProvider({ children }) {
       6,
       Math.floor(completed / 2) + (completed > 0 ? 1 : 0),
     );
-    const latest = [...records].sort((a, b) =>
+    const latest = [...chapterRecords].sort((a, b) =>
       String(b.updatedAt || "").localeCompare(String(a.updatedAt || "")),
     )[0];
 
