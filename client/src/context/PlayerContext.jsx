@@ -52,6 +52,7 @@ export function PlayerProvider({ children }) {
         profile?.preferred_language ||
         user.user_metadata?.preferred_language ||
         "en",
+      createdAt: profile?.created_at || user.created_at || null,
     };
   }, [user, profile]);
 
