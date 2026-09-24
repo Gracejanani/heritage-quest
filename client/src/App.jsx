@@ -16,6 +16,8 @@ import About from "./pages/About";
 import Certificate from "./pages/Certificate";
 import NotFound from "./pages/NotFound";
 import AuthGate from "./components/AuthGate";
+import AdminGuard from "./components/AdminGuard";
+import Admin from "./pages/Admin";
 import { PlayerProvider } from "./context/PlayerContext";
 import { AuthProvider } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -50,6 +52,15 @@ export default function App() {
       <Route path="/certificate/:chapterSlug" element={<Certificate />} />
 
       <Route path="/about" element={<About />} />
+
+      <Route
+        path="/admin"
+        element={
+          <AdminGuard>
+            <Admin />
+          </AdminGuard>
+        }
+      />
 
       <Route path="*" element={<NotFound />} />
       
