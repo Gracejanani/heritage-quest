@@ -951,6 +951,7 @@ export default function Admin() {
                 <div className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">
                   {chapter.description}
                 </div>
+                </div>
               </button>
             ))}
           </div>
