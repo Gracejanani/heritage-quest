@@ -959,3 +959,181 @@ using (
 create index if not exists profiles_avatar_path_idx
   on public.profiles (avatar_path)
   where avatar_path is not null;
+
+
+-- Heritage Word Quest age-based anagram game.
+create table if not exists public.word_puzzles (
+  id text primary key,
+  game_slug text not null default 'heritage-word-quest',
+  age_group text not null check (age_group in ('entry','junior','scholar','open','all')),
+  difficulty text not null default 'Medium',
+  clue text not null,
+  answer text not null,
+  hint text,
+  explanation text,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.word_puzzles enable row level security;
+
+drop policy if exists "word_puzzles_admin_all" on public.word_puzzles;
+create policy "word_puzzles_admin_all"
+on public.word_puzzles for all
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+create index if not exists word_puzzles_game_age_order_idx
+  on public.word_puzzles (game_slug, age_group, sort_order);
+
+create or replace function public.get_word_puzzles(
+  p_game_slug text default 'heritage-word-quest',
+  p_age_group text default 'scholar'
+)
+returns table (
+  id text,
+  clue text,
+  hint text,
+  difficulty text,
+  letters jsonb,
+  answer_pattern text,
+  sort_order integer
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if (select auth.uid()) is null then
+    raise exception 'Authentication required';
+  end if;
+
+  if exists (
+    select 1 from public.word_puzzles q
+    where q.game_slug = p_game_slug and q.age_group = p_age_group
+  ) then
+    return query
+      select
+        q.id,
+        q.clue,
+        q.hint,
+        q.difficulty,
+        (
+          select jsonb_agg(ch order by random())
+          from regexp_split_to_table(
+            regexp_replace(upper(q.answer), '[^A-Z0-9]', '', 'g'),
+            ''
+          ) as ch
+          where ch <> ''
+        ),
+        regexp_replace(upper(q.answer), '[A-Z0-9]', '_', 'g'),
+        q.sort_order
+      from public.word_puzzles q
+      where q.game_slug = p_game_slug and q.age_group = p_age_group
+      order by q.sort_order
+      limit 10;
+  else
+    return query
+      select
+        q.id,
+        q.clue,
+        q.hint,
+        q.difficulty,
+        (
+          select jsonb_agg(ch order by random())
+          from regexp_split_to_table(
+            regexp_replace(upper(q.answer), '[^A-Z0-9]', '', 'g'),
+            ''
+          ) as ch
+          where ch <> ''
+        ),
+        regexp_replace(upper(q.answer), '[A-Z0-9]', '_', 'g'),
+        q.sort_order
+      from public.word_puzzles q
+      where q.game_slug = p_game_slug and q.age_group = 'all'
+      order by q.sort_order
+      limit 10;
+  end if;
+end;
+$$;
+
+create or replace function public.check_word_puzzle_answer(
+  p_game_slug text,
+  p_puzzle_id text,
+  p_age_group text,
+  p_selected_answer text
+)
+returns table (
+  correct boolean,
+  correct_answer text,
+  explanation text,
+  difficulty text,
+  xp integer
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  q public.word_puzzles%rowtype;
+  selected_normalized text;
+  answer_normalized text;
+  is_correct boolean;
+begin
+  if (select auth.uid()) is null then
+    raise exception 'Authentication required';
+  end if;
+
+  select * into q
+  from public.word_puzzles
+  where id = p_puzzle_id
+    and game_slug = p_game_slug
+    and age_group = p_age_group
+  limit 1;
+
+  if not found then
+    select * into q
+    from public.word_puzzles
+    where id = p_puzzle_id
+      and game_slug = p_game_slug
+      and age_group = 'all'
+    limit 1;
+  end if;
+
+  if not found then
+    raise exception 'Word puzzle not found';
+  end if;
+
+  selected_normalized :=
+    regexp_replace(upper(coalesce(p_selected_answer,'')), '[^A-Z0-9]', '', 'g');
+  answer_normalized :=
+    regexp_replace(upper(q.answer), '[^A-Z0-9]', '', 'g');
+  is_correct := selected_normalized = answer_normalized;
+
+  return query
+  select
+    is_correct,
+    q.answer,
+    coalesce(
+      q.explanation,
+      'Great work. Remember the clue and the heritage word together.'
+    ),
+    q.difficulty,
+    case
+      when not is_correct then 0
+      when q.difficulty = 'Advanced' then 30
+      when q.difficulty = 'Entry' then 10
+      else 20
+    end;
+end;
+$$;
+
+revoke all on function public.get_word_puzzles(text,text) from public;
+revoke all on function public.get_word_puzzles(text,text) from anon;
+grant execute on function public.get_word_puzzles(text,text) to authenticated;
+
+revoke all on function public.check_word_puzzle_answer(text,text,text,text) from public;
+revoke all on function public.check_word_puzzle_answer(text,text,text,text) from anon;
+grant execute on function public.check_word_puzzle_answer(text,text,text,text) to authenticated;
