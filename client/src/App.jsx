@@ -1,5 +1,6 @@
 import React from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
+import { Analytics } from "@vercel/analytics/react";
 import Layout from "./components/Layout";
 import { ToastProvider } from "./components/ui";
 import Home from "./pages/Home";
@@ -77,6 +78,7 @@ export default function App() {
           </PlayerProvider>
         </AuthProvider>
       </LanguageProvider>
+      <Analytics />
     </ToastProvider>
   );
 }
