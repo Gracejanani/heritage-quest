@@ -74,7 +74,7 @@ export const games = [
     difficulty: "Advanced",
     players: "Single Player",
     time: "12–15 min",
-    image: "/assets/games/mohenjo-daro.svg",
+    image: "/assets/games/harappan-explorer.webp",
     chapterSlug: "indus-valley-civilization",
     learn: [
       "Urban planning",
@@ -280,7 +280,7 @@ export const learningTopics = [
     era: "c. 2600–1900 BCE",
     description:
       "Investigate planned cities, craft production, trade, seals and the limits of archaeological interpretation.",
-    image: "/assets/games/mohenjo-daro.svg",
+    image: "/assets/games/harappan-explorer.webp",
     tag: "Civilizations",
     learn: [
       "Urban planning and drainage",
