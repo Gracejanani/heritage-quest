@@ -8,13 +8,15 @@ import {
   Sparkles,
   HelpCircle,
 } from "lucide-react";
-import { games, learningTopics } from "../data/content";
+import { useLiveGames, useLiveTopics } from "../lib/liveContent";
 import { Badge, Button, SearchBar } from "../components/ui";
 import { useLanguage } from "../context/LanguageContext";
 import { usePlayer } from "../context/PlayerContext";
 import { AGE_GROUPS } from "../lib/age";
 
 export default function Learn() {
+  const games = useLiveGames();
+  const learningTopics = useLiveTopics();
   const [query, setQuery] = useState("");
   const { language, t, localizeTopic } = useLanguage();
   const { player } = usePlayer();
@@ -22,7 +24,7 @@ export default function Learn() {
 
   const localizedTopics = useMemo(
     () => learningTopics.map((topic) => localizeTopic(topic)),
-    [language],
+    [language, learningTopics, localizeTopic],
   );
 
   const filtered = useMemo(
