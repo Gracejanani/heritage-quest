@@ -1045,6 +1045,42 @@ export default function Admin() {
                 />
               </label>
             </div>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-3">
+              {[
+                ["heroImage", "Upload hero image", "image/*", "site"],
+                ["featuredImage", "Upload featured image", "image/*", "site"],
+                ["introVideo", "Upload intro video", "video/mp4", "site"],
+              ].map(([key, label, accept, folder]) => (
+                <label
+                  key={key}
+                  className="focus-ring inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-600 hover:bg-white"
+                >
+                  <ImagePlus className="h-4 w-4" /> {label}
+                  <input
+                    type="file"
+                    accept={accept}
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const url = await uploadAsset(file, folder);
+                        setSettingsForm((current) => ({
+                          ...current,
+                          [key]: url,
+                        }));
+                        toast("Upload complete. Save settings to publish it.");
+                      } catch (error) {
+                        toast(error.message || "Upload failed.", "error");
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+              ))}
+            </div>
+
             <Button className="mt-6" onClick={saveSettings} loading={saving}>
               <Save className="h-4 w-4" /> Save website settings
             </Button>
