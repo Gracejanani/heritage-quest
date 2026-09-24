@@ -53,6 +53,7 @@ export function PlayerProvider({ children }) {
         user.user_metadata?.preferred_language ||
         "en",
       createdAt: profile?.created_at || user.created_at || null,
+      avatarPath: profile?.avatar_path || null,
     };
   }, [user, profile]);
 
