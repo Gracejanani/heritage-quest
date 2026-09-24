@@ -19,6 +19,9 @@ export default function GameDetails() {
   const games = useLiveGames();
   const { slug } = useParams();
   const game = games.find((g) => g.slug === slug) || games[0];
+  const playPath = game.playPath || `/play/quiz/${game.chapterSlug}`;
+  const questionCount = Number(game.questionCount || 10);
+
   return (
     <div className="container-app py-10 sm:py-14">
       <Link
@@ -51,7 +54,7 @@ export default function GameDetails() {
           </div>
           <div className="mt-6 flex flex-wrap gap-5 text-sm font-semibold text-slate-500">
             <span className="inline-flex items-center gap-2">
-              <Gamepad2 className="h-4 w-4" /> Quiz / Learning
+              <Gamepad2 className="h-4 w-4" /> {game.gameType === "word" ? "Word Builder / Learning" : "Quiz / Learning"}
             </span>
             <span className="inline-flex items-center gap-2">
               <UsersRound className="h-4 w-4" /> {game.players}
@@ -60,7 +63,7 @@ export default function GameDetails() {
               <Clock3 className="h-4 w-4" /> {game.time}
             </span>
             <span className="inline-flex items-center gap-2">
-              <HelpCircle className="h-4 w-4" /> 10 questions
+              <HelpCircle className="h-4 w-4" /> {questionCount} {game.gameType === "word" ? "word puzzles" : "questions"}
             </span>
           </div>
           <p className="mt-7 text-lg leading-8 text-slate-600">
@@ -95,17 +98,19 @@ export default function GameDetails() {
             </div>
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Button as={Link} to={`/play/quiz/${game.chapterSlug}`} size="lg">
+            <Button as={Link} to={playPath} size="lg">
               Play Now <ArrowRight className="h-5 w-5" />
             </Button>
-            <Button
-              as={Link}
-              to={`/learn/${game.chapterSlug}`}
-              variant="outline"
-              size="lg"
-            >
-              <BookOpen className="h-5 w-5" /> Learn First
-            </Button>
+            {game.chapterSlug && (
+              <Button
+                as={Link}
+                to={`/learn/${game.chapterSlug}`}
+                variant="outline"
+                size="lg"
+              >
+                <BookOpen className="h-5 w-5" /> Learn First
+              </Button>
+            )}
           </div>
         </div>
       </section>
