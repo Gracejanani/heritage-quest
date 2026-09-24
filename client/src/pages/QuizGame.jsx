@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import confetti from "canvas-confetti";
 import {
@@ -65,6 +65,8 @@ export default function QuizGame() {
   const [translatedQuestion, setTranslatedQuestion] = useState(null);
   const [translatedExplanation, setTranslatedExplanation] = useState("");
   const [translating, setTranslating] = useState(false);
+  const translationCacheRef = useRef(new Map());
+  const translationPendingRef = useRef(new Map());
   const [showPreTestVideo, setShowPreTestVideo] = useState(true);
   const [videoFinished, setVideoFinished] = useState(false);
 
@@ -134,6 +136,46 @@ export default function QuizGame() {
 
   const q = questions[index];
 
+  const translateQuestionBundle = useCallback(
+    async (question, targetLanguage = language) => {
+      if (!question || targetLanguage === "en") return null;
+
+      const cacheKey = `${targetLanguage}:${question.id}`;
+      const cached = translationCacheRef.current.get(cacheKey);
+      if (cached) return cached;
+
+      const pending = translationPendingRef.current.get(cacheKey);
+      if (pending) return pending;
+
+      const request = Promise.all([
+        translateText(question.question, targetLanguage),
+        ...question.answers.map((answerText) =>
+          translateText(answerText, targetLanguage),
+        ),
+        translateText(question.hint || "", targetLanguage),
+      ])
+        .then(([questionText, ...translatedParts]) => {
+          const bundle = {
+            question: questionText,
+            answers: translatedParts.slice(0, question.answers.length),
+            hint:
+              translatedParts[question.answers.length] ||
+              question.hint ||
+              "",
+          };
+          translationCacheRef.current.set(cacheKey, bundle);
+          return bundle;
+        })
+        .finally(() => {
+          translationPendingRef.current.delete(cacheKey);
+        });
+
+      translationPendingRef.current.set(cacheKey, request);
+      return request;
+    },
+    [language, translateText],
+  );
+
   useEffect(() => {
     let active = true;
     if (!q) return () => {};
@@ -144,27 +186,47 @@ export default function QuizGame() {
       return () => {};
     }
 
-    setTranslatedQuestion(null);
+    const cacheKey = `${language}:${q.id}`;
+    const cached = translationCacheRef.current.get(cacheKey);
+
+    if (cached) {
+      setTranslatedQuestion(cached);
+      setTranslating(false);
+      return () => {};
+    }
+
     setTranslating(true);
-    Promise.all([
-      translateText(q.question),
-      ...q.answers.map((answerText) => translateText(answerText)),
-      translateText(q.hint || ""),
-    ])
-      .then(([questionText, ...translatedParts]) => {
-        if (!active) return;
-        setTranslatedQuestion({
-          question: questionText,
-          answers: translatedParts.slice(0, 4),
-          hint: translatedParts[4] || q.hint,
-        });
+    translateQuestionBundle(q, language)
+      .then((bundle) => {
+        if (active && bundle) setTranslatedQuestion(bundle);
       })
-      .finally(() => active && setTranslating(false));
+      .finally(() => {
+        if (active) setTranslating(false);
+      });
 
     return () => {
       active = false;
     };
-  }, [q?.id, language, translateText]);
+  }, [q?.id, language, translateQuestionBundle]);
+
+  // Translate the next questions in the background while the student is
+  // reading/answering the current one. This makes Next feel instant even when
+  // the selected language needs an online translation request.
+  useEffect(() => {
+    if (language === "en" || !questions.length) return;
+
+    const upcoming = questions.slice(index + 1, index + 3);
+    upcoming.forEach((question) => {
+      translateQuestionBundle(question, language).catch(() => {
+        // English remains available as the non-blocking fallback.
+      });
+    });
+  }, [
+    index,
+    language,
+    questions,
+    translateQuestionBundle,
+  ]);
 
   useEffect(() => {
     let active = true;
@@ -173,7 +235,7 @@ export default function QuizGame() {
       return () => {};
     }
 
-    translateText(result.explanation).then((text) => {
+    translateText(result.explanation, language).then((text) => {
       if (active) setTranslatedExplanation(text);
     });
 
@@ -182,12 +244,18 @@ export default function QuizGame() {
     };
   }, [result?.explanation, language, translateText]);
 
+  const translatedForCurrent =
+    q && language !== "en"
+      ? translationCacheRef.current.get(`${language}:${q.id}`) ||
+        translatedQuestion
+      : null;
+
   const visibleQ = q
     ? {
         ...q,
-        question: translatedQuestion?.question || q.question,
-        answers: translatedQuestion?.answers || q.answers,
-        hint: translatedQuestion?.hint || q.hint,
+        question: translatedForCurrent?.question || q.question,
+        answers: translatedForCurrent?.answers || q.answers,
+        hint: translatedForCurrent?.hint || q.hint,
       }
     : q;
 
