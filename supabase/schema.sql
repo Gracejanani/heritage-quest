@@ -723,6 +723,7 @@ as $$
   );
 $$;
 
+revoke all on function public.is_admin() from anon;
 revoke all on function public.is_admin() from public;
 grant execute on function public.is_admin() to authenticated;
 
@@ -878,3 +879,10 @@ using (bucket_id = 'game-images' and public.is_admin());
 
 create index if not exists admin_audit_created_idx
   on public.admin_audit_log (created_at desc);
+
+
+create index if not exists admin_audit_admin_user_idx
+  on public.admin_audit_log (admin_user_id);
+
+create index if not exists site_settings_updated_by_idx
+  on public.site_settings (updated_by);
