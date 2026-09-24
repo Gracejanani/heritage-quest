@@ -1028,11 +1028,24 @@ export default function Admin() {
                   className="flex flex-col justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-5 sm:flex-row sm:items-center"
                 >
                   <div>
-                    <div className="font-extrabold">
-                      {profile?.full_name || "Student"} · {certificate.task_name}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div className="font-extrabold">
+                        {profile?.full_name || "Student"} · {certificate.task_name}
+                      </div>
+                      <Badge
+                        tone={
+                          certificate.award_tier === "gold"
+                            ? "gold"
+                            : certificate.award_tier === "silver"
+                              ? "gray"
+                              : "orange"
+                        }
+                      >
+                        {String(certificate.award_tier || "bronze").toUpperCase()}
+                      </Badge>
                     </div>
                     <div className="mt-1 text-xs text-slate-500">
-                      {certificate.verification_code} · {new Date(certificate.issued_at).toLocaleString()}
+                      {certificate.correct_answers ?? 0}/{certificate.total_questions ?? 10} correct · {certificate.verification_code} · {new Date(certificate.issued_at).toLocaleString()}
                     </div>
                   </div>
                   <button
