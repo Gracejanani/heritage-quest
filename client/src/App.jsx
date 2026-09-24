@@ -12,6 +12,7 @@ import LearnTopic from "./pages/LearnTopic";
 import Leaderboard from "./pages/Leaderboard";
 import Achievements from "./pages/Achievements";
 import Profile from "./pages/Profile";
+import StudentSettings from "./pages/StudentSettings";
 import About from "./pages/About";
 import Certificate from "./pages/Certificate";
 import NotFound from "./pages/NotFound";
@@ -48,6 +49,8 @@ export default function App() {
       <Route path="/achievements" element={<Achievements />} />
 
       <Route path="/profile" element={<Profile />} />
+
+      <Route path="/settings" element={<StudentSettings />} />
 
       <Route path="/certificate/:chapterSlug" element={<Certificate />} />
 
