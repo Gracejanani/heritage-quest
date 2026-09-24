@@ -1310,20 +1310,12 @@ export default function Admin() {
                 <input
                   className={inputClass}
                   value={gameForm.title}
-                  onChange={(e) => {
-                    const title = e.target.value;
-                    const generated = slugify(title);
+                  onChange={(e) =>
                     setGameForm((current) => ({
                       ...current,
-                      title,
-                      ...(!current.isExisting
-                        ? {
-                            id: current.id || generated,
-                            slug: current.slug || generated,
-                          }
-                        : {}),
-                    }));
-                  }}
+                      title: e.target.value,
+                    }))
+                  }
                 />
               </label>
               <label>
@@ -1395,16 +1387,12 @@ export default function Admin() {
                 <input
                   className={inputClass}
                   value={chapterForm.title}
-                  onChange={(e) => {
-                    const title = e.target.value;
+                  onChange={(e) =>
                     setChapterForm((current) => ({
                       ...current,
-                      title,
-                      ...(!current.isExisting && !current.slug
-                        ? { slug: slugify(title) }
-                        : {}),
-                    }));
-                  }}
+                      title: e.target.value,
+                    }))
+                  }
                 />
               </label>
               <label>
