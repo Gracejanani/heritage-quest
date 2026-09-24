@@ -254,6 +254,31 @@ export const games = [
     learn: ["Reform", "Science", "Politics", "Historical memory"],
     achievements: ["Biography Buff", "Legacy Analyst"],
   },
+  {
+    id: "wordquest",
+    slug: "heritage-word-quest",
+    title: "Heritage Word Quest",
+    description: "Unscramble India's heritage, one word at a time.",
+    longDescription:
+      "Read an age-appropriate heritage clue, then tap the mixed letter tiles in the correct order to build the answer.",
+    category: "Word Games",
+    difficulty: "Mixed",
+    players: "Single Player",
+    time: "8–12 min",
+    image: "/assets/games/word-quest.svg",
+    gameType: "word",
+    playPath: "/play/word-quest",
+    questionCount: 10,
+    testVideo: "",
+    learn: [
+      "Indian monuments",
+      "National symbols",
+      "Dynasties and leaders",
+      "Culture and festivals",
+      "Heritage vocabulary",
+    ],
+    achievements: ["Word Builder", "Heritage Speller"],
+  },
 ];
 
 export const learningTopics = [
