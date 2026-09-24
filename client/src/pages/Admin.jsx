@@ -883,7 +883,7 @@ export default function Admin() {
               <button
                 key={game.id}
                 onClick={() => openGame(game)}
-                className="overflow-hidden rounded-3xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-card"
+                className="group overflow-hidden rounded-3xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-card"
               >
                 <img
                   src={game.payload?.image || "/assets/hero-heritage.jpg"}
@@ -920,9 +920,21 @@ export default function Admin() {
               <button
                 key={chapter.slug}
                 onClick={() => openChapter(chapter)}
-                className="rounded-3xl border border-slate-200 bg-white p-5 text-left shadow-sm transition hover:-translate-y-1 hover:shadow-card"
+                className="group overflow-hidden rounded-3xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-card"
               >
-                <div className="text-xs font-extrabold uppercase tracking-wide text-heritage-saffron">
+                {chapter.payload?.image ? (
+                  <img
+                    src={chapter.payload.image}
+                    alt={`${chapter.title} chapter`}
+                    className="h-36 w-full object-cover"
+                  />
+                ) : (
+                  <div className="grid h-36 place-items-center bg-slate-100 text-slate-400">
+                    <FileImage className="h-8 w-8" />
+                  </div>
+                )}
+                <div className="p-5">
+                  <div className="text-xs font-extrabold uppercase tracking-wide text-heritage-saffron">
                   {chapter.era || "Heritage"}
                 </div>
                 <div className="mt-2 text-xl font-extrabold">{chapter.title}</div>
@@ -1350,21 +1362,65 @@ export default function Admin() {
             </div>
             <label><span className={labelClass}>Card description</span><textarea className={`${inputClass} min-h-20`} value={gameForm.description || ""} onChange={(e) => setGameForm({ ...gameForm, description: e.target.value })} /></label>
             <label><span className={labelClass}>Full description</span><textarea className={`${inputClass} min-h-28`} value={gameForm.longDescription || ""} onChange={(e) => setGameForm({ ...gameForm, longDescription: e.target.value })} /></label>
-            <label><span className={labelClass}>Image URL</span><input className={inputClass} value={gameForm.image || ""} onChange={(e) => setGameForm({ ...gameForm, image: e.target.value })} /></label>
-            {gameForm.image && <img src={gameForm.image} alt="" className="h-44 w-full rounded-2xl object-cover" />}
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 p-4 text-sm font-bold text-slate-600">
-              <ImagePlus className="h-4 w-4" /> Upload replacement image
-              <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                try {
-                  const url = await uploadAsset(file, "games");
-                  setGameForm((current) => ({ ...current, image: url }));
-                } catch (error) {
-                  toast(error.message || "Upload failed.", "error");
-                }
-              }} />
-            </label>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="h-32 w-full overflow-hidden rounded-2xl bg-white sm:w-48">
+                  {gameForm.image ? (
+                    <img
+                      src={gameForm.image}
+                      alt={`${gameForm.title || "Game"} current artwork`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="grid h-full place-items-center text-slate-400">
+                      <FileImage className="h-8 w-8" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-extrabold text-slate-900">
+                    Game picture
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-500">
+                    Choose a new image below. It uploads to Supabase automatically,
+                    then press <strong>Save game</strong> to publish the replacement.
+                  </p>
+                  <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-heritage-green px-4 py-2.5 text-sm font-extrabold text-white hover:bg-emerald-700">
+                    <ImagePlus className="h-4 w-4" />
+                    {gameForm.image ? "Replace image" : "Add image"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const url = await uploadAsset(file, "games");
+                          setGameForm((current) => ({ ...current, image: url }));
+                          toast("New game image selected. Press Save game to publish it.");
+                        } catch (error) {
+                          toast(error.message || "Upload failed.", "error");
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+              <details className="mt-4">
+                <summary className="cursor-pointer text-xs font-extrabold uppercase tracking-wide text-slate-500">
+                  Advanced · image URL
+                </summary>
+                <input
+                  className={`${inputClass} mt-2`}
+                  value={gameForm.image || ""}
+                  onChange={(e) =>
+                    setGameForm({ ...gameForm, image: e.target.value })
+                  }
+                />
+              </details>
+            </div>
             <label><span className={labelClass}>Learning points · one per line</span><textarea className={`${inputClass} min-h-28`} value={gameForm.learnText} onChange={(e) => setGameForm({ ...gameForm, learnText: e.target.value })} /></label>
             <label><span className={labelClass}>Achievements · one per line</span><textarea className={`${inputClass} min-h-24`} value={gameForm.achievementsText} onChange={(e) => setGameForm({ ...gameForm, achievementsText: e.target.value })} /></label>
             <Button onClick={saveGame} loading={saving}>
@@ -1411,21 +1467,65 @@ export default function Admin() {
               <label><span className={labelClass}>Tag / category</span><input className={inputClass} value={chapterForm.tag || ""} onChange={(e) => setChapterForm({ ...chapterForm, tag: e.target.value })} /></label>
             </div>
             <label><span className={labelClass}>Description</span><textarea className={`${inputClass} min-h-24`} value={chapterForm.description || ""} onChange={(e) => setChapterForm({ ...chapterForm, description: e.target.value })} /></label>
-            <label><span className={labelClass}>Image URL</span><input className={inputClass} value={chapterForm.image || ""} onChange={(e) => setChapterForm({ ...chapterForm, image: e.target.value })} /></label>
-            {chapterForm.image && <img src={chapterForm.image} alt="" className="h-44 w-full rounded-2xl object-cover" />}
-            <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-slate-300 p-4 text-sm font-bold text-slate-600">
-              <ImagePlus className="h-4 w-4" /> Upload replacement image
-              <input type="file" accept="image/*" className="hidden" onChange={async (e) => {
-                const file = e.target.files?.[0];
-                if (!file) return;
-                try {
-                  const url = await uploadAsset(file, "chapters");
-                  setChapterForm((current) => ({ ...current, image: url }));
-                } catch (error) {
-                  toast(error.message || "Upload failed.", "error");
-                }
-              }} />
-            </label>
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="h-32 w-full overflow-hidden rounded-2xl bg-white sm:w-48">
+                  {chapterForm.image ? (
+                    <img
+                      src={chapterForm.image}
+                      alt={`${chapterForm.title || "Chapter"} current artwork`}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="grid h-full place-items-center text-slate-400">
+                      <FileImage className="h-8 w-8" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-extrabold text-slate-900">
+                    Chapter picture
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-500">
+                    Choose a new image below. It uploads to Supabase automatically,
+                    then press <strong>Save chapter</strong> to publish the replacement.
+                  </p>
+                  <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-xl bg-heritage-green px-4 py-2.5 text-sm font-extrabold text-white hover:bg-emerald-700">
+                    <ImagePlus className="h-4 w-4" />
+                    {chapterForm.image ? "Replace image" : "Add image"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const url = await uploadAsset(file, "chapters");
+                          setChapterForm((current) => ({ ...current, image: url }));
+                          toast("New chapter image selected. Press Save chapter to publish it.");
+                        } catch (error) {
+                          toast(error.message || "Upload failed.", "error");
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+              <details className="mt-4">
+                <summary className="cursor-pointer text-xs font-extrabold uppercase tracking-wide text-slate-500">
+                  Advanced · image URL
+                </summary>
+                <input
+                  className={`${inputClass} mt-2`}
+                  value={chapterForm.image || ""}
+                  onChange={(e) =>
+                    setChapterForm({ ...chapterForm, image: e.target.value })
+                  }
+                />
+              </details>
+            </div>
             <label><span className={labelClass}>Learning points · one per line</span><textarea className={`${inputClass} min-h-32`} value={chapterForm.learnText} onChange={(e) => setChapterForm({ ...chapterForm, learnText: e.target.value })} /></label>
             <label><span className={labelClass}>Sections JSON</span><textarea className={`${inputClass} min-h-48 font-mono text-xs`} value={chapterForm.sectionsJson} onChange={(e) => setChapterForm({ ...chapterForm, sectionsJson: e.target.value })} /></label>
             <Button onClick={saveChapter} loading={saving}>
