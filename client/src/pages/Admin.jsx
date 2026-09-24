@@ -16,6 +16,7 @@ import {
   Settings,
   ShieldCheck,
   Trash2,
+  Type,
   Users,
   X,
 } from "lucide-react";
@@ -26,6 +27,7 @@ import { supabase } from "../lib/supabase";
 const tabs = [
   ["dashboard", "Dashboard", LayoutDashboard],
   ["questions", "Questions", BookOpen],
+  ["word-puzzles", "Word game", Type],
   ["games", "Games", Gamepad2],
   ["chapters", "Chapters", Database],
   ["students", "Students", Users],
@@ -76,6 +78,7 @@ export default function Admin() {
   const [games, setGames] = useState([]);
   const [chapters, setChapters] = useState([]);
   const [questions, setQuestions] = useState([]);
+  const [wordPuzzles, setWordPuzzles] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [progress, setProgress] = useState([]);
   const [certificates, setCertificates] = useState([]);
@@ -87,6 +90,8 @@ export default function Admin() {
   const [questionChapter, setQuestionChapter] = useState("All");
   const [questionAge, setQuestionAge] = useState("All");
   const [questionForm, setQuestionForm] = useState(null);
+  const [wordPuzzleAge, setWordPuzzleAge] = useState("All");
+  const [wordPuzzleForm, setWordPuzzleForm] = useState(null);
   const [gameForm, setGameForm] = useState(null);
   const [chapterForm, setChapterForm] = useState(null);
   const [studentForm, setStudentForm] = useState(null);
@@ -142,6 +147,7 @@ export default function Admin() {
       gamesRes,
       chaptersRes,
       questionsRes,
+      wordPuzzlesRes,
       profilesRes,
       progressRes,
       certificatesRes,
@@ -154,6 +160,11 @@ export default function Admin() {
         .from("questions")
         .select("*")
         .order("chapter_slug")
+        .order("age_group")
+        .order("sort_order"),
+      supabase
+        .from("word_puzzles")
+        .select("*")
         .order("age_group")
         .order("sort_order"),
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
@@ -174,6 +185,7 @@ export default function Admin() {
       gamesRes,
       chaptersRes,
       questionsRes,
+      wordPuzzlesRes,
       profilesRes,
       progressRes,
       certificatesRes,
@@ -189,6 +201,7 @@ export default function Admin() {
     setGames(gamesRes.data || []);
     setChapters(chaptersRes.data || []);
     setQuestions(questionsRes.data || []);
+    setWordPuzzles(wordPuzzlesRes.data || []);
     setProfiles(profilesRes.data || []);
     setProgress(progressRes.data || []);
     setCertificates(certificatesRes.data || []);
@@ -347,6 +360,100 @@ export default function Admin() {
     );
   };
 
+
+  const openWordPuzzle = (item = null) => {
+    setWordPuzzleForm(
+      item
+        ? { ...item, isExisting: true }
+        : {
+            id: `word-${Date.now()}`,
+            game_slug: "heritage-word-quest",
+            age_group: "entry",
+            difficulty: "Entry",
+            clue: "",
+            answer: "",
+            hint: "",
+            explanation: "",
+            sort_order: 10,
+            isExisting: false,
+          },
+    );
+  };
+
+  const saveWordPuzzle = async () => {
+    if (!wordPuzzleForm || !supabase) return;
+
+    const answer = String(wordPuzzleForm.answer || "").trim().toUpperCase();
+    const clue = String(wordPuzzleForm.clue || "").trim();
+
+    if (!wordPuzzleForm.id || !clue || !answer) {
+      toast("Clue, answer and puzzle ID are required.", "error");
+      return;
+    }
+
+    setSaving(true);
+
+    const record = {
+      id: wordPuzzleForm.id.trim(),
+      game_slug: "heritage-word-quest",
+      age_group: wordPuzzleForm.age_group,
+      difficulty: wordPuzzleForm.difficulty,
+      clue,
+      answer,
+      hint: wordPuzzleForm.hint || null,
+      explanation: wordPuzzleForm.explanation || null,
+      sort_order: Number(wordPuzzleForm.sort_order || 0),
+      updated_at: new Date().toISOString(),
+    };
+
+    const query = wordPuzzleForm.isExisting
+      ? supabase
+          .from("word_puzzles")
+          .update(record)
+          .eq("id", wordPuzzleForm.id)
+      : supabase.from("word_puzzles").insert(record);
+
+    const { error } = await query;
+    setSaving(false);
+
+    if (error) {
+      toast(error.message, "error");
+      return;
+    }
+
+    await audit(
+      wordPuzzleForm.isExisting ? "update" : "create",
+      "word_puzzle",
+      record.id,
+      { ageGroup: record.age_group },
+    );
+    toast(
+      wordPuzzleForm.isExisting
+        ? "Word puzzle updated."
+        : "Word puzzle created.",
+    );
+    setWordPuzzleForm(null);
+    await refreshAll();
+  };
+
+  const deleteWordPuzzle = async (item) => {
+    if (!window.confirm(`Delete word puzzle “${item.clue}”?`)) return;
+
+    const { error } = await supabase
+      .from("word_puzzles")
+      .delete()
+      .eq("id", item.id);
+
+    if (error) {
+      toast(error.message, "error");
+      return;
+    }
+
+    await audit("delete", "word_puzzle", item.id);
+    toast("Word puzzle deleted.");
+    await refreshAll();
+  };
+
   const openGame = (row) => {
     const payload = row.payload || {};
     setGameForm({
@@ -355,6 +462,7 @@ export default function Admin() {
       description: payload.description || "",
       longDescription: payload.longDescription || "",
       image: payload.image || "",
+      testVideo: payload.testVideo || "",
       players: payload.players || "1 Player",
       time: payload.time || "5–10 min",
       learnText: textLines(payload.learn),
@@ -374,6 +482,7 @@ export default function Admin() {
       description: "",
       longDescription: "",
       image: "",
+      testVideo: "",
       players: "1 Player",
       time: "5–10 min",
       learnText: "",
@@ -411,6 +520,7 @@ export default function Admin() {
       description: gameForm.description,
       longDescription: gameForm.longDescription,
       image: gameForm.image,
+      testVideo: gameForm.testVideo || "",
       players: gameForm.players,
       time: gameForm.time,
       learn: lines(gameForm.learnText),
@@ -674,7 +784,7 @@ export default function Admin() {
 
   const dashboardCards = [
     ["Students", profiles.length, Users],
-    ["Questions", questions.length, BookOpen],
+    ["Questions", questions.length + wordPuzzles.length, BookOpen],
     ["Games", games.length, Gamepad2],
     ["Certificates", certificates.length, Award],
   ];
@@ -862,6 +972,88 @@ export default function Admin() {
                     </td>
                   </tr>
                 ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {tab === "word-puzzles" && (
+        <section className="mt-6">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <h2 className="text-2xl font-extrabold">Heritage Word Quest manager</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                Manage the age-based clues and answers used in the mixed-letter word game.
+              </p>
+            </div>
+            <Button onClick={() => openWordPuzzle()}>
+              <Plus className="h-4 w-4" /> Add word puzzle
+            </Button>
+          </div>
+
+          <div className="mt-5 max-w-xs">
+            <Select
+              value={wordPuzzleAge}
+              onChange={setWordPuzzleAge}
+              options={["All", "entry", "junior", "scholar", "open"]}
+              ariaLabel="Filter word puzzles by age group"
+            />
+          </div>
+
+          <div className="mt-5 overflow-x-auto rounded-3xl border border-slate-200 bg-white">
+            <table className="min-w-[920px] w-full text-left text-sm">
+              <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
+                <tr>
+                  <th className="px-4 py-3">Clue</th>
+                  <th className="px-4 py-3">Answer</th>
+                  <th className="px-4 py-3">Age group</th>
+                  <th className="px-4 py-3">Difficulty</th>
+                  <th className="px-4 py-3">Order</th>
+                  <th className="px-4 py-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {wordPuzzles
+                  .filter(
+                    (item) =>
+                      wordPuzzleAge === "All" ||
+                      item.age_group === wordPuzzleAge,
+                  )
+                  .map((item) => (
+                    <tr key={item.id} className="border-t border-slate-100">
+                      <td className="max-w-xl px-4 py-4 font-semibold text-slate-800">
+                        {item.clue}
+                      </td>
+                      <td className="px-4 py-4 font-extrabold text-sky-700">
+                        {item.answer}
+                      </td>
+                      <td className="px-4 py-4">
+                        <Badge tone="gray">{item.age_group}</Badge>
+                      </td>
+                      <td className="px-4 py-4">{item.difficulty}</td>
+                      <td className="px-4 py-4">{item.sort_order}</td>
+                      <td className="px-4 py-4">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openWordPuzzle(item)}
+                            className="rounded-xl bg-sky-50 px-3 py-2 font-bold text-sky-700"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => deleteWordPuzzle(item)}
+                            className="rounded-xl bg-rose-50 p-2 text-rose-600"
+                            aria-label="Delete word puzzle"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
           </div>
@@ -1334,6 +1526,155 @@ export default function Admin() {
         </EditorModal>
       )}
 
+      {wordPuzzleForm && (
+        <EditorModal
+          title={
+            wordPuzzleForm.isExisting
+              ? "Edit Heritage Word Quest puzzle"
+              : "Add Heritage Word Quest puzzle"
+          }
+          onClose={() => setWordPuzzleForm(null)}
+        >
+          <div className="grid gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <label>
+                <span className={labelClass}>Puzzle ID</span>
+                <input
+                  className={inputClass}
+                  value={wordPuzzleForm.id}
+                  disabled={wordPuzzleForm.isExisting}
+                  onChange={(e) =>
+                    setWordPuzzleForm({
+                      ...wordPuzzleForm,
+                      id: slugify(e.target.value),
+                    })
+                  }
+                />
+              </label>
+              <label>
+                <span className={labelClass}>Age group</span>
+                <select
+                  className={inputClass}
+                  value={wordPuzzleForm.age_group}
+                  onChange={(e) => {
+                    const age = e.target.value;
+                    setWordPuzzleForm({
+                      ...wordPuzzleForm,
+                      age_group: age,
+                      difficulty:
+                        age === "entry"
+                          ? "Entry"
+                          : age === "scholar" || age === "open"
+                            ? wordPuzzleForm.difficulty
+                            : "Medium",
+                    });
+                  }}
+                >
+                  {["entry", "junior", "scholar", "open"].map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span className={labelClass}>Difficulty</span>
+                <select
+                  className={inputClass}
+                  value={wordPuzzleForm.difficulty}
+                  onChange={(e) =>
+                    setWordPuzzleForm({
+                      ...wordPuzzleForm,
+                      difficulty: e.target.value,
+                    })
+                  }
+                >
+                  {["Entry", "Medium", "Advanced"].map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span className={labelClass}>Order</span>
+                <input
+                  type="number"
+                  min="1"
+                  className={inputClass}
+                  value={wordPuzzleForm.sort_order}
+                  onChange={(e) =>
+                    setWordPuzzleForm({
+                      ...wordPuzzleForm,
+                      sort_order: e.target.value,
+                    })
+                  }
+                />
+              </label>
+            </div>
+
+            <label>
+              <span className={labelClass}>Question / clue</span>
+              <textarea
+                className={`${inputClass} min-h-24`}
+                value={wordPuzzleForm.clue}
+                onChange={(e) =>
+                  setWordPuzzleForm({
+                    ...wordPuzzleForm,
+                    clue: e.target.value,
+                  })
+                }
+                placeholder="Example: Which Mughal emperor commissioned the Taj Mahal?"
+              />
+            </label>
+
+            <label>
+              <span className={labelClass}>Correct word / answer</span>
+              <input
+                className={inputClass}
+                value={wordPuzzleForm.answer}
+                onChange={(e) =>
+                  setWordPuzzleForm({
+                    ...wordPuzzleForm,
+                    answer: e.target.value.toUpperCase(),
+                  })
+                }
+                placeholder="Example: SHAH JAHAN"
+              />
+            </label>
+
+            <label>
+              <span className={labelClass}>Hint</span>
+              <input
+                className={inputClass}
+                value={wordPuzzleForm.hint || ""}
+                onChange={(e) =>
+                  setWordPuzzleForm({
+                    ...wordPuzzleForm,
+                    hint: e.target.value,
+                  })
+                }
+              />
+            </label>
+
+            <label>
+              <span className={labelClass}>Explanation after answer</span>
+              <textarea
+                className={`${inputClass} min-h-24`}
+                value={wordPuzzleForm.explanation || ""}
+                onChange={(e) =>
+                  setWordPuzzleForm({
+                    ...wordPuzzleForm,
+                    explanation: e.target.value,
+                  })
+                }
+              />
+            </label>
+
+            <Button onClick={saveWordPuzzle} loading={saving}>
+              <Save className="h-4 w-4" />
+              {wordPuzzleForm.isExisting ? "Save puzzle" : "Create puzzle"}
+            </Button>
+          </div>
+        </EditorModal>
+      )}
+
       {gameForm && (
         <EditorModal
           title={gameForm.isExisting ? `Edit game · ${gameForm.title}` : "Create new game"}
@@ -1379,7 +1720,7 @@ export default function Admin() {
                 />
               </label>
               <label><span className={labelClass}>Category</span><input className={inputClass} value={gameForm.category || ""} onChange={(e) => setGameForm({ ...gameForm, category: e.target.value })} /></label>
-              <label><span className={labelClass}>Difficulty</span><select className={inputClass} value={gameForm.difficulty || "Medium"} onChange={(e) => setGameForm({ ...gameForm, difficulty: e.target.value })}>{["Medium","Advanced"].map((item) => <option key={item}>{item}</option>)}</select></label>
+              <label><span className={labelClass}>Difficulty</span><select className={inputClass} value={gameForm.difficulty || "Medium"} onChange={(e) => setGameForm({ ...gameForm, difficulty: e.target.value })}>{["Medium","Advanced","Mixed"].map((item) => <option key={item}>{item}</option>)}</select></label>
               <label><span className={labelClass}>Chapter slug</span><input className={inputClass} value={gameForm.chapterSlug || ""} onChange={(e) => setGameForm({ ...gameForm, chapterSlug: e.target.value })} /></label>
               <label><span className={labelClass}>Players</span><input className={inputClass} value={gameForm.players || ""} onChange={(e) => setGameForm({ ...gameForm, players: e.target.value })} /></label>
               <label><span className={labelClass}>Time</span><input className={inputClass} value={gameForm.time || ""} onChange={(e) => setGameForm({ ...gameForm, time: e.target.value })} /></label>
@@ -1445,6 +1786,70 @@ export default function Admin() {
                 />
               </details>
             </div>
+            <div className="rounded-2xl border border-sky-200 bg-sky-50/60 p-4">
+              <div className="text-sm font-extrabold text-slate-900">
+                Game introduction / pre-test video
+              </div>
+              <p className="mt-1 text-sm leading-6 text-slate-600">
+                Heritage Word Quest shows this before the game and includes a “Skip & go to game” option.
+              </p>
+
+              {gameForm.testVideo ? (
+                <video
+                  src={gameForm.testVideo}
+                  controls
+                  preload="metadata"
+                  className="mt-4 aspect-video w-full rounded-2xl bg-black object-contain"
+                />
+              ) : (
+                <div className="mt-4 grid min-h-36 place-items-center rounded-2xl border-2 border-dashed border-sky-200 bg-white text-center text-sm font-bold text-slate-400">
+                  No game video added yet
+                </div>
+              )}
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-sky-600 px-4 py-2.5 text-sm font-extrabold text-white hover:bg-sky-700">
+                  <ImagePlus className="h-4 w-4" />
+                  {gameForm.testVideo ? "Replace video" : "Upload video"}
+                  <input
+                    type="file"
+                    accept="video/mp4,video/webm,video/ogg"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const url = await uploadAsset(file, "test-videos");
+                        setGameForm((current) => ({
+                          ...current,
+                          testVideo: url,
+                        }));
+                        toast("Video uploaded. Press Save game to publish it.");
+                      } catch (error) {
+                        toast(error.message || "Video upload failed.", "error");
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+
+                {gameForm.testVideo && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setGameForm((current) => ({
+                        ...current,
+                        testVideo: "",
+                      }))
+                    }
+                    className="rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-extrabold text-rose-600"
+                  >
+                    Remove video
+                  </button>
+                )}
+              </div>
+            </div>
+
             <label><span className={labelClass}>Learning points · one per line</span><textarea className={`${inputClass} min-h-28`} value={gameForm.learnText} onChange={(e) => setGameForm({ ...gameForm, learnText: e.target.value })} /></label>
             <label><span className={labelClass}>Achievements · one per line</span><textarea className={`${inputClass} min-h-24`} value={gameForm.achievementsText} onChange={(e) => setGameForm({ ...gameForm, achievementsText: e.target.value })} /></label>
             <Button onClick={saveGame} loading={saving}>
