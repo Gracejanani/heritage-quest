@@ -10,13 +10,15 @@ import {
   Lightbulb,
   HelpCircle,
 } from "lucide-react";
-import { games, learningTopics } from "../data/content";
+import { useLiveGames, useLiveTopics } from "../lib/liveContent";
 import { Badge, Button } from "../components/ui";
 import { useLanguage } from "../context/LanguageContext";
 import { usePlayer } from "../context/PlayerContext";
 import { AGE_GROUPS } from "../lib/age";
 
 export default function LearnTopic() {
+  const games = useLiveGames();
+  const learningTopics = useLiveTopics();
   const { slug } = useParams();
   const { language, t, localizeTopic, translateText } = useLanguage();
   const { player } = usePlayer();
