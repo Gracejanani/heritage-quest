@@ -3,6 +3,7 @@ import { Award, Crown, Medal, Trophy } from "lucide-react";
 import { Badge, Select } from "../components/ui";
 import { supabase } from "../lib/supabase";
 import { usePlayer } from "../context/PlayerContext";
+import { useSiteSettings } from "../lib/liveContent";
 
 export default function Leaderboard() {
   const [period, setPeriod] = useState("Weekly");
@@ -11,6 +12,7 @@ export default function Leaderboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const { player } = usePlayer();
+  const site = useSiteSettings();
 
   useEffect(() => {
     let active = true;
@@ -92,7 +94,7 @@ export default function Leaderboard() {
     [rows],
   );
 
-  const weeklyGoal = 700;
+  const weeklyGoal = Math.max(1, Number(site.weeklyGoalPoints || 700));
   const weeklyGoalProgress = Math.min(
     100,
     Math.round((weeklyPoints / weeklyGoal) * 100),
