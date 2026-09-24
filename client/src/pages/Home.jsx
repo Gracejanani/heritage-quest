@@ -21,7 +21,8 @@ import {
   Sparkles,
   Compass,
 } from "lucide-react";
-import { games, categories } from "../data/content";
+import { categories } from "../data/content";
+import { useLiveGames, useSiteSettings } from "../lib/liveContent";
 import GameCard from "../components/GameCard";
 import { Button, Modal, ProgressBar, useToast } from "../components/ui";
 import { usePlayer } from "../context/PlayerContext";
@@ -65,6 +66,8 @@ const iconMap = {
 };
 
 export default function Home() {
+  const games = useLiveGames();
+  const site = useSiteSettings();
   const [videoOpen, setVideoOpen] = useState(false);
   const navigate = useNavigate();
   const toast = useToast();
@@ -150,14 +153,15 @@ export default function Home() {
     };
   }, [player?.id]);
 
+  const dailyTarget = Math.max(1, Number(site.dailyChallengeQuestions || 5));
   const todayProgress = Math.min(
     100,
-    Math.round((todayStats.answered / 5) * 100),
+    Math.round((todayStats.answered / dailyTarget) * 100),
   );
   const todayAccuracy = todayStats.answered
     ? Math.round((todayStats.correct / todayStats.answered) * 100)
     : 0;
-  const challengeComplete = todayStats.answered >= 5;
+  const challengeComplete = todayStats.answered >= dailyTarget;
   const challengeSlug = summary.latestChapter || "ancient-india";
   const goCategory = (name) =>
     navigate(`/games?category=${encodeURIComponent(name)}`);
@@ -168,18 +172,15 @@ export default function Home() {
         <div className="container-app relative grid min-h-[590px] items-center gap-10 py-12 lg:grid-cols-[.9fr_1.1fr] lg:py-16">
           <div className="relative z-10 max-w-2xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-orange-200 bg-white/85 px-4 py-2 text-xs font-extrabold tracking-[.18em] text-heritage-brown shadow-sm">
-              <Sparkles className="h-4 w-4 text-heritage-saffron" /> GAMES FOR A
-              GREATER TOMORROW
+              <Sparkles className="h-4 w-4 text-heritage-saffron" /> {site.heroEyebrow}
             </div>
             <h1 className="mt-6 font-display text-5xl font-extrabold leading-[.95] tracking-tight text-heritage-brown sm:text-6xl lg:text-7xl">
-              Discover India
+              {site.heroTitle}
               <br />
-              <span className="text-heritage-green">Through Play!</span>
+              <span className="text-heritage-green">{site.heroAccent}</span>
             </h1>
             <p className="mt-6 max-w-xl text-lg leading-8 text-slate-700">
-              Fun games. Real stories. Our incredible heritage. Explore India’s
-              history, culture, monuments and civilizations through interactive
-              learning adventures.
+              {site.heroDescription}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button as={Link} to="/games" size="lg">
@@ -219,7 +220,7 @@ export default function Home() {
           <div className="relative z-0 min-h-[390px] lg:min-h-[500px]">
             <div className="absolute inset-0 overflow-hidden rounded-[2.5rem] shadow-card">
               <img
-                src="/assets/hero-heritage.jpg"
+                src={site.heroImage}
                 alt="Illustrated Indian heritage scene with monuments and a young explorer"
                 className="h-full w-full object-cover"
               />
@@ -327,15 +328,14 @@ export default function Home() {
               <BookOpen className="h-4 w-4" /> FEATURED LEARNING
             </div>
             <h2 className="mt-5 font-display text-4xl font-extrabold leading-tight sm:text-5xl">
-              Learn India. Understand India.
+              {site.featuredTitle}
               <br />
               <span className="text-heritage-gold">
-                Preserve India’s Heritage.
+                {site.featuredAccent}
               </span>
             </h2>
             <p className="mt-5 max-w-xl text-base leading-7 text-white/75">
-              Discover people, places, events and traditions through 12 quiz
-              chapters, 2 additional study materials and 120 mixed normal-and-advanced questions.
+              {site.featuredDescription}
             </p>
             <Button as={Link} to="/learn" className="mt-7" size="lg">
               Start Learning <ArrowRight className="h-5 w-5" />
@@ -343,7 +343,7 @@ export default function Home() {
           </div>
           <div className="relative min-h-[340px]">
             <img
-              src="/assets/hero-heritage.jpg"
+              src={site.featuredImage}
               alt="Indian monuments and heritage landscape"
               className="absolute inset-0 h-full w-full object-cover"
             />
@@ -390,7 +390,7 @@ export default function Home() {
               label={
                 todayStats.loading
                   ? "Loading today’s progress…"
-                  : `Today’s progress · ${Math.min(todayStats.answered, 5)}/5 answered`
+                  : `Today’s progress · ${Math.min(todayStats.answered, dailyTarget)}/${dailyTarget} answered`
               }
               className="mt-6"
             />
@@ -450,7 +450,7 @@ export default function Home() {
               className="h-full w-full object-contain"
             >
               <source
-                src="/videos/heritage-quest-intro.mp4"
+                src={site.introVideo}
                 type="video/mp4"
               />
               Your browser does not support video playback.
