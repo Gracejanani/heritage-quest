@@ -22,6 +22,7 @@ export default function Games() {
     "Art & Culture",
     "Festivals",
     "Famous Personalities",
+    "Word Games",
   ];
   const filtered = useMemo(
     () =>
@@ -48,8 +49,8 @@ export default function Games() {
           Explore Games
         </h1>
         <p className="mt-3 max-w-2xl text-white/70">
-          Choose a chapter challenge with 10 medium-to-advanced questions. Every
-          answer includes educational feedback.
+          Choose quizzes and interactive heritage games matched to the learner's
+          age. Every activity includes educational feedback.
         </p>
       </div>
       <div className="sticky top-[76px] z-30 mt-6 rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-soft backdrop-blur">
@@ -68,7 +69,7 @@ export default function Games() {
           <Select
             value={difficulty}
             onChange={setDifficulty}
-            options={["All", "Medium", "Advanced"]}
+            options={["All", "Medium", "Advanced", "Mixed"]}
             ariaLabel="Filter by difficulty"
           />
         </div>
@@ -78,8 +79,8 @@ export default function Games() {
             games
           </span>
           <Badge tone="gold">
-            <Sparkles className="mr-1 inline h-3.5 w-3.5" /> 120 questions
-            across 12 chapters
+            <Sparkles className="mr-1 inline h-3.5 w-3.5" /> Quizzes + age-based
+            word challenges
           </Badge>
         </div>
       </div>
