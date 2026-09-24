@@ -15,8 +15,12 @@ import {
   Trophy,
   Eye,
   Award,
+  PlayCircle,
+  SkipForward,
+  Video,
 } from "lucide-react";
 import { learningTopics } from "../data/content";
+import { useLiveTopics } from "../lib/liveContent";
 import { api } from "../lib/api";
 import { usePlayer } from "../context/PlayerContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -26,8 +30,12 @@ import { issueCertificate } from "../lib/certificates";
 
 export default function QuizGame() {
   const { chapterSlug = "ancient-india" } = useParams();
+  const liveTopics = useLiveTopics();
   const topic =
-    learningTopics.find((t) => t.slug === chapterSlug) || learningTopics[0];
+    liveTopics.find((t) => t.slug === chapterSlug) ||
+    learningTopics.find((t) => t.slug === chapterSlug) ||
+    liveTopics[0] ||
+    learningTopics[0];
   const [questions, setQuestions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -57,6 +65,13 @@ export default function QuizGame() {
   const [translatedQuestion, setTranslatedQuestion] = useState(null);
   const [translatedExplanation, setTranslatedExplanation] = useState("");
   const [translating, setTranslating] = useState(false);
+  const [showPreTestVideo, setShowPreTestVideo] = useState(true);
+  const [videoFinished, setVideoFinished] = useState(false);
+
+  useEffect(() => {
+    setShowPreTestVideo(true);
+    setVideoFinished(false);
+  }, [chapterSlug]);
 
   useEffect(() => {
     if (!cloudProgressReady) return () => {};
@@ -313,7 +328,33 @@ export default function QuizGame() {
     setReviewing(false);
     setHint(false);
     setAnswers([]);
+    setShowPreTestVideo(true);
+    setVideoFinished(false);
   };
+
+  const enterTest = (mode = "start") => {
+    setShowPreTestVideo(false);
+    logActivity(
+      mode === "skip" ? "pretest_video_skipped" : "pretest_video_completed",
+      {
+        chapterSlug,
+        taskName: topic.title,
+        videoUrl: topic.testVideo || null,
+        ageGroup,
+      },
+    );
+  };
+
+  if (showPreTestVideo)
+    return (
+      <PreTestVideo
+        topic={topic}
+        onSkip={() => enterTest("skip")}
+        onStart={() => enterTest(videoFinished ? "watched" : "start")}
+        onEnded={() => setVideoFinished(true)}
+        videoFinished={videoFinished}
+      />
+    );
 
   if (loading)
     return (
@@ -547,6 +588,100 @@ export default function QuizGame() {
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PreTestVideo({
+  topic,
+  onSkip,
+  onStart,
+  onEnded,
+  videoFinished,
+}) {
+  const videoUrl = topic?.testVideo || topic?.video || "";
+
+  return (
+    <div className="min-h-[100vh] bg-heritage-forest py-6 sm:py-10">
+      <div className="container-app max-w-5xl">
+        <div className="overflow-hidden rounded-[2rem] bg-white shadow-2xl">
+          <div className="relative border-b border-slate-100 p-6 sm:p-8">
+            <div className="pr-36">
+              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-extrabold uppercase tracking-wide text-heritage-green">
+                <Video className="h-4 w-4" /> Before the test
+              </div>
+              <h1 className="mt-4 font-display text-3xl font-extrabold text-slate-950 sm:text-4xl">
+                Watch and understand: {topic?.title || "Heritage Quest"}
+              </h1>
+              <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600 sm:text-base">
+                This short lesson explains the topic before your questions begin.
+                Watch it for a clearer understanding, or skip when you are ready
+                to start the test.
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={onSkip}
+              className="focus-ring absolute right-5 top-5 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-extrabold text-slate-600 shadow-sm hover:border-heritage-green hover:text-heritage-green sm:right-8 sm:top-8"
+            >
+              Skip & go to test <SkipForward className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="p-6 sm:p-8">
+            {videoUrl ? (
+              <div className="overflow-hidden rounded-[1.5rem] bg-black shadow-lg">
+                <video
+                  key={videoUrl}
+                  src={videoUrl}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  onEnded={onEnded}
+                  className="aspect-video w-full bg-black object-contain"
+                >
+                  Your browser does not support this video.
+                </video>
+              </div>
+            ) : (
+              <div className="grid aspect-video place-items-center rounded-[1.5rem] border-2 border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+                <div>
+                  <PlayCircle className="mx-auto h-14 w-14 text-slate-300" />
+                  <h2 className="mt-4 text-xl font-extrabold text-slate-800">
+                    Video lesson coming soon
+                  </h2>
+                  <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                    Your teacher or administrator can upload a lesson video for
+                    this chapter from the Admin → Chapters section. You can
+                    continue to the test now.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-6 flex flex-col justify-between gap-4 rounded-2xl bg-heritage-cream p-4 sm:flex-row sm:items-center">
+              <div>
+                <div className="font-extrabold text-slate-900">
+                  {videoFinished
+                    ? "Video completed — you are ready."
+                    : videoUrl
+                      ? "Watch the lesson, then begin when ready."
+                      : "No lesson video has been added yet."}
+                </div>
+                <div className="mt-1 text-sm text-slate-500">
+                  You can always use “Skip & go to test” in the top-right corner.
+                </div>
+              </div>
+
+              <Button onClick={onStart} variant="secondary">
+                {videoFinished ? "Start test" : "Go to test"}
+                <ArrowRight className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
