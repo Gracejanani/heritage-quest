@@ -1,11 +1,12 @@
 import React, { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Gamepad2, SlidersHorizontal, Sparkles } from "lucide-react";
-import { games } from "../data/content";
+import { useLiveGames } from "../lib/liveContent";
 import GameCard from "../components/GameCard";
 import { Badge, SearchBar, Select } from "../components/ui";
 
 export default function Games() {
+  const games = useLiveGames();
   const [params] = useSearchParams();
   const [query, setQuery] = useState(params.get("q") || "");
   const [category, setCategory] = useState(params.get("category") || "All");
