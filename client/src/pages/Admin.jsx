@@ -97,14 +97,32 @@ export default function Admin() {
 
   const loadAssets = async () => {
     if (!supabase) return;
-    const { data, error } = await supabase.storage
-      .from("game-images")
-      .list("", { limit: 100, sortBy: { column: "created_at", order: "desc" } });
-    if (error) {
-      console.error(error);
-      return;
-    }
-    setAssets(data || []);
+
+    const folders = ["", "admin", "games", "chapters", "site"];
+    const results = await Promise.all(
+      folders.map(async (folder) => {
+        const { data, error } = await supabase.storage
+          .from("game-images")
+          .list(folder, {
+            limit: 100,
+            sortBy: { column: "created_at", order: "desc" },
+          });
+
+        if (error) {
+          console.error(error);
+          return [];
+        }
+
+        return (data || [])
+          .filter((item) => item.id || item.metadata)
+          .map((item) => ({
+            ...item,
+            path: folder ? `${folder}/${item.name}` : item.name,
+          }));
+      }),
+    );
+
+    setAssets(results.flat());
   };
 
   const refreshAll = async () => {
@@ -536,15 +554,15 @@ export default function Admin() {
   };
 
   const removeAsset = async (asset) => {
-    if (!window.confirm(`Delete ${asset.name} from Supabase Storage?`)) return;
+    if (!window.confirm(`Delete ${asset.path || asset.name} from Supabase Storage?`)) return;
     const { error } = await supabase.storage
       .from("game-images")
-      .remove([asset.name]);
+      .remove([asset.path || asset.name]);
     if (error) {
       toast(error.message, "error");
       return;
     }
-    await audit("delete", "asset", asset.name);
+    await audit("delete", "asset", asset.path || asset.name);
     toast("Asset deleted.");
     await loadAssets();
   };
@@ -932,7 +950,7 @@ export default function Admin() {
             {assets.map((asset) => {
               const publicUrl = supabase.storage
                 .from("game-images")
-                .getPublicUrl(asset.name).data.publicUrl;
+                .getPublicUrl(asset.path || asset.name).data.publicUrl;
               return (
                 <div key={asset.id || asset.name} className="overflow-hidden rounded-3xl border border-slate-200 bg-white">
                   <div className="grid h-40 place-items-center bg-slate-50">
@@ -943,7 +961,7 @@ export default function Admin() {
                     )}
                   </div>
                   <div className="p-4">
-                    <div className="truncate text-sm font-bold">{asset.name}</div>
+                    <div className="truncate text-sm font-bold">{asset.path || asset.name}</div>
                     <div className="mt-3 flex gap-2">
                       <button
                         onClick={() => navigator.clipboard?.writeText?.(publicUrl)}
