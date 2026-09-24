@@ -1147,6 +1147,209 @@ export default function Admin() {
             </button>
           </div>
 
+          <div className="mt-8 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+              <div>
+                <h3 className="text-xl font-extrabold">Homepage game section</h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  These two cards appear directly on the Home page. Change their
+                  images and descriptions here without editing code.
+                </p>
+              </div>
+              <Button onClick={saveSettings} loading={saving}>
+                <Save className="h-4 w-4" /> Save homepage game cards
+              </Button>
+            </div>
+
+            <div className="mt-6 grid gap-6 lg:grid-cols-2">
+              <div className="overflow-hidden rounded-3xl border border-emerald-200 bg-emerald-50/40">
+                <div className="relative h-48 overflow-hidden bg-emerald-50">
+                  <img
+                    src={
+                      settingsForm.homeQuizModeImage ||
+                      "/assets/games/ancient-india.webp"
+                    }
+                    alt="Quiz Challenges homepage card"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-emerald-950/70 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <div className="text-xs font-extrabold uppercase tracking-wide">
+                      Homepage · Game mode 1
+                    </div>
+                    <div className="mt-1 font-display text-2xl font-extrabold">
+                      {settingsForm.homeQuizModeTitle || "Quiz Challenges"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 p-5">
+                  <label>
+                    <span className={labelClass}>Card title</span>
+                    <input
+                      className={inputClass}
+                      value={settingsForm.homeQuizModeTitle || ""}
+                      onChange={(e) =>
+                        setSettingsForm((current) => ({
+                          ...current,
+                          homeQuizModeTitle: e.target.value,
+                        }))
+                      }
+                      placeholder="Quiz Challenges"
+                    />
+                  </label>
+
+                  <label>
+                    <span className={labelClass}>Description</span>
+                    <textarea
+                      className={`${inputClass} min-h-24`}
+                      value={settingsForm.homeQuizModeDescription || ""}
+                      onChange={(e) =>
+                        setSettingsForm((current) => ({
+                          ...current,
+                          homeQuizModeDescription: e.target.value,
+                        }))
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    <span className={labelClass}>Image URL</span>
+                    <input
+                      className={inputClass}
+                      value={settingsForm.homeQuizModeImage || ""}
+                      onChange={(e) =>
+                        setSettingsForm((current) => ({
+                          ...current,
+                          homeQuizModeImage: e.target.value,
+                        }))
+                      }
+                    />
+                  </label>
+
+                  <label className="focus-ring inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-emerald-300 bg-white px-4 py-3 text-sm font-extrabold text-heritage-green hover:bg-emerald-50">
+                    <ImagePlus className="h-4 w-4" /> Upload Quiz Challenge image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const url = await uploadAsset(file, "site");
+                          setSettingsForm((current) => ({
+                            ...current,
+                            homeQuizModeImage: url,
+                          }));
+                          toast(
+                            "Quiz card image uploaded. Press Save homepage game cards.",
+                          );
+                        } catch (error) {
+                          toast(error.message || "Image upload failed.", "error");
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div className="overflow-hidden rounded-3xl border border-sky-200 bg-sky-50/40">
+                <div className="relative h-48 overflow-hidden bg-sky-50">
+                  <img
+                    src={
+                      settingsForm.homeWordModeImage ||
+                      "/assets/games/word-quest.svg"
+                    }
+                    alt="Heritage Word Quest homepage card"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-sky-950/70 to-transparent" />
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <div className="text-xs font-extrabold uppercase tracking-wide">
+                      Homepage · Game mode 2
+                    </div>
+                    <div className="mt-1 font-display text-2xl font-extrabold">
+                      {settingsForm.homeWordModeTitle || "Heritage Word Quest"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 p-5">
+                  <label>
+                    <span className={labelClass}>Card title</span>
+                    <input
+                      className={inputClass}
+                      value={settingsForm.homeWordModeTitle || ""}
+                      onChange={(e) =>
+                        setSettingsForm((current) => ({
+                          ...current,
+                          homeWordModeTitle: e.target.value,
+                        }))
+                      }
+                      placeholder="Heritage Word Quest"
+                    />
+                  </label>
+
+                  <label>
+                    <span className={labelClass}>Description</span>
+                    <textarea
+                      className={`${inputClass} min-h-24`}
+                      value={settingsForm.homeWordModeDescription || ""}
+                      onChange={(e) =>
+                        setSettingsForm((current) => ({
+                          ...current,
+                          homeWordModeDescription: e.target.value,
+                        }))
+                      }
+                    />
+                  </label>
+
+                  <label>
+                    <span className={labelClass}>Image URL</span>
+                    <input
+                      className={inputClass}
+                      value={settingsForm.homeWordModeImage || ""}
+                      onChange={(e) =>
+                        setSettingsForm((current) => ({
+                          ...current,
+                          homeWordModeImage: e.target.value,
+                        }))
+                      }
+                    />
+                  </label>
+
+                  <label className="focus-ring inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-sky-300 bg-white px-4 py-3 text-sm font-extrabold text-sky-700 hover:bg-sky-50">
+                    <ImagePlus className="h-4 w-4" /> Upload Word Quest image
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        try {
+                          const url = await uploadAsset(file, "site");
+                          setSettingsForm((current) => ({
+                            ...current,
+                            homeWordModeImage: url,
+                          }));
+                          toast(
+                            "Word Quest card image uploaded. Press Save homepage game cards.",
+                          );
+                        } catch (error) {
+                          toast(error.message || "Image upload failed.", "error");
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="mt-8 flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
             <div>
               <h3 className="text-xl font-extrabold">Quiz game cards</h3>
