@@ -4,6 +4,9 @@ import { ArrowRight, Clock3, UsersRound, Play, HelpCircle } from "lucide-react";
 import { Badge } from "./ui";
 
 export default function GameCard({ game, compact = false }) {
+  const playPath = game.playPath || `/play/quiz/${game.chapterSlug}`;
+  const questionCount = Number(game.questionCount || 10);
+
   return (
     <article className="group overflow-hidden rounded-3xl border border-slate-200/90 bg-gradient-to-b from-slate-50 to-white shadow-none transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.015] hover:bg-white hover:shadow-[0_22px_45px_rgba(15,23,42,0.20)] focus-within:-translate-y-2 focus-within:scale-[1.015] focus-within:bg-white focus-within:shadow-[0_22px_45px_rgba(15,23,42,0.20)] active:-translate-y-2 active:scale-[1.015] active:bg-white active:shadow-[0_22px_45px_rgba(15,23,42,0.20)]">
       <Link to={`/games/${game.slug}`} className="block overflow-hidden">
@@ -38,13 +41,13 @@ export default function GameCard({ game, compact = false }) {
             </span>
             <span className="inline-flex items-center gap-1">
               <HelpCircle className="h-4 w-4" />
-              10 questions
+              {questionCount} {game.gameType === "word" ? "word puzzles" : "questions"}
             </span>
           </div>
         )}
         <div className="mt-5 flex items-center justify-between">
           <Link
-            to={`/play/quiz/${game.chapterSlug}`}
+            to={playPath}
             className="focus-ring inline-flex items-center gap-2 rounded-xl text-sm font-extrabold text-heritage-green hover:text-emerald-800"
           >
             Play <Play className="h-4 w-4 fill-current" />
