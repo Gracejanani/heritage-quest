@@ -12,10 +12,11 @@ import {
   UsersRound,
   HelpCircle,
 } from "lucide-react";
-import { games } from "../data/content";
+import { useLiveGames } from "../lib/liveContent";
 import { Badge, Button } from "../components/ui";
 
 export default function GameDetails() {
+  const games = useLiveGames();
   const { slug } = useParams();
   const game = games.find((g) => g.slug === slug) || games[0];
   return (
