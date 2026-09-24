@@ -749,7 +749,13 @@ values (
     'featuredImage','/assets/hero-heritage.jpg',
     'introVideo','/videos/heritage-quest-intro.mp4',
     'dailyChallengeQuestions',5,
-    'weeklyGoalPoints',700
+    'weeklyGoalPoints',700,
+    'homeQuizModeTitle','Quiz Challenges',
+    'homeQuizModeDescription','Choose a heritage chapter and answer age-appropriate questions with hints, explanations, XP and certificates.',
+    'homeQuizModeImage','/assets/games/ancient-india.webp',
+    'homeWordModeTitle','Heritage Word Quest',
+    'homeWordModeDescription','Read a heritage clue, then tap the shuffled letters in the correct order to build the answer.',
+    'homeWordModeImage','/assets/games/word-quest.svg'
   )
 )
 on conflict (id) do nothing;
@@ -1137,3 +1143,17 @@ grant execute on function public.get_word_puzzles(text,text) to authenticated;
 revoke all on function public.check_word_puzzle_answer(text,text,text,text) from public;
 revoke all on function public.check_word_puzzle_answer(text,text,text,text) from anon;
 grant execute on function public.check_word_puzzle_answer(text,text,text,text) to authenticated;
+
+
+-- Homepage direct game-mode cards are stored inside site_settings.payload.
+update public.site_settings
+set payload = coalesce(payload,'{}'::jsonb) || jsonb_build_object(
+  'homeQuizModeTitle', coalesce(payload->>'homeQuizModeTitle','Quiz Challenges'),
+  'homeQuizModeDescription', coalesce(payload->>'homeQuizModeDescription','Choose a heritage chapter and answer age-appropriate questions with hints, explanations, XP and certificates.'),
+  'homeQuizModeImage', coalesce(payload->>'homeQuizModeImage','/assets/games/ancient-india.webp'),
+  'homeWordModeTitle', coalesce(payload->>'homeWordModeTitle','Heritage Word Quest'),
+  'homeWordModeDescription', coalesce(payload->>'homeWordModeDescription','Read a heritage clue, then tap the shuffled letters in the correct order to build the answer.'),
+  'homeWordModeImage', coalesce(payload->>'homeWordModeImage','/assets/games/word-quest.svg')
+),
+updated_at = now()
+where id='main';
