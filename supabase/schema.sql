@@ -1157,3 +1157,91 @@ set payload = coalesce(payload,'{}'::jsonb) || jsonb_build_object(
 ),
 updated_at = now()
 where id='main';
+
+
+-- Dynamic quiz game display order.
+alter table public.games
+  add column if not exists display_order integer not null default 999;
+
+alter table public.games
+  drop constraint if exists games_display_order_positive;
+
+alter table public.games
+  add constraint games_display_order_positive
+  check (display_order > 0);
+
+create index if not exists games_display_order_idx
+  on public.games (display_order, title);
+
+create or replace function public.move_game_position(
+  p_game_id text,
+  p_new_position integer
+)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_old_position integer;
+  v_new_position integer;
+  v_count integer;
+  v_slug text;
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required';
+  end if;
+
+  select display_order, slug
+  into v_old_position, v_slug
+  from public.games
+  where id = p_game_id;
+
+  if not found then
+    raise exception 'Game not found';
+  end if;
+
+  if v_slug = 'heritage-word-quest' then
+    raise exception 'Heritage Word Quest is a separate game mode and is not part of the quiz order';
+  end if;
+
+  select count(*)::integer
+  into v_count
+  from public.games
+  where slug <> 'heritage-word-quest';
+
+  v_new_position :=
+    greatest(1, least(coalesce(p_new_position, v_old_position), v_count));
+
+  if v_new_position = v_old_position then
+    return;
+  end if;
+
+  if v_new_position < v_old_position then
+    update public.games
+    set display_order = display_order + 1,
+        updated_at = now()
+    where slug <> 'heritage-word-quest'
+      and id <> p_game_id
+      and display_order >= v_new_position
+      and display_order < v_old_position;
+  else
+    update public.games
+    set display_order = display_order - 1,
+        updated_at = now()
+    where slug <> 'heritage-word-quest'
+      and id <> p_game_id
+      and display_order > v_old_position
+      and display_order <= v_new_position;
+  end if;
+
+  update public.games
+  set display_order = v_new_position,
+      updated_at = now()
+  where id = p_game_id;
+end;
+$$;
+
+revoke all on function public.move_game_position(text, integer) from public;
+revoke all on function public.move_game_position(text, integer) from anon;
+grant execute on function public.move_game_position(text, integer) to authenticated;
