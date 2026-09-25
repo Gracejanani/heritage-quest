@@ -42,6 +42,7 @@ function mergeGame(row) {
     title: row.title,
     category: row.category || fallback.category,
     difficulty: row.difficulty || fallback.difficulty,
+    displayOrder: Number(row.display_order || fallback.displayOrder || 999),
   };
 }
 
@@ -69,7 +70,8 @@ export function useLiveGames() {
     supabase
       .from("games")
       .select("*")
-      .order("title")
+      .order("display_order", { ascending: true })
+      .order("title", { ascending: true })
       .then(({ data, error }) => {
         if (!active) return;
         if (error) {
