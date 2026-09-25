@@ -154,7 +154,11 @@ export default function Admin() {
       settingsRes,
       auditRes,
     ] = await Promise.all([
-      supabase.from("games").select("*").order("title"),
+      supabase
+        .from("games")
+        .select("*")
+        .order("display_order", { ascending: true })
+        .order("title", { ascending: true }),
       supabase.from("chapters").select("*").order("title"),
       supabase
         .from("questions")
@@ -467,6 +471,7 @@ export default function Admin() {
       time: payload.time || "5–10 min",
       learnText: textLines(payload.learn),
       achievementsText: textLines(payload.achievements),
+      display_order: Number(row.display_order || 999),
       isExisting: true,
     });
   };
@@ -487,6 +492,13 @@ export default function Admin() {
       time: "5–10 min",
       learnText: "",
       achievementsText: "",
+      display_order:
+        Math.max(
+          0,
+          ...games
+            .filter((item) => item.slug !== "heritage-word-quest")
+            .map((item) => Number(item.display_order || 0)),
+        ) + 1,
       isExisting: false,
     });
   };
@@ -533,6 +545,7 @@ export default function Admin() {
       title: gameForm.title.trim(),
       category: gameForm.category,
       difficulty: gameForm.difficulty,
+      display_order: Number(gameForm.display_order || 999),
       payload,
       updated_at: new Date().toISOString(),
     };
@@ -557,6 +570,29 @@ export default function Admin() {
     );
     toast(gameForm.isExisting ? "Game updated." : "New game created.");
     setGameForm(null);
+    await refreshAll();
+  };
+
+  const moveGamePosition = async (gameId, newPosition) => {
+    if (!supabase) return;
+
+    const target = Math.max(1, Number(newPosition || 1));
+    setSaving(true);
+
+    const { error } = await supabase.rpc("move_game_position", {
+      p_game_id: gameId,
+      p_new_position: target,
+    });
+
+    setSaving(false);
+
+    if (error) {
+      toast(error.message || "Could not change game position.", "error");
+      return;
+    }
+
+    await audit("reorder", "game", gameId, { position: target });
+    toast(`Game moved to position ${target}.`);
     await refreshAll();
   };
 
@@ -1362,24 +1398,62 @@ export default function Admin() {
           <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {games
               .filter((game) => game.slug !== "heritage-word-quest")
-              .map((game) => (
-                <button
+              .map((game, index, quizGames) => (
+                <div
                   key={game.id}
-                  onClick={() => openGame(game)}
-                  className="group overflow-hidden rounded-3xl border border-slate-200 bg-white text-left shadow-sm transition hover:-translate-y-1 hover:shadow-card"
+                  className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
                 >
-                  <img
-                    src={game.payload?.image || "/assets/hero-heritage.jpg"}
-                    alt=""
-                    className="h-40 w-full object-cover"
-                  />
-                  <div className="p-5">
-                    <div className="font-extrabold text-slate-950">{game.title}</div>
-                    <div className="mt-1 text-xs text-slate-500">
-                      {game.category} · {game.difficulty}
+                  <button
+                    type="button"
+                    onClick={() => openGame(game)}
+                    className="group block w-full text-left transition hover:bg-slate-50"
+                  >
+                    <div className="relative">
+                      <img
+                        src={game.payload?.image || "/assets/hero-heritage.jpg"}
+                        alt=""
+                        className="h-40 w-full object-cover"
+                      />
+                      <div className="absolute left-3 top-3 rounded-full bg-slate-950/75 px-3 py-1.5 text-xs font-extrabold text-white backdrop-blur">
+                        Position #{index + 1}
+                      </div>
                     </div>
+                    <div className="p-5">
+                      <div className="font-extrabold text-slate-950">{game.title}</div>
+                      <div className="mt-1 text-xs text-slate-500">
+                        {game.category} · {game.difficulty}
+                      </div>
+                      <div className="mt-3 text-xs font-bold text-heritage-green">
+                        Click card to edit content
+                      </div>
+                    </div>
+                  </button>
+
+                  <div className="border-t border-slate-100 bg-slate-50 p-4">
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs font-extrabold uppercase tracking-wide text-slate-500">
+                        Move to position
+                      </span>
+                      <select
+                        value={index + 1}
+                        disabled={saving}
+                        onChange={(e) =>
+                          moveGamePosition(game.id, Number(e.target.value))
+                        }
+                        className="focus-ring w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-extrabold text-slate-700 outline-none disabled:opacity-50"
+                      >
+                        {quizGames.map((_, positionIndex) => (
+                          <option
+                            key={positionIndex + 1}
+                            value={positionIndex + 1}
+                          >
+                            Position {positionIndex + 1}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
                   </div>
-                </button>
+                </div>
               ))}
           </div>
         </section>
@@ -2009,6 +2083,28 @@ export default function Admin() {
               </label>
               <label><span className={labelClass}>Category</span><input className={inputClass} value={gameForm.category || ""} onChange={(e) => setGameForm({ ...gameForm, category: e.target.value })} /></label>
               <label><span className={labelClass}>Difficulty</span><select className={inputClass} value={gameForm.difficulty || "Medium"} onChange={(e) => setGameForm({ ...gameForm, difficulty: e.target.value })}>{["Medium","Advanced","Mixed"].map((item) => <option key={item}>{item}</option>)}</select></label>
+              {gameForm.slug !== "heritage-word-quest" && (
+                <label>
+                  <span className={labelClass}>Display position</span>
+                  <input
+                    type="number"
+                    min="1"
+                    max={Math.max(
+                      1,
+                      games.filter((item) => item.slug !== "heritage-word-quest").length +
+                        (gameForm.isExisting ? 0 : 1),
+                    )}
+                    className={inputClass}
+                    value={gameForm.display_order || 1}
+                    onChange={(e) =>
+                      setGameForm({
+                        ...gameForm,
+                        display_order: Number(e.target.value || 1),
+                      })
+                    }
+                  />
+                </label>
+              )}
               <label><span className={labelClass}>Chapter slug</span><input className={inputClass} value={gameForm.chapterSlug || ""} onChange={(e) => setGameForm({ ...gameForm, chapterSlug: e.target.value })} /></label>
               <label><span className={labelClass}>Players</span><input className={inputClass} value={gameForm.players || ""} onChange={(e) => setGameForm({ ...gameForm, players: e.target.value })} /></label>
               <label><span className={labelClass}>Time</span><input className={inputClass} value={gameForm.time || ""} onChange={(e) => setGameForm({ ...gameForm, time: e.target.value })} /></label>
