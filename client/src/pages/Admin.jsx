@@ -539,15 +539,30 @@ export default function Admin() {
       achievements: lines(gameForm.achievementsText),
     };
 
+    const desiredPosition = Number(gameForm.display_order || 1);
+    const quizGames = games.filter(
+      (item) => item.slug !== "heritage-word-quest",
+    );
+    const nextEndPosition =
+      Math.max(
+        0,
+        ...quizGames.map((item) => Number(item.display_order || 0)),
+      ) + 1;
+
     const gameRecord = {
       id,
       slug,
       title: gameForm.title.trim(),
       category: gameForm.category,
       difficulty: gameForm.difficulty,
-      display_order: Number(gameForm.display_order || 999),
       payload,
       updated_at: new Date().toISOString(),
+      ...(!gameForm.isExisting
+        ? {
+            display_order:
+              slug === "heritage-word-quest" ? 999 : nextEndPosition,
+          }
+        : {}),
     };
 
     const query = gameForm.isExisting
@@ -555,6 +570,24 @@ export default function Admin() {
       : supabase.from("games").insert(gameRecord);
 
     const { error } = await query;
+
+    if (!error && slug !== "heritage-word-quest") {
+      const { error: orderError } = await supabase.rpc("move_game_position", {
+        p_game_id: id,
+        p_new_position: desiredPosition,
+      });
+
+      if (orderError) {
+        setSaving(false);
+        toast(
+          orderError.message ||
+            "Game saved, but its display position could not be changed.",
+          "error",
+        );
+        await refreshAll();
+        return;
+      }
+    }
 
     setSaving(false);
     if (error) {
@@ -566,7 +599,7 @@ export default function Admin() {
       gameForm.isExisting ? "update" : "create",
       "game",
       id,
-      { slug },
+      { slug, position: slug === "heritage-word-quest" ? null : desiredPosition },
     );
     toast(gameForm.isExisting ? "Game updated." : "New game created.");
     setGameForm(null);
