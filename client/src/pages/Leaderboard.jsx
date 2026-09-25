@@ -31,7 +31,7 @@ export default function Leaderboard() {
       setError("");
 
       const { data, error: leaderboardError } = await supabase.rpc(
-        "get_dynamic_leaderboard",
+        "get_dynamic_leaderboard_v2",
         { p_period: period },
       );
 
@@ -42,17 +42,40 @@ export default function Leaderboard() {
         setRows([]);
         setError("Could not load the live leaderboard.");
       } else {
-        setRows(
-          (data || []).map((row) => ({
-            rank: Number(row.rank || 0),
-            userId: row.user_id,
-            name: row.name || "Explorer",
-            points: Number(row.points || 0),
-            badges: Number(row.badges || 0),
-            registeredDays: Number(row.registered_days || 1),
-            current: Boolean(row.is_current),
-          })),
+        const baseRows = (data || []).map((row) => ({
+          rank: Number(row.rank || 0),
+          userId: row.user_id,
+          name: row.name || "Explorer",
+          points: Number(row.points || 0),
+          badges: Number(row.badges || 0),
+          registeredDays: Number(row.registered_days || 1),
+          current: Boolean(row.is_current),
+          avatarPath: row.avatar_path || null,
+          avatarUrl: "",
+        }));
+
+        const rowsWithAvatars = await Promise.all(
+          baseRows.map(async (row) => {
+            if (!row.avatarPath) return row;
+
+            const { data: signedData, error: avatarError } =
+              await supabase.storage
+                .from("profile-pictures")
+                .createSignedUrl(row.avatarPath, 60 * 60);
+
+            if (avatarError) {
+              console.error("Could not load leaderboard avatar", avatarError);
+              return row;
+            }
+
+            return {
+              ...row,
+              avatarUrl: signedData?.signedUrl || "",
+            };
+          }),
         );
+
+        if (active) setRows(rowsWithAvatars);
       }
 
       setLoading(false);
@@ -72,7 +95,7 @@ export default function Leaderboard() {
       if (!supabase) return;
 
       const { data, error: weeklyError } = await supabase.rpc(
-        "get_dynamic_leaderboard",
+        "get_dynamic_leaderboard_v2",
         { p_period: "Weekly" },
       );
 
@@ -183,13 +206,23 @@ export default function Leaderboard() {
 
                 <div className="flex min-w-0 items-center gap-3">
                   <div
-                    className={`grid h-10 w-10 shrink-0 place-items-center rounded-full font-extrabold ${
+                    className={`grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full ring-2 ${
                       row.current
-                        ? "bg-heritage-green text-white"
-                        : "bg-heritage-cream text-heritage-brown"
+                        ? "bg-heritage-green text-white ring-emerald-200"
+                        : "bg-heritage-cream text-heritage-brown ring-slate-100"
                     }`}
                   >
-                    {row.name.slice(0, 1).toUpperCase()}
+                    {row.avatarUrl ? (
+                      <img
+                        src={row.avatarUrl}
+                        alt={`${row.name} profile`}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      <span className="font-extrabold">
+                        {row.name.slice(0, 1).toUpperCase()}
+                      </span>
+                    )}
                   </div>
 
                   <div className="min-w-0">
