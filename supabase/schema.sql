@@ -1245,3 +1245,94 @@ $$;
 revoke all on function public.move_game_position(text, integer) from public;
 revoke all on function public.move_game_position(text, integer) from anon;
 grant execute on function public.move_game_position(text, integer) to authenticated;
+
+
+-- Leaderboard profile pictures for authenticated students.
+create or replace function public.get_dynamic_leaderboard_v2(
+  p_period text default 'Weekly'
+)
+returns table (
+  rank bigint,
+  user_id uuid,
+  name text,
+  points bigint,
+  badges bigint,
+  registered_days integer,
+  is_current boolean,
+  avatar_path text
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if (select auth.uid()) is null then
+    raise exception 'Authentication required';
+  end if;
+
+  return query
+  with scored as (
+    select
+      p.user_id,
+      p.full_name as name,
+      p.avatar_path,
+      greatest(1, (current_date - p.created_at::date) + 1)::integer as registered_days,
+      coalesce(
+        sum(
+          case
+            when lower(p_period) = 'daily'
+              and qp.updated_at >= now() - interval '24 hours'
+              then qp.score
+            when lower(p_period) = 'weekly'
+              and qp.updated_at >= now() - interval '7 days'
+              then qp.score
+            when lower(p_period) in ('all time','all-time','all_time')
+              then qp.score
+            else 0
+          end
+        ),
+        0
+      )::bigint as points,
+      (
+        select count(*)::bigint
+        from public.certificates c
+        where c.user_id = p.user_id
+      ) as badges
+    from public.profiles p
+    left join public.quiz_progress qp on qp.user_id = p.user_id
+    group by p.user_id, p.full_name, p.avatar_path, p.created_at
+  ),
+  ranked as (
+    select
+      row_number() over (order by s.points desc, s.name asc)::bigint as rank,
+      s.user_id,
+      s.name,
+      s.points,
+      s.badges,
+      s.registered_days,
+      s.avatar_path
+    from scored s
+  )
+  select
+    r.rank,
+    r.user_id,
+    r.name,
+    r.points,
+    r.badges,
+    r.registered_days,
+    (r.user_id = (select auth.uid())) as is_current,
+    r.avatar_path
+  from ranked r
+  order by r.rank;
+end;
+$$;
+
+revoke all on function public.get_dynamic_leaderboard_v2(text) from public;
+revoke all on function public.get_dynamic_leaderboard_v2(text) from anon;
+grant execute on function public.get_dynamic_leaderboard_v2(text) to authenticated;
+
+drop policy if exists "profile_pictures_authenticated_read" on storage.objects;
+create policy "profile_pictures_authenticated_read"
+on storage.objects for select
+to authenticated
+using (bucket_id = 'profile-pictures');
