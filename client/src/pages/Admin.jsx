@@ -80,6 +80,10 @@ export default function Admin() {
   const [questions, setQuestions] = useState([]);
   const [wordPuzzles, setWordPuzzles] = useState([]);
   const [profiles, setProfiles] = useState([]);
+  const [authUsers, setAuthUsers] = useState([]);
+  const [accountInfoUnlocked, setAccountInfoUnlocked] = useState(false);
+  const [accountUnlockOpen, setAccountUnlockOpen] = useState(false);
+  const [accountUnlockPassword, setAccountUnlockPassword] = useState("");
   const [progress, setProgress] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [auditRows, setAuditRows] = useState([]);
@@ -269,10 +273,80 @@ export default function Admin() {
         const certificateCount = certificates.filter(
           (item) => item.user_id === profile.user_id,
         ).length;
-        return { ...profile, totalScore, completed, certificateCount };
+        const authRow = authUsers.find(
+          (item) => item.user_id === profile.user_id,
+        );
+
+        return {
+          ...profile,
+          auth_email: authRow?.email || "",
+          email_confirmed: Boolean(authRow?.email_confirmed),
+          last_sign_in_at: authRow?.last_sign_in_at || null,
+          totalScore,
+          completed,
+          certificateCount,
+        };
       }),
-    [profiles, progress, certificates],
+    [profiles, authUsers, progress, certificates],
   );
+
+  const loadStudentAccountInfo = async () => {
+    if (!supabase) return false;
+
+    const { data, error } = await supabase.rpc("admin_list_student_auth");
+    if (error) {
+      toast(error.message || "Could not load student account details.", "error");
+      return false;
+    }
+
+    setAuthUsers(data || []);
+    return true;
+  };
+
+  const unlockStudentAccountInfo = async () => {
+    if (!supabase || !user?.email || !accountUnlockPassword) return;
+
+    setSaving(true);
+    const { error: verifyError } = await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: accountUnlockPassword,
+    });
+
+    if (verifyError) {
+      setSaving(false);
+      toast("Admin verification failed. Check your password.", "error");
+      return;
+    }
+
+    const loaded = await loadStudentAccountInfo();
+    setSaving(false);
+
+    if (!loaded) return;
+
+    setAccountInfoUnlocked(true);
+    setAccountUnlockPassword("");
+    setAccountUnlockOpen(false);
+    await audit("unlock", "student_account_info", user.id);
+    toast("Student account information unlocked for this session.");
+  };
+
+  const lockStudentAccountInfo = () => {
+    setAccountInfoUnlocked(false);
+    setAuthUsers([]);
+    setAccountUnlockPassword("");
+    toast("Student account information locked.");
+  };
+
+  useEffect(() => {
+    if (!accountInfoUnlocked) return undefined;
+
+    const timer = window.setTimeout(() => {
+      setAccountInfoUnlocked(false);
+      setAuthUsers([]);
+    }, 10 * 60 * 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [accountInfoUnlocked]);
 
   const saveQuestion = async () => {
     if (!questionForm || !supabase) return;
