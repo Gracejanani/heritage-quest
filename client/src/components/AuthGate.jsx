@@ -48,6 +48,11 @@ export default function AuthGate({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, profile?.preferred_language]);
 
+  // Keep an already-authenticated screen mounted during short auth refreshes.
+  // This is especially important when an administrator re-verifies the same
+  // account to unlock protected student account information.
+  if (user && profile) return children;
+
   if (loading) {
     return (
       <div className="grid min-h-screen place-items-center bg-heritage-cream">
@@ -58,8 +63,6 @@ export default function AuthGate({ children }) {
       </div>
     );
   }
-
-  if (user && profile) return children;
 
   const update = (key) => (event) => {
     setForm((current) => ({ ...current, [key]: event.target.value }));
