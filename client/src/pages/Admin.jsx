@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Save,
   Settings,
+  ShieldCheck,
   Trash2,
   Type,
   Users,
