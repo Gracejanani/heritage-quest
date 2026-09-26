@@ -18,6 +18,7 @@ import {
   PlayCircle,
   SkipForward,
   Video,
+  Volume2,
 } from "lucide-react";
 import { learningTopics } from "../data/content";
 import { useLiveTopics } from "../lib/liveContent";
@@ -675,10 +676,55 @@ function PreTestVideo({
   videoFinished,
 }) {
   const videoUrl = topic?.testVideo || topic?.video || "";
+  const videoRef = useRef(null);
+  const [autoplayMuted, setAutoplayMuted] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoUrl) return undefined;
+
+    let active = true;
+
+    const startAutomatically = async () => {
+      try {
+        video.muted = false;
+        await video.play();
+        if (active) setAutoplayMuted(false);
+      } catch {
+        try {
+          video.muted = true;
+          await video.play();
+          if (active) setAutoplayMuted(true);
+        } catch (error) {
+          console.error("Video autoplay could not start", error);
+        }
+      }
+    };
+
+    startAutomatically();
+
+    return () => {
+      active = false;
+    };
+  }, [videoUrl]);
+
+  const enableSound = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = false;
+    setAutoplayMuted(false);
+
+    try {
+      await video.play();
+    } catch (error) {
+      console.error("Could not enable video sound", error);
+    }
+  };
 
   return (
     <div className="min-h-[100vh] bg-heritage-forest py-6 sm:py-10">
-      <div className="container-app max-w-5xl">
+      <div className="container-app max-w-6xl">
         <div className="overflow-hidden rounded-[2rem] bg-white shadow-2xl">
           <div className="relative border-b border-slate-100 p-6 sm:p-8">
             <div className="pr-36">
@@ -704,38 +750,50 @@ function PreTestVideo({
             </button>
           </div>
 
-          <div className="p-6 sm:p-8">
-            {videoUrl ? (
-              <div className="overflow-hidden rounded-[1.5rem] bg-black shadow-lg">
-                <video
-                  key={videoUrl}
-                  src={videoUrl}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  onEnded={onEnded}
-                  className="aspect-video w-full bg-black object-contain"
-                >
-                  Your browser does not support this video.
-                </video>
-              </div>
-            ) : (
-              <div className="grid aspect-video place-items-center rounded-[1.5rem] border-2 border-dashed border-slate-200 bg-slate-50 p-8 text-center">
-                <div>
-                  <PlayCircle className="mx-auto h-14 w-14 text-slate-300" />
-                  <h2 className="mt-4 text-xl font-extrabold text-slate-800">
-                    Video lesson coming soon
-                  </h2>
-                  <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                    Your teacher or administrator can upload a lesson video for
-                    this chapter from the Admin → Chapters section. You can
-                    continue to the test now.
-                  </p>
-                </div>
-              </div>
-            )}
+          {videoUrl ? (
+            <div className="relative aspect-video w-full overflow-hidden bg-black">
+              <video
+                ref={videoRef}
+                key={videoUrl}
+                src={videoUrl}
+                controls
+                autoPlay
+                playsInline
+                preload="auto"
+                onEnded={onEnded}
+                className="absolute inset-0 h-full w-full bg-black object-cover"
+              >
+                Your browser does not support this video.
+              </video>
 
-            <div className="mt-6 flex flex-col justify-between gap-4 rounded-2xl bg-heritage-cream p-4 sm:flex-row sm:items-center">
+              {autoplayMuted && (
+                <button
+                  type="button"
+                  onClick={enableSound}
+                  className="focus-ring absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-full bg-slate-950/80 px-4 py-2 text-sm font-extrabold text-white shadow-lg backdrop-blur hover:bg-slate-950"
+                >
+                  <Volume2 className="h-4 w-4" /> Tap for sound
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid aspect-video place-items-center border-y-2 border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+              <div>
+                <PlayCircle className="mx-auto h-14 w-14 text-slate-300" />
+                <h2 className="mt-4 text-xl font-extrabold text-slate-800">
+                  Video lesson coming soon
+                </h2>
+                <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                  Your teacher or administrator can upload a lesson video for
+                  this chapter from the Admin → Chapters section. You can
+                  continue to the test now.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="p-6 sm:p-8">
+            <div className="flex flex-col justify-between gap-4 rounded-2xl bg-heritage-cream p-4 sm:flex-row sm:items-center">
               <div>
                 <div className="font-extrabold text-slate-900">
                   {videoFinished
