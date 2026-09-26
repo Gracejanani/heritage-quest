@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import confetti from "canvas-confetti";
 import {
@@ -16,6 +16,7 @@ import {
   Trophy,
   Undo2,
   Video,
+  Volume2,
   XCircle,
 } from "lucide-react";
 import { Button, Badge, ProgressBar, useToast } from "../components/ui";
@@ -66,10 +67,55 @@ function fillPattern(pattern = "", selectedLetters = []) {
 
 function PreGameVideo({ game, onSkip, onStart, onEnded, videoFinished }) {
   const videoUrl = game?.testVideo || "";
+  const videoRef = useRef(null);
+  const [autoplayMuted, setAutoplayMuted] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !videoUrl) return undefined;
+
+    let active = true;
+
+    const startAutomatically = async () => {
+      try {
+        video.muted = false;
+        await video.play();
+        if (active) setAutoplayMuted(false);
+      } catch {
+        try {
+          video.muted = true;
+          await video.play();
+          if (active) setAutoplayMuted(true);
+        } catch (error) {
+          console.error("Video autoplay could not start", error);
+        }
+      }
+    };
+
+    startAutomatically();
+
+    return () => {
+      active = false;
+    };
+  }, [videoUrl]);
+
+  const enableSound = async () => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.muted = false;
+    setAutoplayMuted(false);
+
+    try {
+      await video.play();
+    } catch (error) {
+      console.error("Could not enable video sound", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-950 via-blue-950 to-slate-950 py-8">
-      <div className="container-app max-w-5xl">
+      <div className="container-app max-w-6xl">
         <div className="overflow-hidden rounded-[2rem] bg-white shadow-2xl">
           <div className="relative border-b border-sky-100 p-6 sm:p-8">
             <div className="pr-0 sm:pr-44">
@@ -94,37 +140,49 @@ function PreGameVideo({ game, onSkip, onStart, onEnded, videoFinished }) {
             </button>
           </div>
 
-          <div className="p-6 sm:p-8">
-            {videoUrl ? (
-              <div className="overflow-hidden rounded-[1.5rem] bg-black shadow-lg">
-                <video
-                  key={videoUrl}
-                  src={videoUrl}
-                  controls
-                  playsInline
-                  preload="metadata"
-                  onEnded={onEnded}
-                  className="aspect-video w-full bg-black object-contain"
-                >
-                  Your browser does not support this video.
-                </video>
-              </div>
-            ) : (
-              <div className="grid aspect-video place-items-center rounded-[1.5rem] border-2 border-dashed border-sky-200 bg-sky-50/70 p-8 text-center">
-                <div>
-                  <PlayCircle className="mx-auto h-14 w-14 text-sky-300" />
-                  <h2 className="mt-4 text-xl font-extrabold text-slate-800">
-                    Video lesson can be added later
-                  </h2>
-                  <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                    The administrator can upload a video for Heritage Word Quest
-                    from the game editor. For now, continue directly to the game.
-                  </p>
-                </div>
-              </div>
-            )}
+          {videoUrl ? (
+            <div className="relative aspect-video w-full overflow-hidden bg-black">
+              <video
+                ref={videoRef}
+                key={videoUrl}
+                src={videoUrl}
+                controls
+                autoPlay
+                playsInline
+                preload="auto"
+                onEnded={onEnded}
+                className="absolute inset-0 h-full w-full bg-black object-cover"
+              >
+                Your browser does not support this video.
+              </video>
 
-            <div className="mt-6 flex flex-col justify-between gap-4 rounded-2xl bg-sky-50 p-4 sm:flex-row sm:items-center">
+              {autoplayMuted && (
+                <button
+                  type="button"
+                  onClick={enableSound}
+                  className="focus-ring absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-full bg-slate-950/80 px-4 py-2 text-sm font-extrabold text-white shadow-lg backdrop-blur hover:bg-slate-950"
+                >
+                  <Volume2 className="h-4 w-4" /> Tap for sound
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid aspect-video place-items-center border-y-2 border-dashed border-sky-200 bg-sky-50/70 p-8 text-center">
+              <div>
+                <PlayCircle className="mx-auto h-14 w-14 text-sky-300" />
+                <h2 className="mt-4 text-xl font-extrabold text-slate-800">
+                  Video lesson can be added later
+                </h2>
+                <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
+                  The administrator can upload a video for Heritage Word Quest
+                  from the game editor. For now, continue directly to the game.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="p-6 sm:p-8">
+            <div className="flex flex-col justify-between gap-4 rounded-2xl bg-sky-50 p-4 sm:flex-row sm:items-center">
               <div>
                 <div className="font-extrabold text-slate-900">
                   {videoFinished
