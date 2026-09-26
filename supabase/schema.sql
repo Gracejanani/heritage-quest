@@ -1336,37 +1336,3 @@ create policy "profile_pictures_authenticated_read"
 on storage.objects for select
 to authenticated
 using (bucket_id = 'profile-pictures');
-
-
--- Admin-only student auth email view.
-create or replace function public.admin_list_student_auth()
-returns table (
-  user_id uuid,
-  email text,
-  email_confirmed boolean,
-  last_sign_in_at timestamptz
-)
-language plpgsql
-security definer
-set search_path = public, auth
-as $$
-begin
-  if not public.is_admin() then
-    raise exception 'Admin access required';
-  end if;
-
-  return query
-  select
-    u.id as user_id,
-    coalesce(u.email, '')::text as email,
-    (u.email_confirmed_at is not null) as email_confirmed,
-    u.last_sign_in_at
-  from auth.users u
-  join public.profiles p on p.user_id = u.id
-  order by p.created_at desc;
-end;
-$$;
-
-revoke all on function public.admin_list_student_auth() from public;
-revoke all on function public.admin_list_student_auth() from anon;
-grant execute on function public.admin_list_student_auth() to authenticated;
