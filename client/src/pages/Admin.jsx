@@ -1645,12 +1645,87 @@ export default function Admin() {
             ) : (
               <Button
                 type="button"
-                onClick={() => setAccountUnlockOpen(true)}
+                onClick={() => {
+                  setAccountUnlockOpen(true);
+                  window.setTimeout(() => {
+                    document
+                      .getElementById("student-account-unlock")
+                      ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                  }, 50);
+                }}
               >
                 <ShieldCheck className="h-4 w-4" /> Unlock account info
               </Button>
             )}
           </div>
+
+          {accountUnlockOpen && !accountInfoUnlocked && (
+            <div
+              id="student-account-unlock"
+              className="mt-5 rounded-[1.5rem] border border-amber-200 bg-white p-5 shadow-sm sm:p-6"
+            >
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                <div>
+                  <div className="flex items-center gap-2 text-lg font-extrabold text-slate-900">
+                    <ShieldCheck className="h-5 w-5 text-heritage-green" />
+                    Verify administrator account
+                  </div>
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                    Re-enter your own admin password to temporarily reveal
+                    registered student email addresses. Your password is used
+                    only for verification and is cleared immediately after.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAccountUnlockOpen(false);
+                    setAccountUnlockPassword("");
+                  }}
+                  className="focus-ring rounded-xl p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                  aria-label="Close unlock panel"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <div className="mt-5 grid gap-4 md:grid-cols-[1fr_1fr_auto] md:items-end">
+                <label>
+                  <span className={labelClass}>Administrator email</span>
+                  <input
+                    className={inputClass}
+                    value={user?.email || ""}
+                    readOnly
+                  />
+                </label>
+
+                <label>
+                  <span className={labelClass}>Administrator password</span>
+                  <input
+                    type="password"
+                    autoComplete="current-password"
+                    className={inputClass}
+                    value={accountUnlockPassword}
+                    onChange={(e) => setAccountUnlockPassword(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") unlockStudentAccountInfo();
+                    }}
+                    placeholder="Enter your admin password"
+                  />
+                </label>
+
+                <Button
+                  type="button"
+                  onClick={unlockStudentAccountInfo}
+                  loading={saving}
+                  disabled={!accountUnlockPassword}
+                  className="md:mb-0"
+                >
+                  <ShieldCheck className="h-4 w-4" /> Verify & unlock
+                </Button>
+              </div>
+            </div>
+          )}
 
           {accountInfoUnlocked && (
             <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
@@ -2685,55 +2760,6 @@ export default function Admin() {
         </EditorModal>
       )}
 
-      {accountUnlockOpen && (
-        <EditorModal
-          title="Unlock student account information"
-          onClose={() => {
-            setAccountUnlockOpen(false);
-            setAccountUnlockPassword("");
-          }}
-        >
-          <div className="grid gap-5">
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
-              Re-enter your own administrator password. It is used only to
-              verify the current admin session and is cleared immediately after
-              verification.
-            </div>
-
-            <label>
-              <span className={labelClass}>Administrator email</span>
-              <input
-                className={inputClass}
-                value={user?.email || ""}
-                readOnly
-              />
-            </label>
-
-            <label>
-              <span className={labelClass}>Administrator password</span>
-              <input
-                type="password"
-                autoComplete="current-password"
-                className={inputClass}
-                value={accountUnlockPassword}
-                onChange={(e) => setAccountUnlockPassword(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") unlockStudentAccountInfo();
-                }}
-                placeholder="Enter your admin password"
-              />
-            </label>
-
-            <Button
-              onClick={unlockStudentAccountInfo}
-              loading={saving}
-              disabled={!accountUnlockPassword}
-            >
-              <ShieldCheck className="h-4 w-4" /> Verify & unlock
-            </Button>
-          </div>
-        </EditorModal>
-      )}
     </div>
   );
 }
