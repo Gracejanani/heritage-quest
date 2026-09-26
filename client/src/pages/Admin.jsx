@@ -10,6 +10,8 @@ import {
   ImagePlus,
   LayoutDashboard,
   Loader2,
+  LockKeyhole,
+  Mail,
   Plus,
   RefreshCw,
   Save,
@@ -1621,15 +1623,49 @@ export default function Admin() {
 
       {tab === "students" && (
         <section className="mt-6">
-          <h2 className="text-2xl font-extrabold">Student manager</h2>
-          <p className="mt-1 text-sm text-slate-500">
-            View student profiles and learning performance. Passwords are never exposed to the admin panel.
-          </p>
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+            <div>
+              <h2 className="text-2xl font-extrabold">Student manager</h2>
+              <p className="mt-1 max-w-3xl text-sm text-slate-500">
+                View profiles and learning performance. Registered email addresses
+                are protected behind admin re-verification. Existing account
+                passwords cannot be displayed because Supabase stores only secure
+                password hashes.
+              </p>
+            </div>
+
+            {accountInfoUnlocked ? (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={lockStudentAccountInfo}
+              >
+                <LockKeyhole className="h-4 w-4" /> Lock account info
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                onClick={() => setAccountUnlockOpen(true)}
+              >
+                <ShieldCheck className="h-4 w-4" /> Unlock account info
+              </Button>
+            )}
+          </div>
+
+          {accountInfoUnlocked && (
+            <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-semibold text-emerald-900">
+              Account information is unlocked for 10 minutes. Registered emails
+              are visible below. Passwords remain protected and cannot be recovered
+              in readable form.
+            </div>
+          )}
+
           <div className="mt-5 overflow-x-auto rounded-3xl border border-slate-200 bg-white">
-            <table className="min-w-[900px] w-full text-left text-sm">
+            <table className="min-w-[1080px] w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500">
                 <tr>
                   <th className="px-4 py-3">Student</th>
+                  <th className="px-4 py-3">Registered email</th>
                   <th className="px-4 py-3">DOB</th>
                   <th className="px-4 py-3">Age group</th>
                   <th className="px-4 py-3">Score</th>
@@ -1644,6 +1680,24 @@ export default function Admin() {
                     <td className="px-4 py-4">
                       <div className="font-extrabold">{row.full_name}</div>
                       <div className="text-xs text-slate-400">{row.user_id}</div>
+                    </td>
+                    <td className="px-4 py-4">
+                      {accountInfoUnlocked ? (
+                        <div>
+                          <div className="font-semibold text-slate-700">
+                            {row.auth_email || "No email found"}
+                          </div>
+                          <div className="mt-1 text-[11px] font-bold text-slate-400">
+                            {row.email_confirmed
+                              ? "Email confirmed"
+                              : "Email not confirmed"}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-xs font-extrabold text-slate-500">
+                          <LockKeyhole className="h-3.5 w-3.5" /> Locked
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-4">{row.dob}</td>
                     <td className="px-4 py-4"><Badge>{row.age_group}</Badge></td>
@@ -2554,16 +2608,129 @@ export default function Admin() {
       )}
 
       {studentForm && (
-        <EditorModal title={`Edit student · ${studentForm.full_name}`} onClose={() => setStudentForm(null)}>
-          <div className="grid gap-4">
-            <label><span className={labelClass}>Full name</span><input className={inputClass} value={studentForm.full_name || ""} onChange={(e) => setStudentForm({ ...studentForm, full_name: e.target.value })} /></label>
+        <EditorModal
+          title={`Edit student · ${studentForm.full_name}`}
+          onClose={() => setStudentForm(null)}
+        >
+          <div className="grid gap-5">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center gap-2 text-sm font-extrabold text-slate-900">
+                <ShieldCheck className="h-4 w-4 text-heritage-green" />
+                Account credentials
+              </div>
+
+              {accountInfoUnlocked ? (
+                <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                  <label>
+                    <span className={labelClass}>Registered email</span>
+                    <div className="relative">
+                      <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        className={`${inputClass} pl-10`}
+                        value={studentForm.auth_email || "No email found"}
+                        readOnly
+                      />
+                    </div>
+                  </label>
+
+                  <label>
+                    <span className={labelClass}>Password</span>
+                    <div className="relative">
+                      <LockKeyhole className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <input
+                        className={`${inputClass} pl-10`}
+                        value="Protected by Supabase"
+                        readOnly
+                      />
+                    </div>
+                    <span className="mt-1.5 block text-xs font-semibold text-slate-400">
+                      The original password cannot be viewed or recovered.
+                    </span>
+                  </label>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setAccountUnlockOpen(true)}
+                  className="mt-4 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-extrabold text-white"
+                >
+                  <LockKeyhole className="h-4 w-4" />
+                  Verify admin account to view email
+                </button>
+              )}
+            </div>
+
+            <label>
+              <span className={labelClass}>Full name</span>
+              <input
+                className={inputClass}
+                value={studentForm.full_name || ""}
+                onChange={(e) =>
+                  setStudentForm({ ...studentForm, full_name: e.target.value })
+                }
+              />
+            </label>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <label><span className={labelClass}>Date of birth</span><input type="date" className={inputClass} value={studentForm.dob || ""} onChange={(e) => setStudentForm({ ...studentForm, dob: e.target.value })} /></label>
               <label><span className={labelClass}>Age group</span><select className={inputClass} value={studentForm.age_group} onChange={(e) => setStudentForm({ ...studentForm, age_group: e.target.value })}>{["entry","junior","scholar","open"].map((item) => <option key={item}>{item}</option>)}</select></label>
               <label><span className={labelClass}>Preferred language code</span><input className={inputClass} value={studentForm.preferred_language || "en"} onChange={(e) => setStudentForm({ ...studentForm, preferred_language: e.target.value })} /></label>
               <label className="flex items-center gap-3 rounded-xl border border-slate-200 p-3"><input type="checkbox" checked={Boolean(studentForm.leaderboard_opt_in)} onChange={(e) => setStudentForm({ ...studentForm, leaderboard_opt_in: e.target.checked })} /><span className="text-sm font-bold">Leaderboard opt-in</span></label>
             </div>
-            <Button onClick={saveStudent} loading={saving}><Save className="h-4 w-4" /> Save student profile</Button>
+
+            <Button onClick={saveStudent} loading={saving}>
+              <Save className="h-4 w-4" /> Save student profile
+            </Button>
+          </div>
+        </EditorModal>
+      )}
+
+      {accountUnlockOpen && (
+        <EditorModal
+          title="Unlock student account information"
+          onClose={() => {
+            setAccountUnlockOpen(false);
+            setAccountUnlockPassword("");
+          }}
+        >
+          <div className="grid gap-5">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+              Re-enter your own administrator password. It is used only to
+              verify the current admin session and is cleared immediately after
+              verification.
+            </div>
+
+            <label>
+              <span className={labelClass}>Administrator email</span>
+              <input
+                className={inputClass}
+                value={user?.email || ""}
+                readOnly
+              />
+            </label>
+
+            <label>
+              <span className={labelClass}>Administrator password</span>
+              <input
+                type="password"
+                autoComplete="current-password"
+                className={inputClass}
+                value={accountUnlockPassword}
+                onChange={(e) => setAccountUnlockPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") unlockStudentAccountInfo();
+                }}
+                placeholder="Enter your admin password"
+              />
+            </label>
+
+            <Button
+              onClick={unlockStudentAccountInfo}
+              loading={saving}
+              disabled={!accountUnlockPassword}
+            >
+              <ShieldCheck className="h-4 w-4" /> Verify & unlock
+            </Button>
           </div>
         </EditorModal>
       )}
