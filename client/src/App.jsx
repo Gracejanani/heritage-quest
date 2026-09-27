@@ -23,6 +23,7 @@ import Admin from "./pages/Admin";
 import { PlayerProvider } from "./context/PlayerContext";
 import { AuthProvider } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
+import HeritageChatbot from "./components/HeritageChatbot";
 
 export default function App() {
   const { pathname } = useLocation();
@@ -80,6 +81,7 @@ export default function App() {
             <AuthGate>
               {immersive ? content : <Layout>{content}</Layout>}
             </AuthGate>
+            <HeritageChatbot />
           </PlayerProvider>
         </AuthProvider>
       </LanguageProvider>
