@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   Bot,
   MessageCircle,
@@ -7,7 +8,10 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { games as fallbackGames, learningTopics as fallbackTopics } from "../data/content";
+import {
+  games as fallbackGames,
+  learningTopics as fallbackTopics,
+} from "../data/content";
 import { usePlayer } from "../context/PlayerContext";
 import { supabase } from "../lib/supabase";
 
@@ -45,24 +49,25 @@ function includesAny(text, phrases) {
 
 function titleMatch(text, item) {
   const title = normalize(item?.title);
-  if (!title || title.length < 4) return false;
-  return text.includes(title);
+  return Boolean(title && title.length >= 4 && text.includes(title));
 }
 
-function findVerifiedQuestion(text, questionBank) {
+function findVerifiedStudyQuestion(text, questionBank) {
   const q = normalize(text);
   if (!q || q.length < 8) return null;
 
-  return questionBank.find((item) => {
-    const candidate = normalize(item?.question);
-    if (!candidate) return false;
+  return (
+    questionBank.find((item) => {
+      const candidate = normalize(item?.question);
+      if (!candidate) return false;
 
-    return (
-      q === candidate ||
-      (q.length >= 20 && candidate.includes(q)) ||
-      (candidate.length >= 20 && q.includes(candidate))
-    );
-  }) || null;
+      return (
+        q === candidate ||
+        (q.length >= 20 && candidate.includes(q)) ||
+        (candidate.length >= 20 && q.includes(candidate))
+      );
+    }) || null
+  );
 }
 
 function mergeGame(row) {
@@ -82,8 +87,7 @@ function mergeGame(row) {
 }
 
 function mergeTopic(row) {
-  const fallback =
-    fallbackTopics.find((item) => item.slug === row.slug) || {};
+  const fallback = fallbackTopics.find((item) => item.slug === row.slug) || {};
 
   return {
     ...fallback,
@@ -106,9 +110,7 @@ function answerFromKnowledge({
 }) {
   const q = normalize(question);
 
-  if (!q) {
-    return "Please type a Heritage Quest question.";
-  }
+  if (!q) return "Please type a Heritage Quest question.";
 
   if (
     includesAny(q, [
@@ -121,39 +123,12 @@ function answerFromKnowledge({
       "नमस्ते",
     ])
   ) {
-    return "Hello! I’m the Heritage Quest Helper. I can answer only verified questions about this website, its games, learning chapters, registration, age levels, progress, leaderboard and certificates.";
+    return "Hello! I’m the Heritage Quest Helper. I answer only verified questions about this website and its learning content.";
   }
 
-  const verifiedQuestion = findVerifiedQuestion(q, questionBank);
-  if (verifiedQuestion) {
-    const correctAnswer =
-      Array.isArray(verifiedQuestion.answers) &&
-      Number.isInteger(Number(verifiedQuestion.correct))
-        ? verifiedQuestion.answers[Number(verifiedQuestion.correct)]
-        : "";
-
-    const explanation = verifiedQuestion.explanation || "";
-
-    return [
-      correctAnswer ? `Short answer: ${correctAnswer}.` : "",
-      explanation ? `Why: ${explanation}` : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
-  }
-
-  const matchedGame = games.find((game) => titleMatch(q, game));
-  if (matchedGame) {
-    const details = [
-      matchedGame.description,
-      matchedGame.category ? `Category: ${matchedGame.category}.` : "",
-      matchedGame.difficulty ? `Difficulty: ${matchedGame.difficulty}.` : "",
-      matchedGame.time ? `Typical time: ${matchedGame.time}.` : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
-
-    return `${matchedGame.title}: ${details || "This is a Heritage Quest game available from the Games page."}`;
+  const verifiedQuestion = findVerifiedStudyQuestion(q, questionBank);
+  if (verifiedQuestion?.explanation) {
+    return `Brief explanation: ${verifiedQuestion.explanation}`;
   }
 
   const matchedTopic = topics.find((topic) => titleMatch(q, topic));
@@ -165,10 +140,23 @@ function answerFromKnowledge({
     return [
       `${matchedTopic.title}: ${matchedTopic.description || "This is a Heritage Quest learning topic."}`,
       matchedTopic.era ? `Era: ${matchedTopic.era}.` : "",
-      learn ? `You can learn about: ${learn}.` : "",
+      learn ? `Key areas: ${learn}.` : "",
     ]
       .filter(Boolean)
       .join(" ");
+  }
+
+  const matchedGame = games.find((game) => titleMatch(q, game));
+  if (matchedGame) {
+    const details = [
+      matchedGame.description,
+      matchedGame.category ? `Category: ${matchedGame.category}.` : "",
+      matchedGame.difficulty ? `Difficulty: ${matchedGame.difficulty}.` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
+
+    return `${matchedGame.title}: ${details || "This game is available from the Games page."}`;
   }
 
   if (
@@ -182,19 +170,13 @@ function answerFromKnowledge({
       "create account",
     ])
   ) {
-    return "To start, register with your student name, email, password and date of birth. Heritage Quest uses your date of birth to choose your question level. After registration, you can use Games for activities and Learn for chapter study.";
+    return "Register with your student name, email, password and date of birth. Heritage Quest uses your date of birth to select the suitable question level. Then use Learn to study and Games to play.";
   }
 
   if (
-    includesAny(q, [
-      "login",
-      "log in",
-      "sign in",
-      "enter again",
-      "same account",
-    ])
+    includesAny(q, ["login", "log in", "sign in", "enter again", "same account"])
   ) {
-    return "Use the same registered email and password on the Login tab. Your Supabase account reconnects you to your saved profile and learning progress.";
+    return "Use the same registered email and password on the Login tab. Your Supabase account reconnects you to your saved profile and progress.";
   }
 
   if (
@@ -210,24 +192,10 @@ function answerFromKnowledge({
     ])
   ) {
     const personal = player?.ageGroup
-      ? ` Your current profile is set to “${AGE_LABELS[player.ageGroup] || player.ageGroup}”.`
+      ? ` Your profile is “${AGE_LABELS[player.ageGroup] || player.ageGroup}”.`
       : "";
 
-    return `Question levels are selected from the registered date of birth: ages 1–5 get Entry questions, ages 6–9 get Medium questions, ages 10–16 get a Medium + Advanced mix, and ages 17+ use the full Open Explorer set.${personal}`;
-  }
-
-  if (
-    includesAny(q, [
-      "quiz",
-      "questions per chapter",
-      "how many questions",
-      "normal questions",
-      "advanced questions",
-      "hint",
-      "explanation",
-    ])
-  ) {
-    return "Quiz chapters use 10 questions. For the scholar/open pattern, normal and advanced questions are mixed rather than grouped together. Quiz questions include answer choices, hints and explanations, and progress is saved to the student profile.";
+    return `Ages 1–5 receive Entry questions, ages 6–9 receive Medium questions, ages 10–16 receive a Medium + Advanced mix, and ages 17+ use the full Open Explorer set.${personal}`;
   }
 
   if (
@@ -235,46 +203,32 @@ function answerFromKnowledge({
       "certificate",
       "download certificate",
       "completion certificate",
-      "certificate download",
     ])
   ) {
-    return "When you complete an eligible chapter/task, Heritage Quest creates a certificate with your student name, completed task, issue date and verification code. You can download the certificate as an image or print/save it as PDF.";
+    return "After an eligible chapter or task is completed, Heritage Quest can create a certificate using the student name, completed task, date and verification code. It can be downloaded or printed as PDF.";
   }
 
   if (
-    includesAny(q, [
-      "leaderboard",
-      "ranking",
-      "rank",
-      "points",
-      "weekly goal",
-    ])
+    includesAny(q, ["leaderboard", "ranking", "rank", "points", "weekly goal"])
   ) {
-    return `The leaderboard is calculated from real quiz scores saved in Supabase. It supports Daily, Weekly and All Time views. The current weekly goal is ${Number(settings.weeklyGoalPoints || 700)} points.`;
+    return `The leaderboard uses real quiz scores saved in Supabase and supports Daily, Weekly and All Time views. The current weekly goal is ${Number(settings.weeklyGoalPoints || 700)} points.`;
   }
 
   if (
     includesAny(q, [
       "daily challenge",
       "today challenge",
-      "today's challenge",
-      "progress today",
       "today progress",
+      "progress today",
     ])
   ) {
-    return `Today’s Heritage Challenge tracks your real quiz activity saved in Supabase. The current target is ${Number(settings.dailyChallengeQuestions || 5)} answered questions. Its progress and accuracy update from your activity for the current day.`;
+    return `The daily challenge reads the student’s real quiz activity from Supabase. The current target is ${Number(settings.dailyChallengeQuestions || 5)} answered questions for the day.`;
   }
 
   if (
-    includesAny(q, [
-      "progress",
-      "saved progress",
-      "activity",
-      "my score",
-      "score saved",
-    ])
+    includesAny(q, ["progress", "saved progress", "activity", "my score"])
   ) {
-    return "Your quiz progress, score and gameplay activity are stored with your Supabase student account, so the website can restore your learning journey when you log in again.";
+    return "Quiz progress, scores and gameplay activity are saved with the student’s Supabase account so the learning journey can continue after logging in again.";
   }
 
   if (
@@ -293,13 +247,7 @@ function answerFromKnowledge({
   }
 
   if (
-    includesAny(q, [
-      "show games",
-      "games available",
-      "list games",
-      "what games",
-      "games",
-    ])
+    includesAny(q, ["show games", "games available", "list games", "what games"])
   ) {
     const names = games.map((game) => game.title).filter(Boolean);
     return `Current games: ${names.join(", ")}. Open the Games page to choose one.`;
@@ -317,31 +265,13 @@ function answerFromKnowledge({
     ])
   ) {
     const names = topics.map((topic) => topic.title).filter(Boolean);
-    return `Current learning topics: ${names.join(", ")}. Open the Learn page to read a topic before attempting its challenge.`;
+    return `Current learning topics: ${names.join(", ")}. Open Learn to study a topic before starting a challenge.`;
   }
 
   if (
-    includesAny(q, [
-      "profile",
-      "student profile",
-      "settings",
-      "change language",
-      "my account",
-    ])
+    includesAny(q, ["profile", "student profile", "settings", "my account"])
   ) {
-    return "Use Profile to see your student information and saved learning summary. Use Settings for supported student preferences. The language selector in the navigation changes the website language.";
-  }
-
-  if (
-    includesAny(q, [
-      "admin",
-      "admin dashboard",
-      "edit game",
-      "edit chapter",
-      "replace image",
-    ])
-  ) {
-    return "The Admin Dashboard is restricted to authorized admin accounts. Admins can manage games, chapters, questions, images, student records, certificates and site settings in Supabase.";
+    return "Use Profile to view student information and the saved learning summary. Use Settings for student preferences.";
   }
 
   if (
@@ -353,13 +283,14 @@ function answerFromKnowledge({
       "heritage quest",
     ])
   ) {
-    return "Heritage Quest is an educational platform for exploring Indian history, civilization, monuments, art, festivals and culture through games, chapter learning, quizzes, progress tracking and completion certificates.";
+    return "Heritage Quest is an educational platform for exploring Indian history, civilization, monuments, art, festivals and culture through learning chapters, games, quizzes, progress tracking and certificates.";
   }
 
-  return "I don’t have a verified Heritage Quest answer for that. I only answer questions supported by this website’s content and features. Try asking about registration, age levels, games, learning chapters, languages, progress, leaderboard, daily challenge or certificates.";
+  return "I don’t have a verified Heritage Quest answer for that. I only answer questions supported by this website’s content and features.";
 }
 
 export default function HeritageChatbot() {
+  const { pathname } = useLocation();
   const { player } = usePlayer();
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState("");
@@ -371,7 +302,7 @@ export default function HeritageChatbot() {
     {
       id: "welcome",
       role: "bot",
-      text: "Hi! I’m the Heritage Quest Helper. Ask me small questions about this website. I only use verified Heritage Quest information and I won’t answer unrelated questions.",
+      text: "Hi! I’m the Heritage Quest Helper. Ask me about the website or a study question from one of the Heritage Quest chapters.",
     },
   ]);
   const endRef = useRef(null);
@@ -379,14 +310,35 @@ export default function HeritageChatbot() {
   useEffect(() => {
     let active = true;
 
-    if (!player?.id || !supabase) {
-      return () => {
-        active = false;
-      };
-    }
+    fetch("/data/content.json")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((content) => {
+        if (!active || !content?.questionsByChapter) return;
 
-    const loadKnowledge = async () => {
-      const [gamesRes, topicsRes, settingsRes, contentRes] = await Promise.all([
+        const verifiedQuestions = Object.entries(
+          content.questionsByChapter,
+        ).flatMap(([chapterSlug, questions]) =>
+          (questions || []).map((item) => ({
+            ...item,
+            chapterSlug,
+          })),
+        );
+
+        setQuestionBank(verifiedQuestions);
+      })
+      .catch(() => {});
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    if (!supabase) return undefined;
+
+    const loadLiveKnowledge = async () => {
+      const [gamesRes, topicsRes, settingsRes] = await Promise.all([
         supabase.from("games").select("*").order("title"),
         supabase.from("chapters").select("*").order("title"),
         supabase
@@ -394,9 +346,6 @@ export default function HeritageChatbot() {
           .select("payload")
           .eq("id", "main")
           .maybeSingle(),
-        fetch("/data/content.json")
-          .then((response) => (response.ok ? response.json() : null))
-          .catch(() => null),
       ]);
 
       if (!active) return;
@@ -429,22 +378,9 @@ export default function HeritageChatbot() {
           ...settingsRes.data.payload,
         }));
       }
-
-      if (contentRes?.questionsByChapter) {
-        const verifiedQuestions = Object.entries(
-          contentRes.questionsByChapter,
-        ).flatMap(([chapterSlug, questions]) =>
-          (questions || []).map((item) => ({
-            ...item,
-            chapterSlug,
-          })),
-        );
-
-        setQuestionBank(verifiedQuestions);
-      }
     };
 
-    loadKnowledge();
+    loadLiveKnowledge();
 
     return () => {
       active = false;
@@ -492,6 +428,10 @@ export default function HeritageChatbot() {
     ask(draft);
   };
 
+  if (pathname.startsWith("/play/")) {
+    return null;
+  }
+
   return (
     <>
       {open && (
@@ -529,9 +469,8 @@ export default function HeritageChatbot() {
           </div>
 
           <div className="border-b border-slate-100 bg-emerald-50 px-4 py-2.5 text-xs font-semibold leading-5 text-emerald-900">
-            I only use verified Heritage Quest content. You can also ask a
-            specific study question from a chapter, and I’ll give its short
-            stored answer and explanation.
+            Ask a website question or a specific chapter study question. If it
+            is not in Heritage Quest, I will not invent an answer.
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50/70 p-4">
