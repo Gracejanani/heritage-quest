@@ -49,6 +49,22 @@ function titleMatch(text, item) {
   return text.includes(title);
 }
 
+function findVerifiedQuestion(text, questionBank) {
+  const q = normalize(text);
+  if (!q || q.length < 8) return null;
+
+  return questionBank.find((item) => {
+    const candidate = normalize(item?.question);
+    if (!candidate) return false;
+
+    return (
+      q === candidate ||
+      (q.length >= 20 && candidate.includes(q)) ||
+      (candidate.length >= 20 && q.includes(candidate))
+    );
+  }) || null;
+}
+
 function mergeGame(row) {
   const fallback =
     fallbackGames.find((item) => item.id === row.id || item.slug === row.slug) ||
@@ -86,6 +102,7 @@ function answerFromKnowledge({
   topics,
   settings,
   player,
+  questionBank,
 }) {
   const q = normalize(question);
 
@@ -105,6 +122,24 @@ function answerFromKnowledge({
     ])
   ) {
     return "Hello! I’m the Heritage Quest Helper. I can answer only verified questions about this website, its games, learning chapters, registration, age levels, progress, leaderboard and certificates.";
+  }
+
+  const verifiedQuestion = findVerifiedQuestion(q, questionBank);
+  if (verifiedQuestion) {
+    const correctAnswer =
+      Array.isArray(verifiedQuestion.answers) &&
+      Number.isInteger(Number(verifiedQuestion.correct))
+        ? verifiedQuestion.answers[Number(verifiedQuestion.correct)]
+        : "";
+
+    const explanation = verifiedQuestion.explanation || "";
+
+    return [
+      correctAnswer ? `Short answer: ${correctAnswer}.` : "",
+      explanation ? `Why: ${explanation}` : "",
+    ]
+      .filter(Boolean)
+      .join(" ");
   }
 
   const matchedGame = games.find((game) => titleMatch(q, game));
@@ -331,6 +366,7 @@ export default function HeritageChatbot() {
   const [games, setGames] = useState(fallbackGames);
   const [topics, setTopics] = useState(fallbackTopics);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [questionBank, setQuestionBank] = useState([]);
   const [messages, setMessages] = useState([
     {
       id: "welcome",
@@ -350,7 +386,7 @@ export default function HeritageChatbot() {
     }
 
     const loadKnowledge = async () => {
-      const [gamesRes, topicsRes, settingsRes] = await Promise.all([
+      const [gamesRes, topicsRes, settingsRes, contentRes] = await Promise.all([
         supabase.from("games").select("*").order("title"),
         supabase.from("chapters").select("*").order("title"),
         supabase
@@ -358,6 +394,9 @@ export default function HeritageChatbot() {
           .select("payload")
           .eq("id", "main")
           .maybeSingle(),
+        fetch("/data/content.json")
+          .then((response) => (response.ok ? response.json() : null))
+          .catch(() => null),
       ]);
 
       if (!active) return;
@@ -390,6 +429,19 @@ export default function HeritageChatbot() {
           ...settingsRes.data.payload,
         }));
       }
+
+      if (contentRes?.questionsByChapter) {
+        const verifiedQuestions = Object.entries(
+          contentRes.questionsByChapter,
+        ).flatMap(([chapterSlug, questions]) =>
+          (questions || []).map((item) => ({
+            ...item,
+            chapterSlug,
+          })),
+        );
+
+        setQuestionBank(verifiedQuestions);
+      }
     };
 
     loadKnowledge();
@@ -405,8 +457,8 @@ export default function HeritageChatbot() {
   }, [messages, open]);
 
   const knowledge = useMemo(
-    () => ({ games, topics, settings, player }),
-    [games, topics, settings, player],
+    () => ({ games, topics, settings, player, questionBank }),
+    [games, topics, settings, player, questionBank],
   );
 
   const ask = (value) => {
@@ -477,8 +529,9 @@ export default function HeritageChatbot() {
           </div>
 
           <div className="border-b border-slate-100 bg-emerald-50 px-4 py-2.5 text-xs font-semibold leading-5 text-emerald-900">
-            I don’t generate open-ended answers. If Heritage Quest does not
-            contain a verified answer, I’ll say so.
+            I only use verified Heritage Quest content. You can also ask a
+            specific study question from a chapter, and I’ll give its short
+            stored answer and explanation.
           </div>
 
           <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50/70 p-4">
