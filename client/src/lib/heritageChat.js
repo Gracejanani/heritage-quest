@@ -9,7 +9,7 @@ const HERITAGE_FACTS = [
   {
     terms: ["taj mahal"],
     answer:
-      "Mughal emperor Shah Jahan commissioned the Taj Mahal in 1632. Its main mausoleum was completed in 1648, and the wider complex around 1653.",
+      "Mughal emperor Shah Jahan commissioned the Taj Mahal in 1632, and the complex was completed around 1653.",
   },
   {
     terms: ["qutub minar", "qutb minar"],
@@ -280,7 +280,7 @@ function endSentence(value) {
   return /[.!?]$/.test(text) ? text : `${text}.`;
 }
 
-function concise(value, maximum = 280) {
+function concise(value, maximum = 220) {
   const text = String(value || "").replace(/\s+/g, " ").trim();
   if (text.length <= maximum) return text;
   const shortened = text.slice(0, maximum - 1);
