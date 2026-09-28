@@ -15,6 +15,7 @@ A modern, responsive educational gaming prototype for exploring Indian civilizat
 - Every question has four mixed answer options, answer validation, a hint and a historical explanation.
 - New age-curated temple questions use the client-provided temple reference material.
 - English plus all **22 Scheduled Indian languages** are available in the language selector.
+- The **Heritage Helper** chatbot understands natural greetings and returns concise answers from curated heritage facts, chapter questions and live website content.
 - Student profile, quiz progress and gameplay activity are stored in Supabase with a local browser cache for resilience.
 - Completing a chapter automatically issues a personalised certificate that can be downloaded or printed and stored privately in Supabase Storage.
 - Teachers have a protected dashboard for assigned student profiles, chapter progress, quiz performance, achievements, certificates and recent activity.

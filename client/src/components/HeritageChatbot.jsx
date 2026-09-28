@@ -13,6 +13,7 @@ import {
   learningTopics as fallbackTopics,
 } from "../data/content";
 import { usePlayer } from "../context/PlayerContext";
+import { answerFromKnowledge } from "../lib/heritageChat";
 import { supabase } from "../lib/supabase";
 
 const DEFAULT_SETTINGS = {
@@ -21,54 +22,11 @@ const DEFAULT_SETTINGS = {
 };
 
 const QUICK_QUESTIONS = [
-  "How do I start?",
-  "Which questions will I get?",
-  "How do certificates work?",
-  "Show me the games",
-  "What languages are available?",
+  "Good morning",
+  "When was the Taj Mahal built?",
+  "Who built Qutub Minar?",
+  "What is Heritage Quest?",
 ];
-
-const AGE_LABELS = {
-  entry: "Little Explorer · Entry level",
-  junior: "Young Explorer · Medium level",
-  scholar: "Heritage Scholar · Medium + Advanced",
-  open: "Open Explorer · Full question set",
-};
-
-function normalize(value) {
-  return String(value || "")
-    .toLowerCase()
-    .replace(/[^a-z0-9\u00c0-\u024f\u0900-\u097f\u0980-\u09ff\u0b80-\u0bff\u0c00-\u0c7f\u0c80-\u0cff\s-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-function includesAny(text, phrases) {
-  return phrases.some((phrase) => text.includes(normalize(phrase)));
-}
-
-function titleMatch(text, item) {
-  const title = normalize(item?.title);
-  return Boolean(title && title.length >= 4 && text.includes(title));
-}
-
-function findVerifiedStudyQuestion(text, questionBank) {
-  const q = normalize(text);
-  if (!q || q.length < 8) return null;
-
-  return (
-    questionBank.find((item) => {
-      const candidate = normalize(item?.question);
-      if (!candidate) return false;
-
-      return (
-        q === candidate ||
-        (q.length >= 20 && candidate.includes(q)) ||
-        (candidate.length >= 20 && q.includes(candidate))
-      );
-    }) || null
-  );
-}
 
 function mergeGame(row) {
   const fallback =
@@ -100,195 +58,6 @@ function mergeTopic(row) {
   };
 }
 
-function answerFromKnowledge({
-  question,
-  games,
-  topics,
-  settings,
-  player,
-  questionBank,
-}) {
-  const q = normalize(question);
-
-  if (!q) return "Please type a Heritage Quest question.";
-
-  if (
-    includesAny(q, [
-      "hi",
-      "hello",
-      "hey",
-      "vanakkam",
-      "வணக்கம்",
-      "namaste",
-      "नमस्ते",
-    ])
-  ) {
-    return "Hello! I’m the Heritage Quest Helper. I answer only verified questions about this website and its learning content.";
-  }
-
-  const verifiedQuestion = findVerifiedStudyQuestion(q, questionBank);
-  if (verifiedQuestion?.explanation) {
-    return `Brief explanation: ${verifiedQuestion.explanation}`;
-  }
-
-  const matchedTopic = topics.find((topic) => titleMatch(q, topic));
-  if (matchedTopic) {
-    const learn = Array.isArray(matchedTopic.learn)
-      ? matchedTopic.learn.slice(0, 5).join(", ")
-      : "";
-
-    return [
-      `${matchedTopic.title}: ${matchedTopic.description || "This is a Heritage Quest learning topic."}`,
-      matchedTopic.era ? `Era: ${matchedTopic.era}.` : "",
-      learn ? `Key areas: ${learn}.` : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
-  }
-
-  const matchedGame = games.find((game) => titleMatch(q, game));
-  if (matchedGame) {
-    const details = [
-      matchedGame.description,
-      matchedGame.category ? `Category: ${matchedGame.category}.` : "",
-      matchedGame.difficulty ? `Difficulty: ${matchedGame.difficulty}.` : "",
-    ]
-      .filter(Boolean)
-      .join(" ");
-
-    return `${matchedGame.title}: ${details || "This game is available from the Games page."}`;
-  }
-
-  if (
-    includesAny(q, [
-      "how do i start",
-      "how to start",
-      "start learning",
-      "begin",
-      "register",
-      "sign up",
-      "create account",
-    ])
-  ) {
-    return "Register with your student name, email, password and date of birth. Heritage Quest uses your date of birth to select the suitable question level. Then use Learn to study and Games to play.";
-  }
-
-  if (
-    includesAny(q, ["login", "log in", "sign in", "enter again", "same account"])
-  ) {
-    return "Use the same registered email and password on the Login tab. Your Supabase account reconnects you to your saved profile and progress.";
-  }
-
-  if (
-    includesAny(q, [
-      "age",
-      "age group",
-      "question level",
-      "which questions",
-      "my level",
-      "difficulty",
-      "entry level",
-      "advanced level",
-    ])
-  ) {
-    const personal = player?.ageGroup
-      ? ` Your profile is “${AGE_LABELS[player.ageGroup] || player.ageGroup}”.`
-      : "";
-
-    return `Ages 1–5 receive Entry questions, ages 6–9 receive Medium questions, ages 10–16 receive a Medium + Advanced mix, and ages 17+ use the full Open Explorer set.${personal}`;
-  }
-
-  if (
-    includesAny(q, [
-      "certificate",
-      "download certificate",
-      "completion certificate",
-    ])
-  ) {
-    return "After an eligible chapter or task is completed, Heritage Quest can create a certificate using the student name, completed task, date and verification code. It can be downloaded or printed as PDF.";
-  }
-
-  if (
-    includesAny(q, ["leaderboard", "ranking", "rank", "points", "weekly goal"])
-  ) {
-    return `The leaderboard uses real quiz scores saved in Supabase and supports Daily, Weekly and All Time views. The current weekly goal is ${Number(settings.weeklyGoalPoints || 700)} points.`;
-  }
-
-  if (
-    includesAny(q, [
-      "daily challenge",
-      "today challenge",
-      "today progress",
-      "progress today",
-    ])
-  ) {
-    return `The daily challenge reads the student’s real quiz activity from Supabase. The current target is ${Number(settings.dailyChallengeQuestions || 5)} answered questions for the day.`;
-  }
-
-  if (
-    includesAny(q, ["progress", "saved progress", "activity", "my score"])
-  ) {
-    return "Quiz progress, scores and gameplay activity are saved with the student’s Supabase account so the learning journey can continue after logging in again.";
-  }
-
-  if (
-    includesAny(q, [
-      "language",
-      "languages",
-      "tamil",
-      "hindi",
-      "telugu",
-      "kannada",
-      "urdu",
-      "22",
-    ])
-  ) {
-    return "Heritage Quest includes English plus the 22 Scheduled Indian languages in the language selector: Assamese, Bengali, Bodo, Dogri, Gujarati, Hindi, Kannada, Kashmiri, Konkani, Maithili, Malayalam, Manipuri, Marathi, Nepali, Odia, Punjabi, Sanskrit, Santali, Sindhi, Tamil, Telugu and Urdu.";
-  }
-
-  if (
-    includesAny(q, ["show games", "games available", "list games", "what games"])
-  ) {
-    const names = games.map((game) => game.title).filter(Boolean);
-    return `Current games: ${names.join(", ")}. Open the Games page to choose one.`;
-  }
-
-  if (
-    includesAny(q, [
-      "learning chapters",
-      "chapters",
-      "study material",
-      "study materials",
-      "what can i learn",
-      "learn page",
-      "topics",
-    ])
-  ) {
-    const names = topics.map((topic) => topic.title).filter(Boolean);
-    return `Current learning topics: ${names.join(", ")}. Open Learn to study a topic before starting a challenge.`;
-  }
-
-  if (
-    includesAny(q, ["profile", "student profile", "settings", "my account"])
-  ) {
-    return "Use Profile to view student information and the saved learning summary. Use Settings for student preferences.";
-  }
-
-  if (
-    includesAny(q, [
-      "what is heritage quest",
-      "about website",
-      "what is this website",
-      "website purpose",
-      "heritage quest",
-    ])
-  ) {
-    return "Heritage Quest is an educational platform for exploring Indian history, civilization, monuments, art, festivals and culture through learning chapters, games, quizzes, progress tracking and certificates.";
-  }
-
-  return "I don’t have a verified Heritage Quest answer for that. I only answer questions supported by this website’s content and features.";
-}
-
 export default function HeritageChatbot() {
   const { pathname } = useLocation();
   const { player } = usePlayer();
@@ -298,14 +67,17 @@ export default function HeritageChatbot() {
   const [topics, setTopics] = useState(fallbackTopics);
   const [settings, setSettings] = useState(DEFAULT_SETTINGS);
   const [questionBank, setQuestionBank] = useState([]);
+  const [typing, setTyping] = useState(false);
   const [messages, setMessages] = useState([
     {
       id: "welcome",
       role: "bot",
-      text: "Hi! I’m the Heritage Quest Helper. Ask me about the website or a study question from one of the Heritage Quest chapters.",
+      text: "Hello! Ask me a short question about Indian heritage or Heritage Quest.",
     },
   ]);
   const endRef = useRef(null);
+  const replyTimerRef = useRef(null);
+  const replyPendingRef = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -390,7 +162,15 @@ export default function HeritageChatbot() {
   useEffect(() => {
     if (!open) return;
     endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, open]);
+  }, [messages, open, typing]);
+
+  useEffect(
+    () => () => {
+      if (replyTimerRef.current) clearTimeout(replyTimerRef.current);
+      replyPendingRef.current = false;
+    },
+    [],
+  );
 
   const knowledge = useMemo(
     () => ({ games, topics, settings, player, questionBank }),
@@ -399,7 +179,8 @@ export default function HeritageChatbot() {
 
   const ask = (value) => {
     const question = String(value || "").trim();
-    if (!question) return;
+    if (!question || replyPendingRef.current) return;
+    replyPendingRef.current = true;
 
     const reply = answerFromKnowledge({
       question,
@@ -413,14 +194,23 @@ export default function HeritageChatbot() {
         role: "user",
         text: question,
       },
-      {
-        id: `bot-${Date.now()}-${current.length}`,
-        role: "bot",
-        text: reply,
-      },
     ]);
-
     setDraft("");
+    setTyping(true);
+
+    replyTimerRef.current = setTimeout(() => {
+      setMessages((current) => [
+        ...current,
+        {
+          id: `bot-${Date.now()}-${current.length}`,
+          role: "bot",
+          text: reply,
+        },
+      ]);
+      replyPendingRef.current = false;
+      setTyping(false);
+      replyTimerRef.current = null;
+    }, 420);
   };
 
   const submit = (event) => {
@@ -452,7 +242,7 @@ export default function HeritageChatbot() {
                   </div>
                   <div className="mt-1 flex items-center gap-1.5 text-xs font-bold text-emerald-100">
                     <ShieldCheck className="h-3.5 w-3.5" />
-                    Website-only verified answers
+                    Online · Short verified answers
                   </div>
                 </div>
               </div>
@@ -469,11 +259,14 @@ export default function HeritageChatbot() {
           </div>
 
           <div className="border-b border-slate-100 bg-emerald-50 px-4 py-2.5 text-xs font-semibold leading-5 text-emerald-900">
-            Ask a website question or a specific chapter study question. If it
-            is not in Heritage Quest, I will not invent an answer.
+            Ask naturally about Indian heritage or the website. Replies stay
+            clear and concise.
           </div>
 
-          <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50/70 p-4">
+          <div
+            className="flex-1 space-y-3 overflow-y-auto bg-slate-50/70 p-4"
+            aria-live="polite"
+          >
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -486,6 +279,22 @@ export default function HeritageChatbot() {
                 {message.text}
               </div>
             ))}
+            {typing ? (
+              <div
+                className="flex w-fit items-center gap-1 rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-sm"
+                aria-label="Heritage Helper is typing"
+                role="status"
+              >
+                {[0, 1, 2].map((dot) => (
+                  <span
+                    key={dot}
+                    aria-hidden="true"
+                    className="h-2 w-2 animate-bounce rounded-full bg-heritage-green"
+                    style={{ animationDelay: `${dot * 120}ms` }}
+                  />
+                ))}
+              </div>
+            ) : null}
             <div ref={endRef} />
           </div>
 
@@ -496,7 +305,8 @@ export default function HeritageChatbot() {
                   type="button"
                   key={question}
                   onClick={() => ask(question)}
-                  className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-heritage-green hover:bg-emerald-100"
+                  disabled={typing}
+                  className="shrink-0 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-heritage-green hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {question}
                 </button>
@@ -516,14 +326,14 @@ export default function HeritageChatbot() {
                       ask(draft);
                     }
                   }}
-                  placeholder="Ask about Heritage Quest…"
+                  placeholder="Ask a short question…"
                   className="focus-ring max-h-24 min-h-11 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 outline-none placeholder:text-slate-400 focus:border-heritage-green focus:bg-white"
                 />
               </label>
 
               <button
                 type="submit"
-                disabled={!draft.trim()}
+                disabled={!draft.trim() || typing}
                 className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-heritage-green text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-40"
                 aria-label="Send question"
               >
