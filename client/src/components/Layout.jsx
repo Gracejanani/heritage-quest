@@ -10,6 +10,7 @@ import {
   UserRound,
   LogOut,
   ShieldCheck,
+  GraduationCap,
 } from "lucide-react";
 import Logo from "./Logo";
 import { SearchBar } from "./ui";
@@ -31,19 +32,24 @@ export function Navbar() {
   const { player, switchPlayer } = usePlayer();
   const { language, setLanguage, languages, t } = useLanguage();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isTeacher, setIsTeacher] = useState(false);
   useEffect(() => setOpen(false), [location.pathname]);
 
   useEffect(() => {
     let active = true;
     if (!player?.id || !supabase) {
       setIsAdmin(false);
+      setIsTeacher(false);
       return undefined;
     }
 
-    supabase.rpc("is_admin").then(({ data, error }) => {
-      if (!active) return;
-      setIsAdmin(!error && Boolean(data));
-    });
+    Promise.all([supabase.rpc("is_admin"), supabase.rpc("is_teacher")]).then(
+      ([adminResult, teacherResult]) => {
+        if (!active) return;
+        setIsAdmin(!adminResult.error && Boolean(adminResult.data));
+        setIsTeacher(!teacherResult.error && Boolean(teacherResult.data));
+      },
+    );
 
     return () => {
       active = false;
@@ -92,6 +98,14 @@ export function Navbar() {
             className="focus-ring hidden items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-2.5 text-sm font-bold text-heritage-green shadow-sm hover:bg-emerald-50 xl:inline-flex"
           >
             <ShieldCheck className="h-4 w-4" /> Admin
+          </Link>
+        )}
+        {isTeacher && (
+          <Link
+            to="/teacher"
+            className="focus-ring hidden items-center gap-2 rounded-2xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-bold text-sky-700 shadow-sm hover:bg-sky-50 xl:inline-flex"
+          >
+            <GraduationCap className="h-4 w-4" /> Teacher
           </Link>
         )}
         <Link
@@ -179,6 +193,14 @@ export function Navbar() {
                   className="rounded-xl px-4 py-3 font-bold text-heritage-green hover:bg-emerald-50"
                 >
                   Admin Dashboard
+                </NavLink>
+              )}
+              {isTeacher && (
+                <NavLink
+                  to="/teacher"
+                  className="rounded-xl px-4 py-3 font-bold text-sky-700 hover:bg-sky-50"
+                >
+                  Teacher Dashboard
                 </NavLink>
               )}
               <NavLink

@@ -7,6 +7,7 @@ import {
   Database,
   FileImage,
   Gamepad2,
+  GraduationCap,
   ImagePlus,
   LayoutDashboard,
   Loader2,
@@ -23,6 +24,7 @@ import {
 import { Badge, Button, Select, useToast } from "../components/ui";
 import { useAuth } from "../context/AuthContext";
 import { supabase } from "../lib/supabase";
+import AdminTeacherManager from "../components/AdminTeacherManager";
 
 const tabs = [
   ["dashboard", "Dashboard", LayoutDashboard],
@@ -31,6 +33,7 @@ const tabs = [
   ["games", "Games", Gamepad2],
   ["chapters", "Chapters", Database],
   ["students", "Students", Users],
+  ["teachers", "Teachers", GraduationCap],
   ["certificates", "Certificates", Award],
   ["assets", "Images & files", FileImage],
   ["settings", "Site settings", Settings],
@@ -83,6 +86,10 @@ export default function Admin() {
   const [progress, setProgress] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [auditRows, setAuditRows] = useState([]);
+  const [teachers, setTeachers] = useState([]);
+  const [teacherAssignments, setTeacherAssignments] = useState([]);
+  const [teacherActivity, setTeacherActivity] = useState([]);
+  const [adminUsers, setAdminUsers] = useState([]);
   const [settingsRow, setSettingsRow] = useState({ id: "main", payload: {} });
   const [assets, setAssets] = useState([]);
 
@@ -153,6 +160,10 @@ export default function Admin() {
       certificatesRes,
       settingsRes,
       auditRes,
+      teachersRes,
+      teacherAssignmentsRes,
+      teacherActivityRes,
+      adminUsersRes,
     ] = await Promise.all([
       supabase
         .from("games")
@@ -183,6 +194,17 @@ export default function Admin() {
         .select("*")
         .order("created_at", { ascending: false })
         .limit(100),
+      supabase.from("teacher_profiles").select("*").order("display_name"),
+      supabase
+        .from("teacher_student_assignments")
+        .select("*")
+        .order("assigned_at", { ascending: false }),
+      supabase
+        .from("teacher_activity_log")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(500),
+      supabase.from("admin_users").select("user_id, role"),
     ]);
 
     const firstError = [
@@ -195,6 +217,10 @@ export default function Admin() {
       certificatesRes,
       settingsRes,
       auditRes,
+      teachersRes,
+      teacherAssignmentsRes,
+      teacherActivityRes,
+      adminUsersRes,
     ].find((result) => result.error)?.error;
 
     if (firstError) {
@@ -214,6 +240,10 @@ export default function Admin() {
     setSettingsRow(nextSettings);
     setSettingsForm(nextSettings.payload || {});
     setAuditRows(auditRes.data || []);
+    setTeachers(teachersRes.data || []);
+    setTeacherAssignments(teacherAssignmentsRes.data || []);
+    setTeacherActivity(teacherActivityRes.data || []);
+    setAdminUsers(adminUsersRes.data || []);
 
     await loadAssets();
     setBusy(false);
@@ -257,9 +287,17 @@ export default function Admin() {
     });
   }, [questions, questionSearch, questionChapter, questionAge]);
 
+  const studentProfiles = useMemo(() => {
+    const staffIds = new Set([
+      ...teachers.map((teacher) => teacher.user_id),
+      ...adminUsers.map((admin) => admin.user_id),
+    ]);
+    return profiles.filter((profile) => !staffIds.has(profile.user_id));
+  }, [profiles, teachers, adminUsers]);
+
   const studentRows = useMemo(
     () =>
-      profiles.map((profile) => {
+      studentProfiles.map((profile) => {
         const rows = progress.filter((item) => item.user_id === profile.user_id);
         const totalScore = rows.reduce(
           (sum, item) => sum + Number(item.score || 0),
@@ -271,7 +309,7 @@ export default function Admin() {
         ).length;
         return { ...profile, totalScore, completed, certificateCount };
       }),
-    [profiles, progress, certificates],
+    [studentProfiles, progress, certificates],
   );
 
   const saveQuestion = async () => {
@@ -852,7 +890,8 @@ export default function Admin() {
   };
 
   const dashboardCards = [
-    ["Students", profiles.length, Users],
+    ["Students", studentProfiles.length, Users],
+    ["Teachers", teachers.filter((teacher) => teacher.status === "active").length, GraduationCap],
     ["Questions", questions.length + wordPuzzles.length, BookOpen],
     ["Games", games.length, Gamepad2],
     ["Certificates", certificates.length, Award],
@@ -908,7 +947,7 @@ export default function Admin() {
 
       {tab === "dashboard" && (
         <section className="mt-6">
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
             {dashboardCards.map(([label, value, Icon]) => (
               <div key={label} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
                 <Icon className="h-7 w-7 text-heritage-green" />
@@ -1598,6 +1637,18 @@ export default function Admin() {
             </table>
           </div>
         </section>
+      )}
+
+      {tab === "teachers" && (
+        <AdminTeacherManager
+          profiles={profiles}
+          teachers={teachers}
+          assignments={teacherAssignments}
+          activityRows={teacherActivity}
+          adminUsers={adminUsers}
+          onRefresh={refreshAll}
+          audit={audit}
+        />
       )}
 
       {tab === "certificates" && (

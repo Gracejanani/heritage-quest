@@ -20,6 +20,7 @@ This creates:
 - quiz progress
 - gameplay activity logs
 - completion certificates
+- teacher profiles, student assignments and teacher activity logs
 - private certificate Storage bucket
 - Row Level Security policies
 
@@ -96,3 +97,14 @@ The certificate:
 - downloads as a PNG
 - can be printed/saved as PDF
 - is also uploaded to the private Supabase `certificates` bucket
+
+## 9. Teacher dashboard
+
+Teacher access is assigned from the protected `/admin` dashboard:
+
+1. The teacher registers a normal Heritage Quest account.
+2. An administrator opens **Teachers**, activates that account and adds the school or subject details.
+3. The administrator assigns one or more registered students.
+4. The teacher signs in and opens `/teacher` from the navigation.
+
+Row Level Security limits teachers to students explicitly assigned to them. The admin dashboard records teacher dashboard visits, refreshes and student-detail views.

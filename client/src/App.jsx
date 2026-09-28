@@ -1,4 +1,4 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import Layout from "./components/Layout";
 import { ToastProvider } from "./components/ui";
@@ -19,11 +19,22 @@ import Certificate from "./pages/Certificate";
 import NotFound from "./pages/NotFound";
 import AuthGate from "./components/AuthGate";
 import AdminGuard from "./components/AdminGuard";
-import Admin from "./pages/Admin";
+import TeacherGuard from "./components/TeacherGuard";
 import { PlayerProvider } from "./context/PlayerContext";
 import { AuthProvider } from "./context/AuthContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import HeritageChatbot from "./components/HeritageChatbot";
+
+const Admin = lazy(() => import("./pages/Admin"));
+const TeacherDashboard = lazy(() => import("./pages/TeacherDashboard"));
+
+function DashboardFallback() {
+  return (
+    <div className="container-app py-20 text-center font-bold text-slate-600">
+      Loading dashboard…
+    </div>
+  );
+}
 
 export default function App() {
   const { pathname } = useLocation();
@@ -64,8 +75,21 @@ export default function App() {
         path="/admin"
         element={
           <AdminGuard>
-            <Admin />
+            <Suspense fallback={<DashboardFallback />}>
+              <Admin />
+            </Suspense>
           </AdminGuard>
+        }
+      />
+
+      <Route
+        path="/teacher"
+        element={
+          <TeacherGuard>
+            <Suspense fallback={<DashboardFallback />}>
+              <TeacherDashboard />
+            </Suspense>
+          </TeacherGuard>
         }
       />
 
