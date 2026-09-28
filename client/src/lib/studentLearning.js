@@ -34,6 +34,172 @@ export function activityLabel(type) {
   return labels[type] || readableSlug(type);
 }
 
+function daysSince(value, now) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return Math.max(0, Math.floor((now.getTime() - date.getTime()) / 86400000));
+}
+
+export function buildImprovementPlan(student, now = new Date()) {
+  if (!student) return [];
+
+  const progressRows = Array.isArray(student.progressRows)
+    ? student.progressRows
+    : [];
+  const totalAnswers = Number(student.totalAnswers || 0);
+  const accuracy = Number(student.accuracy || 0);
+  const completed = Number(student.completed || 0);
+  const inactiveDays = daysSince(student.lastActive, now);
+  const inProgressChapter = progressRows.find((row) => !row.finished);
+  const attemptedChapters = progressRows.filter((row) => row.answerCount > 0);
+  const weakestChapter = [...attemptedChapters].sort(
+    (a, b) => a.accuracy - b.accuracy || b.answerCount - a.answerCount,
+  )[0];
+  const lockedAchievements = (student.achievements || [])
+    .filter((achievement) => !achievement.unlocked)
+    .sort(
+      (a, b) =>
+        b.progress - a.progress ||
+        a.target - a.current - (b.target - b.current),
+    );
+
+  const plan = [];
+
+  if (inactiveDays === null) {
+    plan.push({
+      id: "start-routine",
+      priority: "Start here",
+      tone: "orange",
+      title: "Begin a simple learning routine",
+      detail:
+        "Choose one chapter and spend 15 focused minutes on its lesson and quiz.",
+      goal: "Record the first learning activity this week.",
+    });
+  } else if (inactiveDays >= 7) {
+    plan.push({
+      id: "restore-routine",
+      priority: "Start here",
+      tone: "orange",
+      title: "Restore a steady learning routine",
+      detail: `No activity has been recorded for ${inactiveDays} days. Schedule three short practice sessions instead of one long session.`,
+      goal: "Complete three 15-minute sessions over the next seven days.",
+    });
+  } else {
+    plan.push({
+      id: "maintain-routine",
+      priority: "This week",
+      tone: "green",
+      title: "Keep the current learning rhythm",
+      detail:
+        "Continue with short, regular sessions and finish each session by explaining one idea in your own words.",
+      goal: "Learn on at least three different days this week.",
+    });
+  }
+
+  if (!totalAnswers) {
+    plan.push({
+      id: "build-quiz-baseline",
+      priority: "Core skill",
+      tone: "blue",
+      title: "Build a quiz-performance baseline",
+      detail:
+        "Read the lesson first, answer one complete quiz, and review every explanation after submitting an answer.",
+      goal: "Complete at least 10 quiz questions.",
+    });
+  } else if (accuracy < 60) {
+    plan.push({
+      id: "strengthen-foundations",
+      priority: "Core skill",
+      tone: "orange",
+      title: weakestChapter
+        ? `Review ${readableSlug(weakestChapter.chapter_slug)}`
+        : "Strengthen core concepts",
+      detail:
+        "Revisit the lesson and make a short note for each incorrect answer before trying the quiz again.",
+      goal: `Raise overall accuracy from ${accuracy}% to at least 70%.`,
+    });
+  } else if (accuracy < 80) {
+    plan.push({
+      id: "close-knowledge-gaps",
+      priority: "Core skill",
+      tone: "blue",
+      title: weakestChapter
+        ? `Close gaps in ${readableSlug(weakestChapter.chapter_slug)}`
+        : "Close the remaining knowledge gaps",
+      detail:
+        "Group missed questions by topic, review the matching lesson sections, then retry without using hints.",
+      goal: `Move accuracy from ${accuracy}% to 80% or higher.`,
+    });
+  } else {
+    plan.push({
+      id: "extend-mastery",
+      priority: "Challenge",
+      tone: "green",
+      title: "Extend strong quiz mastery",
+      detail:
+        "After each correct answer, explain why the other choices are incorrect to deepen understanding.",
+      goal: `Maintain at least ${accuracy}% accuracy across the next 20 answers.`,
+    });
+  }
+
+  if (inProgressChapter) {
+    plan.push({
+      id: "finish-current-chapter",
+      priority: "Next step",
+      tone: "blue",
+      title: `Finish ${readableSlug(inProgressChapter.chapter_slug)}`,
+      detail:
+        "Return to this in-progress chapter before starting a new one, then review its lowest-confidence questions.",
+      goal: "Complete the chapter and earn its certificate.",
+    });
+  } else if (completed < TOTAL_CHAPTERS) {
+    plan.push({
+      id: "continue-chapters",
+      priority: "Next step",
+      tone: "blue",
+      title: "Continue to the next heritage chapter",
+      detail:
+        "Select one new chapter that interests the student and complete its lesson and quiz as one learning cycle.",
+      goal: `Progress from ${completed} to ${Math.min(completed + 1, TOTAL_CHAPTERS)} completed chapters.`,
+    });
+  } else {
+    plan.push({
+      id: "consolidate-chapters",
+      priority: "Next step",
+      tone: "green",
+      title: "Consolidate all-chapter knowledge",
+      detail:
+        "Revisit the three most difficult chapters and create a short timeline or concept map linking them together.",
+      goal: "Complete one mixed review session each week.",
+    });
+  }
+
+  const nextAchievement = lockedAchievements[0];
+  if (nextAchievement) {
+    plan.push({
+      id: "next-milestone",
+      priority: "Motivation",
+      tone: "gold",
+      title: `Work toward ${nextAchievement.name}`,
+      detail: nextAchievement.detail,
+      goal: `Move from ${nextAchievement.current} of ${nextAchievement.target} to the next milestone.`,
+    });
+  } else {
+    plan.push({
+      id: "sustain-achievements",
+      priority: "Motivation",
+      tone: "gold",
+      title: "Celebrate and sustain full achievement",
+      detail:
+        "Review completed work, choose a favourite heritage topic, and teach its key ideas to someone else.",
+      goal: "Create one short student-led recap or presentation.",
+    });
+  }
+
+  return plan.slice(0, 4);
+}
+
 function groupByUser(rows) {
   const grouped = new Map();
   for (const row of rows) {

@@ -328,7 +328,18 @@ export default function TeacherDashboard() {
             </div>
           </section>
 
-          {selectedStudent && <StudentLearningReport student={selectedStudent} />}
+          {selectedStudent && (
+            <StudentLearningReport
+              student={selectedStudent}
+              onReportDownloaded={(student) =>
+                writeTeacherActivity(
+                  "student_report_downloaded",
+                  student.user_id,
+                  { format: "pdf" },
+                )
+              }
+            />
+          )}
         </div>
       )}
     </div>

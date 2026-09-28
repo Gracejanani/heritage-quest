@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Activity,
   Award,
   BarChart3,
   BookOpen,
+  ClipboardList,
   Clock3,
+  Download,
   LockKeyhole,
   Medal,
   Star,
@@ -16,21 +18,45 @@ import {
 import { AGE_GROUPS, calculateAge } from "../lib/age";
 import {
   activityLabel,
+  buildImprovementPlan,
   formatLearningDate,
   readableSlug,
   TOTAL_CHAPTERS,
 } from "../lib/studentLearning";
-import { Badge, ProgressBar } from "./ui";
+import { downloadStudentReportPdf } from "../lib/studentReportPdf";
+import { Badge, Button, ProgressBar, useToast } from "./ui";
 
-export default function StudentLearningReport({ student }) {
+export default function StudentLearningReport({ student, onReportDownloaded }) {
+  const toast = useToast();
+  const [downloading, setDownloading] = useState(false);
+
   if (!student) return null;
 
   const ageInfo = AGE_GROUPS[student.age_group] || AGE_GROUPS.scholar;
   const age = calculateAge(student.dob);
+  const improvementPlan = buildImprovementPlan(student);
   const progressPercent = Math.min(
     100,
     Math.round((student.completed / TOTAL_CHAPTERS) * 100),
   );
+
+  const downloadReport = async () => {
+    setDownloading(true);
+    try {
+      await downloadStudentReportPdf(student, improvementPlan);
+      toast("Student report downloaded as a PDF.");
+      try {
+        await onReportDownloaded?.(student);
+      } catch (logError) {
+        console.error("Could not record the report download", logError);
+      }
+    } catch (downloadError) {
+      console.error("Could not download the student report", downloadError);
+      toast("Could not create the PDF report. Please try again.", "error");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <section className="space-y-6">
@@ -64,6 +90,16 @@ export default function StudentLearningReport({ student }) {
             <div className="mt-1">
               Last active: {formatLearningDate(student.lastActive, true)}
             </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              className="mt-4 w-full sm:w-auto"
+              onClick={downloadReport}
+              loading={downloading}
+            >
+              <Download className="h-4 w-4" />
+              {downloading ? "Creating report…" : "Download PDF report"}
+            </Button>
           </div>
         </div>
 
@@ -92,6 +128,48 @@ export default function StudentLearningReport({ student }) {
           label="Overall chapter completion"
           className="mt-6"
         />
+      </div>
+
+      <div className="rounded-[2rem] border border-emerald-200 bg-emerald-50/60 p-5 shadow-sm sm:p-6">
+        <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
+          <div>
+            <h3 className="flex items-center gap-2 text-xl font-extrabold text-slate-900">
+              <ClipboardList className="h-5 w-5 text-heritage-green" />
+              Recommended improvement plan
+            </h3>
+            <p className="mt-1 text-xs font-semibold text-slate-500">
+              Practical next steps generated from this student&apos;s saved progress,
+              accuracy, activity, and milestones.
+            </p>
+          </div>
+          <Badge tone="green">{improvementPlan.length} focused actions</Badge>
+        </div>
+        <div className="mt-5 grid gap-3 md:grid-cols-2">
+          {improvementPlan.map((item, index) => (
+            <article
+              key={item.id}
+              className="rounded-2xl border border-white bg-white p-4 shadow-sm"
+            >
+              <div className="flex items-start gap-3">
+                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-heritage-green text-sm font-extrabold text-white">
+                  {index + 1}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h4 className="font-extrabold text-slate-900">{item.title}</h4>
+                    <Badge tone={item.tone}>{item.priority}</Badge>
+                  </div>
+                  <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                    {item.detail}
+                  </p>
+                  <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs font-bold leading-5 text-slate-500">
+                    Target: {item.goal}
+                  </p>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
 
       <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">

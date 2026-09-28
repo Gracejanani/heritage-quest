@@ -553,7 +553,14 @@ export default function AdminTeacherManager({
         panelClassName="max-h-[92vh] overflow-y-auto"
       >
         {selectedStudentReport ? (
-          <StudentLearningReport student={selectedStudentReport} />
+          <StudentLearningReport
+            student={selectedStudentReport}
+            onReportDownloaded={(student) =>
+              audit("download", "student_learning_report", student.user_id, {
+                format: "pdf",
+              })
+            }
+          />
         ) : null}
       </Modal>
 

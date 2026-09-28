@@ -18,7 +18,8 @@ A modern, responsive educational gaming prototype for exploring Indian civilizat
 - Student profile, quiz progress and gameplay activity are stored in Supabase with a local browser cache for resilience.
 - Completing a chapter automatically issues a personalised certificate that can be downloaded or printed and stored privately in Supabase Storage.
 - Teachers have a protected dashboard for assigned student profiles, chapter progress, quiz performance, achievements, certificates and recent activity.
-- Administrators can activate teacher accounts, assign students, open complete student learning reports and review teacher dashboard activity.
+- Teacher and administrator reports include a personalized improvement plan and can be downloaded as a PDF for student support and planning.
+- Administrators can activate teacher accounts, assign students, open complete student learning reports and review teacher dashboard activity, including teacher report downloads.
 
 ## Tech stack
 
