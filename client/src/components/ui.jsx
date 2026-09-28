@@ -173,7 +173,14 @@ export function Select({
   );
 }
 
-export function Modal({ open, onClose, title, children }) {
+export function Modal({
+  open,
+  onClose,
+  title,
+  children,
+  maxWidth = "max-w-xl",
+  panelClassName = "",
+}) {
   useEffect(() => {
     if (!open) return;
 
@@ -193,7 +200,9 @@ export function Modal({ open, onClose, title, children }) {
       aria-labelledby="modal-title"
       onMouseDown={(e) => e.target === e.currentTarget && onClose?.()}
     >
-      <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-2xl">
+      <div
+        className={`w-full ${maxWidth} rounded-3xl bg-white p-6 shadow-2xl ${panelClassName}`}
+      >
         <div className="flex items-center justify-between gap-4">
           <h2
             id="modal-title"

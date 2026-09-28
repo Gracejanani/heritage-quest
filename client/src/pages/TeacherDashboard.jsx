@@ -2,92 +2,22 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Activity,
   Award,
-  BarChart3,
-  BookOpen,
   CheckCircle2,
   ChevronRight,
-  Clock3,
   GraduationCap,
   Loader2,
   RefreshCw,
   Search,
-  Target,
   Trophy,
   UserRound,
   Users,
 } from "lucide-react";
-import { Badge, Button, ProgressBar } from "../components/ui";
+import StudentLearningReport from "../components/StudentLearningReport";
+import { Badge, Button } from "../components/ui";
 import { useAuth } from "../context/AuthContext";
-import { AGE_GROUPS, calculateAge } from "../lib/age";
+import { AGE_GROUPS } from "../lib/age";
+import { buildStudentReports } from "../lib/studentLearning";
 import { supabase } from "../lib/supabase";
-
-function readableSlug(value = "") {
-  return String(value)
-    .split("-")
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-function formatDate(value, withTime = false) {
-  if (!value) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(undefined, withTime
-    ? { dateStyle: "medium", timeStyle: "short" }
-    : { dateStyle: "medium" });
-}
-
-function activityLabel(type) {
-  const labels = {
-    question_answered: "Answered a quiz question",
-    chapter_completed: "Completed a chapter",
-    pretest_video_completed: "Watched the lesson video",
-    pretest_video_skipped: "Skipped the lesson video",
-    word_puzzle_answered: "Answered a word puzzle",
-    word_game_completed: "Completed Heritage Word Quest",
-    word_game_video_completed: "Watched the word-game lesson",
-    word_game_video_skipped: "Skipped the word-game lesson",
-  };
-  return labels[type] || readableSlug(type);
-}
-
-function buildStudentRows(profiles, progress, activity, certificates) {
-  return profiles.map((profile) => {
-    const progressRows = progress.filter((row) => row.user_id === profile.user_id);
-    const activityRows = activity.filter((row) => row.user_id === profile.user_id);
-    const certificateRows = certificates.filter(
-      (row) => row.user_id === profile.user_id,
-    );
-    const answers = progressRows.flatMap((row) =>
-      Array.isArray(row.answers) ? row.answers : [],
-    );
-    const correctAnswers = answers.filter((answer) => answer?.correct).length;
-    const latestActivity = activityRows[0]?.created_at;
-    const latestProgress = [...progressRows]
-      .sort((a, b) => String(b.updated_at).localeCompare(String(a.updated_at)))[0]
-      ?.updated_at;
-
-    return {
-      ...profile,
-      progressRows,
-      activityRows,
-      certificateRows,
-      totalScore: progressRows.reduce(
-        (sum, row) => sum + Number(row.score || 0),
-        0,
-      ),
-      totalXp: progressRows.reduce((sum, row) => sum + Number(row.xp || 0), 0),
-      completed: progressRows.filter((row) => row.finished).length,
-      accuracy: answers.length
-        ? Math.round((correctAnswers / answers.length) * 100)
-        : 0,
-      lastActive: [latestActivity, latestProgress]
-        .filter(Boolean)
-        .sort((a, b) => String(b).localeCompare(String(a)))[0] || null,
-    };
-  });
-}
 
 export default function TeacherDashboard() {
   const { user } = useAuth();
@@ -214,7 +144,7 @@ export default function TeacherDashboard() {
   }, [loadDashboard]);
 
   const studentRows = useMemo(
-    () => buildStudentRows(profiles, progress, activity, certificates),
+    () => buildStudentReports(profiles, progress, activity, certificates),
     [profiles, progress, activity, certificates],
   );
 
@@ -242,6 +172,10 @@ export default function TeacherDashboard() {
       ).length,
       completed: studentRows.reduce(
         (sum, student) => sum + student.completed,
+        0,
+      ),
+      achievements: studentRows.reduce(
+        (sum, student) => sum + student.unlockedAchievements,
         0,
       ),
       certificates: certificates.length,
@@ -274,8 +208,8 @@ export default function TeacherDashboard() {
               Welcome, {teacher?.display_name || "Teacher"}
             </h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-white/70">
-              View the profiles, chapter progress, quiz performance, certificates,
-              and recent learning activity of students assigned to you.
+              View profiles, chapter progress, quiz performance, achievements,
+              certificates, and recent activity for students assigned to you.
             </p>
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-white/70">
               {teacher?.school_name && (
@@ -305,10 +239,11 @@ export default function TeacherDashboard() {
         </div>
       )}
 
-      <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <SummaryCard icon={Users} label="Assigned students" value={summary.students} />
         <SummaryCard icon={Activity} label="Active this week" value={summary.active} tone="blue" />
         <SummaryCard icon={CheckCircle2} label="Chapters completed" value={summary.completed} tone="orange" />
+        <SummaryCard icon={Trophy} label="Achievements unlocked" value={summary.achievements} tone="purple" />
         <SummaryCard icon={Award} label="Certificates earned" value={summary.certificates} tone="gold" />
       </section>
 
@@ -377,7 +312,10 @@ export default function TeacherDashboard() {
                     <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
                       <MiniStat label="Score" value={student.totalScore} />
                       <MiniStat label="Accuracy" value={`${student.accuracy}%`} />
-                      <MiniStat label="Awards" value={student.certificateRows.length} />
+                      <MiniStat
+                        label="Achievements"
+                        value={`${student.unlockedAchievements}/${student.achievements.length}`}
+                      />
                     </div>
                   </button>
                 );
@@ -390,7 +328,7 @@ export default function TeacherDashboard() {
             </div>
           </section>
 
-          {selectedStudent && <StudentDetail student={selectedStudent} />}
+          {selectedStudent && <StudentLearningReport student={selectedStudent} />}
         </div>
       )}
     </div>
@@ -402,6 +340,7 @@ function SummaryCard({ icon: Icon, label, value, tone = "green" }) {
     green: "bg-emerald-50 text-heritage-green",
     blue: "bg-sky-50 text-sky-700",
     orange: "bg-orange-50 text-orange-700",
+    purple: "bg-violet-50 text-violet-700",
     gold: "bg-amber-50 text-amber-700",
   };
   return (
@@ -422,180 +361,6 @@ function MiniStat({ label, value }) {
       <div className="mt-0.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
         {label}
       </div>
-    </div>
-  );
-}
-
-function StudentDetail({ student }) {
-  const ageInfo = AGE_GROUPS[student.age_group] || AGE_GROUPS.scholar;
-  const age = calculateAge(student.dob);
-  const progressPercent = Math.min(100, Math.round((student.completed / 12) * 100));
-
-  return (
-    <section className="space-y-6">
-      <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm sm:p-7">
-        <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-start">
-          <div className="flex items-start gap-4">
-            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-3xl bg-heritage-cream text-heritage-green">
-              <UserRound className="h-8 w-8" />
-            </div>
-            <div>
-              <div className="text-xs font-extrabold uppercase tracking-wider text-heritage-green">
-                Student details
-              </div>
-              <h2 className="mt-1 font-display text-3xl font-extrabold text-slate-950">
-                {student.full_name}
-              </h2>
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Badge>{ageInfo.label}</Badge>
-                <Badge tone="blue">Age {age ?? "—"}</Badge>
-                <Badge tone="gray">{student.preferred_language || "en"}</Badge>
-              </div>
-            </div>
-          </div>
-          <div className="text-sm font-semibold text-slate-500 sm:text-right">
-            <div>DOB: {formatDate(student.dob)}</div>
-            <div className="mt-1">Joined: {formatDate(student.created_at)}</div>
-            <div className="mt-1">Last active: {formatDate(student.lastActive, true)}</div>
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <DetailStat icon={BookOpen} label="Completed" value={`${student.completed}/12`} />
-          <DetailStat icon={Trophy} label="Total score" value={student.totalScore} />
-          <DetailStat icon={Target} label="Accuracy" value={`${student.accuracy}%`} />
-          <DetailStat icon={Award} label="Certificates" value={student.certificateRows.length} />
-        </div>
-        <ProgressBar
-          value={progressPercent}
-          label="Overall chapter completion"
-          className="mt-6"
-        />
-      </div>
-
-      <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-xl font-extrabold">Chapter progress</h3>
-            <p className="mt-1 text-xs font-semibold text-slate-400">
-              Saved quiz scores, XP, completion, and last update.
-            </p>
-          </div>
-          <BarChart3 className="h-6 w-6 text-heritage-green" />
-        </div>
-        <div className="mt-5 overflow-x-auto">
-          <table className="min-w-[620px] w-full text-left text-sm">
-            <thead className="text-xs uppercase tracking-wide text-slate-400">
-              <tr>
-                <th className="pb-3">Chapter</th>
-                <th className="pb-3">Status</th>
-                <th className="pb-3">Score</th>
-                <th className="pb-3">XP</th>
-                <th className="pb-3">Updated</th>
-              </tr>
-            </thead>
-            <tbody>
-              {student.progressRows.map((row) => (
-                <tr key={row.chapter_slug} className="border-t border-slate-100">
-                  <td className="py-3 pr-4 font-bold text-slate-800">
-                    {readableSlug(row.chapter_slug)}
-                  </td>
-                  <td className="py-3 pr-4">
-                    <Badge tone={row.finished ? "green" : "orange"}>
-                      {row.finished ? "Completed" : "In progress"}
-                    </Badge>
-                  </td>
-                  <td className="py-3 pr-4 font-extrabold text-heritage-green">
-                    {Number(row.score || 0)}
-                  </td>
-                  <td className="py-3 pr-4">{Number(row.xp || 0)}</td>
-                  <td className="py-3 text-xs text-slate-400">
-                    {formatDate(row.updated_at, true)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {!student.progressRows.length && (
-            <p className="rounded-2xl bg-slate-50 p-5 text-center text-sm font-semibold text-slate-500">
-              This student has not started a quiz yet.
-            </p>
-          )}
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-extrabold">Recent learning activity</h3>
-            <Activity className="h-5 w-5 text-sky-600" />
-          </div>
-          <div className="mt-4 grid gap-3">
-            {student.activityRows.slice(0, 10).map((row) => (
-              <div key={row.id} className="rounded-2xl bg-slate-50 p-3">
-                <div className="flex items-start gap-3">
-                  <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">
-                      {activityLabel(row.activity_type)}
-                    </div>
-                    <div className="mt-1 text-xs text-slate-400">
-                      {row.chapter_slug ? `${readableSlug(row.chapter_slug)} · ` : ""}
-                      {formatDate(row.created_at, true)}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {!student.activityRows.length && (
-              <p className="text-sm font-semibold text-slate-500">
-                No learning activity recorded yet.
-              </p>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-extrabold">Certificates</h3>
-            <Award className="h-5 w-5 text-amber-600" />
-          </div>
-          <div className="mt-4 grid gap-3">
-            {student.certificateRows.map((certificate) => (
-              <div key={certificate.id} className="rounded-2xl border border-amber-100 bg-amber-50 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="font-extrabold text-slate-900">
-                      {certificate.task_name}
-                    </div>
-                    <div className="mt-1 text-xs font-semibold text-slate-500">
-                      {certificate.correct_answers}/{certificate.total_questions} correct · {formatDate(certificate.issued_at)}
-                    </div>
-                  </div>
-                  <Badge tone="gold">
-                    {String(certificate.award_tier || "bronze").toUpperCase()}
-                  </Badge>
-                </div>
-              </div>
-            ))}
-            {!student.certificateRows.length && (
-              <p className="text-sm font-semibold text-slate-500">
-                No certificates earned yet.
-              </p>
-            )}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function DetailStat({ icon: Icon, label, value }) {
-  return (
-    <div className="rounded-2xl bg-slate-50 p-4">
-      <Icon className="h-5 w-5 text-heritage-green" />
-      <div className="mt-3 text-xl font-extrabold text-slate-900">{value}</div>
-      <div className="mt-1 text-xs font-bold text-slate-400">{label}</div>
     </div>
   );
 }

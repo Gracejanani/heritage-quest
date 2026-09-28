@@ -84,6 +84,7 @@ export default function Admin() {
   const [wordPuzzles, setWordPuzzles] = useState([]);
   const [profiles, setProfiles] = useState([]);
   const [progress, setProgress] = useState([]);
+  const [studentActivity, setStudentActivity] = useState([]);
   const [certificates, setCertificates] = useState([]);
   const [auditRows, setAuditRows] = useState([]);
   const [teachers, setTeachers] = useState([]);
@@ -157,6 +158,7 @@ export default function Admin() {
       wordPuzzlesRes,
       profilesRes,
       progressRes,
+      studentActivityRes,
       certificatesRes,
       settingsRes,
       auditRes,
@@ -184,6 +186,11 @@ export default function Admin() {
         .order("sort_order"),
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("quiz_progress").select("*"),
+      supabase
+        .from("activity_log")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(2000),
       supabase
         .from("certificates")
         .select("*")
@@ -214,6 +221,7 @@ export default function Admin() {
       wordPuzzlesRes,
       profilesRes,
       progressRes,
+      studentActivityRes,
       certificatesRes,
       settingsRes,
       auditRes,
@@ -234,6 +242,7 @@ export default function Admin() {
     setWordPuzzles(wordPuzzlesRes.data || []);
     setProfiles(profilesRes.data || []);
     setProgress(progressRes.data || []);
+    setStudentActivity(studentActivityRes.data || []);
     setCertificates(certificatesRes.data || []);
 
     const nextSettings = settingsRes.data || { id: "main", payload: {} };
@@ -1645,6 +1654,9 @@ export default function Admin() {
           teachers={teachers}
           assignments={teacherAssignments}
           activityRows={teacherActivity}
+          progressRows={progress}
+          studentActivityRows={studentActivity}
+          certificates={certificates}
           adminUsers={adminUsers}
           onRefresh={refreshAll}
           audit={audit}

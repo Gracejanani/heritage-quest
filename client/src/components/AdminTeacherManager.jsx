@@ -2,17 +2,22 @@ import React, { useMemo, useState } from "react";
 import {
   Activity,
   BookOpenCheck,
+  CheckCircle2,
+  Eye,
   GraduationCap,
   Loader2,
   Pencil,
   Plus,
   School,
+  Trophy,
   UserMinus,
   UserPlus,
   Users,
 } from "lucide-react";
+import StudentLearningReport from "./StudentLearningReport";
 import { Badge, Button, Modal, useToast } from "./ui";
 import { useAuth } from "../context/AuthContext";
+import { buildStudentReports } from "../lib/studentLearning";
 import { supabase } from "../lib/supabase";
 
 const inputClass =
@@ -43,6 +48,9 @@ export default function AdminTeacherManager({
   teachers,
   assignments,
   activityRows,
+  progressRows,
+  studentActivityRows,
+  certificates,
   adminUsers,
   onRefresh,
   audit,
@@ -52,6 +60,7 @@ export default function AdminTeacherManager({
   const [teacherForm, setTeacherForm] = useState(null);
   const [studentSelections, setStudentSelections] = useState({});
   const [activityTeacher, setActivityTeacher] = useState("all");
+  const [selectedReportStudentId, setSelectedReportStudentId] = useState("");
   const [saving, setSaving] = useState(false);
 
   const profileMap = useMemo(
@@ -80,6 +89,24 @@ export default function AdminTeacherManager({
     [profiles, teacherIds, adminIds],
   );
 
+  const studentReports = useMemo(
+    () =>
+      buildStudentReports(
+        profiles,
+        progressRows,
+        studentActivityRows,
+        certificates,
+      ),
+    [profiles, progressRows, studentActivityRows, certificates],
+  );
+  const studentReportMap = useMemo(
+    () => new Map(studentReports.map((student) => [student.user_id, student])),
+    [studentReports],
+  );
+  const selectedStudentReport = selectedReportStudentId
+    ? studentReportMap.get(selectedReportStudentId)
+    : null;
+
   const teacherRows = useMemo(
     () =>
       teachers
@@ -90,10 +117,32 @@ export default function AdminTeacherManager({
           const latestActivity = activityRows.find(
             (row) => row.teacher_id === teacher.user_id,
           );
-          return { ...teacher, teacherAssignments, latestActivity };
+          const assignedReports = teacherAssignments
+            .map((row) => studentReportMap.get(row.student_id))
+            .filter(Boolean);
+          const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+          return {
+            ...teacher,
+            teacherAssignments,
+            assignedReports,
+            latestActivity,
+            activeStudents: assignedReports.filter(
+              (student) =>
+                student.lastActive &&
+                new Date(student.lastActive).getTime() >= weekAgo,
+            ).length,
+            completedChapters: assignedReports.reduce(
+              (sum, student) => sum + student.completed,
+              0,
+            ),
+            unlockedAchievements: assignedReports.reduce(
+              (sum, student) => sum + student.unlockedAchievements,
+              0,
+            ),
+          };
         })
         .sort((a, b) => a.display_name.localeCompare(b.display_name)),
-    [teachers, assignments, activityRows],
+    [teachers, assignments, activityRows, studentReportMap],
   );
 
   const filteredActivity = useMemo(
@@ -290,20 +339,36 @@ export default function AdminTeacherManager({
               </div>
 
               <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                <div className="rounded-2xl bg-slate-50 p-3">
-                  <div className="flex items-center gap-2 font-bold text-slate-800">
-                    <Users className="h-4 w-4 text-heritage-green" />
-                    {teacher.teacherAssignments.length} students
-                  </div>
-                </div>
-                <div className="rounded-2xl bg-slate-50 p-3">
-                  <div className="flex items-center gap-2 font-bold text-slate-800">
-                    <Activity className="h-4 w-4 text-sky-600" />
-                    {teacher.latestActivity
-                      ? formatDate(teacher.latestActivity.created_at)
-                      : "No activity"}
-                  </div>
-                </div>
+                <TeacherStat
+                  icon={Users}
+                  label="Students"
+                  value={teacher.teacherAssignments.length}
+                />
+                <TeacherStat
+                  icon={Activity}
+                  label="Active this week"
+                  value={teacher.activeStudents}
+                  tone="blue"
+                />
+                <TeacherStat
+                  icon={CheckCircle2}
+                  label="Chapters completed"
+                  value={teacher.completedChapters}
+                  tone="orange"
+                />
+                <TeacherStat
+                  icon={Trophy}
+                  label="Achievements"
+                  value={teacher.unlockedAchievements}
+                  tone="gold"
+                />
+              </div>
+
+              <div className="mt-3 flex items-center gap-2 rounded-2xl bg-sky-50 px-3 py-2.5 text-xs font-bold text-sky-800">
+                <Activity className="h-4 w-4 shrink-0" />
+                Teacher dashboard: {teacher.latestActivity
+                  ? `last used ${formatDate(teacher.latestActivity.created_at)}`
+                  : "not opened yet"}
               </div>
 
               {teacher.school_name && (
@@ -316,27 +381,50 @@ export default function AdminTeacherManager({
                 <div className="text-xs font-extrabold uppercase tracking-wide text-slate-400">
                   Assigned students
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-3 grid gap-2">
                   {teacher.teacherAssignments.map((assignment) => {
-                    const student = profileMap.get(assignment.student_id);
+                    const student = studentReportMap.get(assignment.student_id);
                     return (
-                      <span
+                      <div
                         key={assignment.student_id}
-                        className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-800"
+                        className="flex items-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 p-2"
                       >
-                        {student?.full_name || "Registered student"}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setSelectedReportStudentId(assignment.student_id)
+                          }
+                          disabled={!student}
+                          className="focus-ring flex min-w-0 flex-1 items-center gap-3 rounded-xl px-2 py-1.5 text-left hover:bg-white/70 disabled:cursor-not-allowed"
+                          aria-label={`View ${student?.full_name || "student"} learning report`}
+                        >
+                          <Eye className="h-4 w-4 shrink-0 text-heritage-green" />
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-sm font-extrabold text-emerald-900">
+                              {student?.full_name || "Registered student"}
+                            </span>
+                            <span className="mt-0.5 block text-[11px] font-semibold text-emerald-700">
+                              {student
+                                ? `${student.completed}/12 chapters · ${student.unlockedAchievements}/${student.achievements.length} achievements · ${student.activityRows.length} activities`
+                                : "Learning report unavailable"}
+                            </span>
+                          </span>
+                          <span className="hidden text-[11px] font-extrabold text-heritage-green sm:inline">
+                            View report
+                          </span>
+                        </button>
                         <button
                           type="button"
                           onClick={() =>
                             removeAssignment(teacher.user_id, assignment.student_id)
                           }
                           disabled={saving}
-                          className="rounded-full text-emerald-700 hover:text-rose-600"
+                          className="focus-ring rounded-xl p-2 text-emerald-700 hover:bg-rose-50 hover:text-rose-600"
                           aria-label={`Remove ${student?.full_name || "student"}`}
                         >
-                          <UserMinus className="h-3.5 w-3.5" />
+                          <UserMinus className="h-4 w-4" />
                         </button>
-                      </span>
+                      </div>
                     );
                   })}
                   {!teacher.teacherAssignments.length && (
@@ -447,12 +535,27 @@ export default function AdminTeacherManager({
             </tbody>
           </table>
           {!filteredActivity.length && (
-            <div className="py-10 text-center text-sm font-semibold text-slate-500">
-              No teacher dashboard activity recorded yet.
+            <div className="mx-auto my-8 max-w-2xl rounded-2xl border border-sky-100 bg-sky-50 p-5 text-center text-sm font-semibold leading-6 text-sky-800">
+              No teacher dashboard activity yet. This table starts recording after
+              the teacher signs in, opens the Teacher Dashboard, refreshes data, or
+              views a student report. Student learning activity is available now by
+              selecting <strong>View report</strong> beside an assigned student.
             </div>
           )}
         </div>
       </div>
+
+      <Modal
+        open={Boolean(selectedStudentReport)}
+        onClose={() => setSelectedReportStudentId("")}
+        title="Assigned student learning report"
+        maxWidth="max-w-6xl"
+        panelClassName="max-h-[92vh] overflow-y-auto"
+      >
+        {selectedStudentReport ? (
+          <StudentLearningReport student={selectedStudentReport} />
+        ) : null}
+      </Modal>
 
       <Modal
         open={Boolean(teacherForm)}
@@ -556,5 +659,32 @@ export default function AdminTeacherManager({
         )}
       </Modal>
     </section>
+  );
+}
+
+function TeacherStat({ icon: Icon, label, value, tone = "green" }) {
+  const tones = {
+    green: "bg-emerald-100 text-emerald-700",
+    blue: "bg-sky-100 text-sky-700",
+    orange: "bg-orange-100 text-orange-700",
+    gold: "bg-amber-100 text-amber-700",
+  };
+
+  return (
+    <div className="rounded-2xl bg-slate-50 p-3">
+      <div className="flex items-center gap-2">
+        <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl ${tones[tone]}`}>
+          <Icon className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <div className="text-lg font-extrabold leading-none text-slate-900">
+            {value}
+          </div>
+          <div className="mt-1 truncate text-[10px] font-extrabold uppercase tracking-wide text-slate-400">
+            {label}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

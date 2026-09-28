@@ -17,8 +17,8 @@ A modern, responsive educational gaming prototype for exploring Indian civilizat
 - English plus all **22 Scheduled Indian languages** are available in the language selector.
 - Student profile, quiz progress and gameplay activity are stored in Supabase with a local browser cache for resilience.
 - Completing a chapter automatically issues a personalised certificate that can be downloaded or printed and stored privately in Supabase Storage.
-- Teachers have a protected dashboard for assigned student profiles, chapter progress, quiz performance, certificates and recent activity.
-- Administrators can activate teacher accounts, assign students and review teacher dashboard activity.
+- Teachers have a protected dashboard for assigned student profiles, chapter progress, quiz performance, achievements, certificates and recent activity.
+- Administrators can activate teacher accounts, assign students, open complete student learning reports and review teacher dashboard activity.
 
 ## Tech stack
 
