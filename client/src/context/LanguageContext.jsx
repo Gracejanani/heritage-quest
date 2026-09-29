@@ -1,5 +1,17 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { supabase } from "../lib/supabase";
+import {
+  translateText as translateTextValue,
+  translateTexts as translateTextValues,
+} from "../lib/translation";
 
 const LanguageContext = createContext(null);
 const STORAGE_KEY = "heritageQuest:language";
@@ -17,7 +29,7 @@ export const languages = [
   { code: "gom", label: "कोंकणी", english: "Konkani", translationCode: "gom" },
   { code: "mai", label: "मैथिली", english: "Maithili", translationCode: "mai" },
   { code: "ml", label: "മലയാളം", english: "Malayalam", translationCode: "ml" },
-  { code: "mni", label: "মৈতৈলোন", english: "Manipuri", translationCode: "mni" },
+  { code: "mni", label: "মৈতৈলোন", english: "Manipuri", translationCode: "mni-Mtei" },
   { code: "mr", label: "मराठी", english: "Marathi", translationCode: "mr" },
   { code: "ne", label: "नेपाली", english: "Nepali", translationCode: "ne" },
   { code: "or", label: "ଓଡ଼ିଆ", english: "Odia", translationCode: "or" },
@@ -105,6 +117,30 @@ const ui = {
     registerEnter: "Register & Enter",
     loginContinue: "Login & Continue",
     pleaseWait: "Please wait…",
+    admin: "Admin",
+    teacher: "Teacher",
+    adminDashboard: "Admin Dashboard",
+    teacherDashboard: "Teacher Dashboard",
+    download: "Download",
+    downloadApp: "Download App",
+    downloadAndroidApp: "Download Android App",
+    explorerProfile: "Explorer Profile",
+    quizChapterCount: "12 quiz chapters + 2 study materials",
+    noLearningTopics: "No learning topics match your search.",
+    guidedPathway: "Guided pathway",
+    pathwayTitle: "From Harappa to the Freedom Movement",
+    startPathway: "Start pathway",
+    readyChallenge: "Ready for the chapter challenge?",
+    startChapter: "Start Chapter",
+    footerDescription:
+      "A playful educational platform for exploring Indian history, civilization, monuments, art, festivals and culture through games and interactive learning.",
+    footerTagline: "Our Heritage. Your Quest. A Brighter Tomorrow.",
+    explore: "Explore",
+    community: "Community",
+    project: "Project",
+    contact: "Contact",
+    privacy: "Privacy",
+    terms: "Terms",
   },
   ta: {
     home: "முகப்பு",
@@ -423,15 +459,29 @@ const topicTranslations = {
 
 export function LanguageProvider({ children }) {
   const [language, setLanguageState] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return languages.some((item) => item.code === saved) ? saved : "en";
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return languages.some((item) => item.code === saved) ? saved : "en";
+    } catch {
+      return "en";
+    }
   });
+  const languageRef = useRef(language);
+  const [dynamicUi, setDynamicUi] = useState({ language: "en", values: {} });
+  const [isTranslatingUi, setIsTranslatingUi] = useState(false);
 
-  const [dynamicUi, setDynamicUi] = useState({});
-
-  const setLanguage = (code) => {
+  const setLanguage = useCallback((code) => {
     const next = languages.some((item) => item.code === code) ? code : "en";
-    localStorage.setItem(STORAGE_KEY, next);
+    languageRef.current = next;
+    try {
+      localStorage.setItem(STORAGE_KEY, next);
+    } catch {
+      // Keep the selected language for this session when storage is unavailable.
+    }
+    setDynamicUi({ language: next, values: {} });
+    setIsTranslatingUi(
+      next !== "en" && Object.keys(ui.en).some((key) => !ui[next]?.[key]),
+    );
     setLanguageState(next);
 
     if (supabase) {
@@ -450,90 +500,103 @@ export function LanguageProvider({ children }) {
           });
       });
     }
-  };
+  }, []);
 
   const translateText = useCallback(
-    async (text, target = language) => {
+    async (text, target = languageRef.current) => {
       if (!text || target === "en") return text;
-
       const targetCode = languageCodeMap[target] || target;
-      const sourceText = String(text);
-      let hash = 0;
-      for (let i = 0; i < sourceText.length; i += 1) {
-        hash = (hash * 31 + sourceText.charCodeAt(i)) >>> 0;
-      }
-      const cacheKey = `heritageQuest:translation:${targetCode}:${hash}`;
-
-      try {
-        const cached = localStorage.getItem(cacheKey);
-        if (cached) return cached;
-      } catch {
-        // Ignore storage failures and translate normally.
-      }
-
-      try {
-        const url =
-          "https://api.mymemory.translated.net/get?q=" +
-          encodeURIComponent(sourceText.slice(0, 450)) +
-          "&langpair=en|" +
-          encodeURIComponent(targetCode);
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Translation request failed");
-        const data = await response.json();
-        const translated = data?.responseData?.translatedText;
-        const safe =
-          typeof translated === "string" &&
-          translated.trim() &&
-          !translated.toUpperCase().includes("MYMEMORY WARNING")
-            ? translated
-            : sourceText;
-        try {
-          localStorage.setItem(cacheKey, safe);
-        } catch {
-          // Cache is optional.
-        }
-        return safe;
-      } catch {
-        return sourceText;
-      }
+      return translateTextValue(String(text), targetCode);
     },
-    [language],
+    [],
+  );
+
+  const translateTexts = useCallback(
+    async (texts, target = languageRef.current) => {
+      if (target === "en") return texts.map((value) => String(value ?? ""));
+      const targetCode = languageCodeMap[target] || target;
+      return translateTextValues(texts, targetCode);
+    },
+    [],
   );
 
   useEffect(() => {
-    let active = true;
+    languageRef.current = language;
+    document.documentElement.lang = language;
+    document.documentElement.dir = ["ks", "sd", "ur"].includes(language)
+      ? "rtl"
+      : "ltr";
+  }, [language]);
 
-    if (ui[language]) {
-      setDynamicUi({});
+  useEffect(() => {
+    let active = true;
+    const staticUi = ui[language] || {};
+    const entries = Object.entries(ui.en).filter(([key]) => !staticUi[key]);
+
+    if (language === "en" || entries.length === 0) {
+      setDynamicUi({ language, values: {} });
+      setIsTranslatingUi(false);
       return () => {
         active = false;
       };
     }
 
-    const entries = Object.entries(ui.en);
-    Promise.all(
-      entries.map(async ([key, value]) => [key, await translateText(value, language)]),
-    ).then((translatedEntries) => {
-      if (active) setDynamicUi(Object.fromEntries(translatedEntries));
-    });
+    setIsTranslatingUi(true);
+    translateTexts(
+      entries.map(([, value]) => value),
+      language,
+    )
+      .then((translatedValues) => {
+        if (!active) return;
+        setDynamicUi({
+          language,
+          values: Object.fromEntries(
+            entries.map(([key], index) => [key, translatedValues[index]]),
+          ),
+        });
+      })
+      .finally(() => {
+        if (active) setIsTranslatingUi(false);
+      });
 
     return () => {
       active = false;
     };
-  }, [language, translateText]);
+  }, [language, translateTexts]);
 
-  const t = (key) =>
-    ui[language]?.[key] || dynamicUi[key] || ui.en[key] || key;
+  const t = useCallback(
+    (key) =>
+      ui[language]?.[key] ||
+      (dynamicUi.language === language ? dynamicUi.values[key] : null) ||
+      ui.en[key] ||
+      key,
+    [dynamicUi, language],
+  );
 
-  const localizeTopic = (topic) => {
-    if (language === "en") return topic;
-    const translated = topicTranslations[language]?.[topic.slug];
-    return translated ? { ...topic, ...translated } : topic;
-  };
+  // Topic text always starts from the latest live Supabase content. Keeping an
+  // old built-in translation here would hide an administrator's recent edit.
+  const localizeTopic = useCallback((topic) => topic, []);
 
   const value = useMemo(
-    () => ({ language, setLanguage, languages, t, localizeTopic, translateText }),
-    [language, translateText, dynamicUi],
+    () => ({
+      language,
+      setLanguage,
+      languages,
+      t,
+      localizeTopic,
+      translateText,
+      translateTexts,
+      isTranslatingUi,
+    }),
+    [
+      isTranslatingUi,
+      language,
+      localizeTopic,
+      setLanguage,
+      t,
+      translateText,
+      translateTexts,
+    ],
   );
 
   return (

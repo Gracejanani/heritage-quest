@@ -11,6 +11,7 @@ import {
   LogOut,
   ShieldCheck,
   GraduationCap,
+  LoaderCircle,
 } from "lucide-react";
 import Logo from "./Logo";
 import DownloadAppButton from "./DownloadAppButton";
@@ -31,7 +32,7 @@ export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const { player, switchPlayer } = usePlayer();
-  const { language, setLanguage, languages, t } = useLanguage();
+  const { language, setLanguage, languages, t, isTranslatingUi } = useLanguage();
   const [isAdmin, setIsAdmin] = useState(false);
   const [isTeacher, setIsTeacher] = useState(false);
   useEffect(() => setOpen(false), [location.pathname]);
@@ -81,24 +82,29 @@ export function Navbar() {
             </NavLink>
           ))}
         </nav>
-        <select
-          value={language}
-          onChange={(e) => setLanguage(e.target.value)}
-          aria-label={t("language")}
-          className="focus-ring hidden rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-bold text-slate-700 lg:block"
-        >
-          {languages.map((item) => (
-            <option key={item.code} value={item.code}>
-              {item.label}
-            </option>
-          ))}
-        </select>
+        <div className="relative hidden lg:block">
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            aria-label={t("language")}
+            className={`focus-ring rounded-xl border border-slate-200 bg-white py-2 pl-3 text-sm font-bold text-slate-700 ${isTranslatingUi ? "pr-10" : "pr-3"}`}
+          >
+            {languages.map((item) => (
+              <option key={item.code} value={item.code}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+          {isTranslatingUi && (
+            <LoaderCircle className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-heritage-green" />
+          )}
+        </div>
         {isAdmin && (
           <Link
             to="/admin"
             className="focus-ring hidden items-center gap-2 rounded-2xl border border-emerald-200 bg-white px-4 py-2.5 text-sm font-bold text-heritage-green shadow-sm hover:bg-emerald-50 xl:inline-flex"
           >
-            <ShieldCheck className="h-4 w-4" /> Admin
+            <ShieldCheck className="h-4 w-4" /> {t("admin")}
           </Link>
         )}
         {isTeacher && (
@@ -106,11 +112,11 @@ export function Navbar() {
             to="/teacher"
             className="focus-ring hidden items-center gap-2 rounded-2xl border border-sky-200 bg-white px-4 py-2.5 text-sm font-bold text-sky-700 shadow-sm hover:bg-sky-50 xl:inline-flex"
           >
-            <GraduationCap className="h-4 w-4" /> Teacher
+            <GraduationCap className="h-4 w-4" /> {t("teacher")}
           </Link>
         )}
         <DownloadAppButton
-          label="Download"
+          label={t("download")}
           variant="accent"
           className="hidden xl:inline-flex"
         />
@@ -118,14 +124,14 @@ export function Navbar() {
           to="/profile"
           className="focus-ring hidden rounded-2xl bg-heritage-green px-4 py-2.5 text-sm font-bold text-white shadow-soft hover:bg-emerald-700 sm:inline-flex"
         >
-          {player?.name || "Explorer Profile"}
+          {player?.name || t("explorerProfile")}
         </Link>
         <button
           type="button"
           onClick={switchPlayer}
           className="focus-ring hidden rounded-xl p-2 text-slate-500 hover:bg-white hover:text-heritage-saffron sm:block"
-          aria-label="Log out"
-          title="Log out"
+          aria-label={t("switchExplorer")}
+          title={t("switchExplorer")}
         >
           <LogOut className="h-5 w-5" />
         </button>
@@ -198,7 +204,7 @@ export function Navbar() {
                   to="/admin"
                   className="rounded-xl px-4 py-3 font-bold text-heritage-green hover:bg-emerald-50"
                 >
-                  Admin Dashboard
+                  {t("adminDashboard")}
                 </NavLink>
               )}
               {isTeacher && (
@@ -206,11 +212,11 @@ export function Navbar() {
                   to="/teacher"
                   className="rounded-xl px-4 py-3 font-bold text-sky-700 hover:bg-sky-50"
                 >
-                  Teacher Dashboard
+                  {t("teacherDashboard")}
                 </NavLink>
               )}
               <DownloadAppButton
-                label="Download Android App"
+                label={t("downloadAndroidApp")}
                 variant="accent"
                 className="mt-2 w-full"
               />
@@ -218,7 +224,7 @@ export function Navbar() {
                 to="/profile"
                 className="rounded-xl px-4 py-3 font-bold text-heritage-green hover:bg-emerald-50"
               >
-                {player?.name || "Explorer Profile"}
+                {player?.name || t("explorerProfile")}
               </NavLink>
               <button
                 type="button"
@@ -266,49 +272,48 @@ export function MobileBottomNav() {
   );
 }
 export function Footer() {
+  const { t } = useLanguage();
   return (
     <footer className="mt-16 bg-heritage-forest pb-24 pt-12 text-white md:pb-10">
       <div className="container-app grid gap-10 lg:grid-cols-[1.2fr_.8fr]">
         <div>
           <Logo light />
           <p className="mt-5 max-w-xl text-sm leading-6 text-white/70">
-            A playful educational platform for exploring Indian history,
-            civilization, monuments, art, festivals and culture through games
-            and interactive learning.
+            {t("footerDescription")}
           </p>
           <p className="mt-5 font-display text-xl font-bold text-emerald-100">
-            Our Heritage. Your Quest. A Brighter Tomorrow.
+            {t("footerTagline")}
           </p>
           <DownloadAppButton
-            label="Download Android App"
+            label={t("downloadAndroidApp")}
             variant="light"
             className="mt-6"
           />
         </div>
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
           <div>
-            <h3 className="font-bold">Explore</h3>
+            <h3 className="font-bold">{t("explore")}</h3>
             <div className="mt-3 grid gap-2 text-sm text-white/70">
-              <Link to="/">Home</Link>
-              <Link to="/games">Games</Link>
-              <Link to="/learn">Learn</Link>
+              <Link to="/">{t("home")}</Link>
+              <Link to="/games">{t("games")}</Link>
+              <Link to="/learn">{t("learn")}</Link>
             </div>
           </div>
           <div>
-            <h3 className="font-bold">Community</h3>
+            <h3 className="font-bold">{t("community")}</h3>
             <div className="mt-3 grid gap-2 text-sm text-white/70">
-              <Link to="/leaderboard">Leaderboard</Link>
-              <Link to="/achievements">Achievements</Link>
-              <Link to="/profile">Profile</Link>
+              <Link to="/leaderboard">{t("leaderboard")}</Link>
+              <Link to="/achievements">{t("achievements")}</Link>
+              <Link to="/profile">{t("profile")}</Link>
             </div>
           </div>
           <div>
-            <h3 className="font-bold">Project</h3>
+            <h3 className="font-bold">{t("project")}</h3>
             <div className="mt-3 grid gap-2 text-sm text-white/70">
-              <Link to="/about">About</Link>
-              <a href="mailto:hello@heritagequest.local">Contact</a>
-              <span>Privacy</span>
-              <span>Terms</span>
+              <Link to="/about">{t("about")}</Link>
+              <a href="mailto:hello@heritagequest.local">{t("contact")}</a>
+              <span>{t("privacy")}</span>
+              <span>{t("terms")}</span>
             </div>
           </div>
         </div>
