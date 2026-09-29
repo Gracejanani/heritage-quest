@@ -18,6 +18,9 @@ jobs:
     name: Build Android debug APK
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
     defaults:
       run:
@@ -41,7 +44,10 @@ jobs:
           java-version: 21
 
       - name: Install Android 16 SDK
-        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+        run: >-
+          "$ANDROID_HOME/cmdline-tools/16.0/bin/sdkmanager"
+          "platforms;android-36"
+          "build-tools;36.0.0"
 
       - name: Install web dependencies
         run: npm ci
