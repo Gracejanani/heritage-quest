@@ -1,0 +1,89 @@
+name: Build Heritage Quest APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - feature/android-apk
+    paths:
+      - "client/**"
+      - ".github/workflows/build-android-apk.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    name: Build Android debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Set up Android 16 SDK
+        uses: android-actions/setup-android@v4.0.4
+        with:
+          packages: "platform-tools platforms;android-36 build-tools;36.0.0"
+
+      - name: Install web dependencies
+        run: npm ci
+
+      - name: Build fallback web assets
+        run: npm run build
+
+      - name: Generate Android project and branded assets
+        run: npm run android:init
+
+      - name: Build APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        working-directory: client/android
+
+      - name: Name APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Heritage-Quest.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Heritage-Quest-Android-APK
+          path: client/Heritage-Quest.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Publish public APK download
+        if: github.ref == 'refs/heads/feature/android-apk'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view android-v1.0.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create android-v1.0.0 \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "Heritage Quest Android v1.0" \
+              --notes "Heritage Quest Android app for mobile testing and learning." \
+              --prerelease
+          gh release upload android-v1.0.0 Heritage-Quest.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber

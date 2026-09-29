@@ -9,6 +9,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Logo from "./Logo";
+import DownloadAppButton from "./DownloadAppButton";
 import { useAuth } from "../context/AuthContext";
 import { useLanguage } from "../context/LanguageContext";
 import { AGE_GROUPS, calculateAge, getAgeGroup } from "../lib/age";
@@ -256,6 +257,20 @@ export default function AuthGate({ children }) {
               </p>
             )}
           </form>
+
+          <div className="mt-6 border-t border-slate-100 pt-5">
+            <p className="mb-3 text-center text-sm font-semibold text-slate-500">
+              Want the complete Heritage Quest experience on your phone?
+            </p>
+            <DownloadAppButton
+              label="Download Android App"
+              variant="accent"
+              className="w-full"
+            />
+            <p className="mt-2 text-center text-xs text-slate-400">
+              Free download · Android 7 or newer
+            </p>
+          </div>
         </section>
 
         <aside className="relative hidden min-h-[610px] overflow-hidden rounded-[2.5rem] lg:block">
