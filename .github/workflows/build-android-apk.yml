@@ -1,0 +1,72 @@
+name: Build Heritage Quest APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - feature/android-apk
+    paths:
+      - "client/**"
+      - ".github/workflows/build-android-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    name: Build Android debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android 16 SDK
+        run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+
+      - name: Install web dependencies
+        run: npm ci
+
+      - name: Build fallback web assets
+        run: npm run build
+
+      - name: Generate Android project and branded assets
+        run: npm run android:init
+
+      - name: Build APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        working-directory: client/android
+
+      - name: Name APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Heritage-Quest.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Heritage-Quest-Android-APK
+          path: client/Heritage-Quest.apk
+          if-no-files-found: error
+          retention-days: 30
