@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
@@ -7,6 +7,7 @@ import {
   Gamepad2,
   Sparkles,
   HelpCircle,
+  LoaderCircle,
 } from "lucide-react";
 import { useLiveGames, useLiveTopics } from "../lib/liveContent";
 import { Badge, Button, SearchBar } from "../components/ui";
@@ -18,19 +19,104 @@ export default function Learn() {
   const games = useLiveGames();
   const learningTopics = useLiveTopics();
   const [query, setQuery] = useState("");
-  const { language, t, localizeTopic } = useLanguage();
+  const { language, t, translateTexts } = useLanguage();
   const { player } = usePlayer();
   const ageInfo = AGE_GROUPS[player?.ageGroup] || AGE_GROUPS.scholar;
+  const [translationState, setTranslationState] = useState({
+    language: "en",
+    topics: [],
+    ageLabel: ageInfo.label,
+    ageRange: ageInfo.range,
+    pathwayCopy: "",
+  });
 
-  const localizedTopics = useMemo(
-    () => learningTopics.map((topic) => localizeTopic(topic)),
-    [language, learningTopics, localizeTopic],
-  );
+  useEffect(() => {
+    let active = true;
+    const pathwayCopy = `Your quiz level is selected automatically from your date of birth. ${ageInfo.label} learners receive ${ageInfo.description.toLowerCase()}`;
+
+    if (language === "en") {
+      setTranslationState({
+        language,
+        topics: learningTopics,
+        ageLabel: ageInfo.label,
+        ageRange: ageInfo.range,
+        pathwayCopy,
+      });
+      return () => {
+        active = false;
+      };
+    }
+
+    setTranslationState((current) => ({ ...current, language: "" }));
+
+    const texts = [];
+    const addText = (value) => {
+      texts.push(String(value || ""));
+      return texts.length - 1;
+    };
+    const plans = learningTopics.map((topic) => ({
+      topic,
+      title: addText(topic.title),
+      description: addText(topic.description),
+      era: addText(topic.era),
+      tag: addText(topic.tag),
+      learn: (topic.learn || []).map(addText),
+    }));
+    const ageLabelIndex = addText(ageInfo.label);
+    const ageRangeIndex = addText(ageInfo.range);
+    const pathwayCopyIndex = addText(pathwayCopy);
+
+    translateTexts(texts, language).then((translated) => {
+      if (!active) return;
+      setTranslationState({
+        language,
+        topics: plans.map((plan) => ({
+          ...plan.topic,
+          title: translated[plan.title],
+          description: translated[plan.description],
+          era: translated[plan.era],
+          tag: translated[plan.tag],
+          learn: plan.learn.map((index) => translated[index]),
+        })),
+        ageLabel: translated[ageLabelIndex],
+        ageRange: translated[ageRangeIndex],
+        pathwayCopy: translated[pathwayCopyIndex],
+      });
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [
+    ageInfo.description,
+    ageInfo.label,
+    ageInfo.range,
+    language,
+    learningTopics,
+    translateTexts,
+  ]);
+
+  const isTranslatingTopics =
+    language !== "en" && translationState.language !== language;
+  const localizedTopics =
+    language === "en"
+      ? learningTopics
+      : translationState.language === language
+        ? translationState.topics
+        : [];
+  const localizedAge =
+    language === "en" || translationState.language !== language
+      ? ageInfo
+      : {
+          ...ageInfo,
+          label: translationState.ageLabel,
+          range: translationState.ageRange,
+        };
 
   const filtered = useMemo(
     () =>
       localizedTopics.filter((tpc) =>
-        `${tpc.title} ${tpc.description} ${tpc.tag} ${tpc.learn.join(" ")}`
+        `${tpc.title} ${tpc.description} ${tpc.tag} ${(tpc.learn || []).join(" ")}`
           .toLowerCase()
           .includes(query.toLowerCase()),
       ),
@@ -67,7 +153,7 @@ export default function Learn() {
             <div className="absolute -bottom-4 -left-2 rounded-2xl bg-white p-4 shadow-card">
               <Sparkles className="h-5 w-5 text-heritage-saffron" />
               <div className="mt-2 text-sm font-extrabold">
-                12 quiz chapters + 2 study materials
+                {t("quizChapterCount")}
               </div>
             </div>
           </div>
@@ -75,7 +161,20 @@ export default function Learn() {
       </section>
 
       <section className="container-app py-14">
+        {isTranslatingTopics && (
+          <div className="mb-6 flex items-center justify-center gap-2 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm font-extrabold text-heritage-green">
+            <LoaderCircle className="h-4 w-4 animate-spin" /> {t("translating")}
+          </div>
+        )}
+
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {isTranslatingTopics &&
+            Array.from({ length: 8 }).map((_, index) => (
+              <div
+                key={index}
+                className="h-[390px] animate-pulse rounded-3xl border border-slate-200 bg-slate-100"
+              />
+            ))}
           {filtered.map((topic, i) => {
             const related =
               games.find((g) => g.chapterSlug === topic.slug) ||
@@ -109,7 +208,7 @@ export default function Learn() {
                   ) : (
                     <div className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-bold text-amber-800">
                       <HelpCircle className="h-3.5 w-3.5" />
-                      {ageInfo.label} · {ageInfo.range}
+                      {localizedAge.label} · {localizedAge.range}
                     </div>
                   )}
 
@@ -137,9 +236,9 @@ export default function Learn() {
           })}
         </div>
 
-        {!filtered.length && (
+        {!isTranslatingTopics && !filtered.length && (
           <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center">
-            No learning topics match your search.
+            {t("noLearningTopics")}
           </div>
         )}
       </section>
@@ -149,14 +248,16 @@ export default function Learn() {
           <div className="flex flex-col justify-between gap-6 lg:flex-row lg:items-center">
             <div>
               <div className="flex items-center gap-2 text-sm font-bold text-emerald-100">
-                <BookMarked className="h-5 w-5" /> Guided pathway
+                <BookMarked className="h-5 w-5" /> {t("guidedPathway")}
               </div>
               <h2 className="mt-3 font-display text-3xl font-extrabold">
-                From Harappa to the Freedom Movement
+                {t("pathwayTitle")}
               </h2>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-white/65">
-                Your quiz level is selected automatically from your date of
-                birth. {ageInfo.label} learners receive {ageInfo.description.toLowerCase()}
+                {language === "en" || translationState.language === language
+                  ? translationState.pathwayCopy ||
+                    `Your quiz level is selected automatically from your date of birth. ${ageInfo.label} learners receive ${ageInfo.description.toLowerCase()}`
+                  : t("translating")}
               </p>
             </div>
             <Button
@@ -164,7 +265,7 @@ export default function Learn() {
               to="/play/quiz/indus-valley-civilization"
               size="lg"
             >
-              Start pathway <ArrowRight className="h-5 w-5" />
+              {t("startPathway")} <ArrowRight className="h-5 w-5" />
             </Button>
           </div>
         </div>

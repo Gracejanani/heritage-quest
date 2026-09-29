@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -10,6 +10,7 @@ import {
   Gamepad2,
   Lightbulb,
   HelpCircle,
+  LoaderCircle,
 } from "lucide-react";
 import { useLiveGames, useLiveTopics } from "../lib/liveContent";
 import { Badge, Button } from "../components/ui";
@@ -21,80 +22,164 @@ export default function LearnTopic() {
   const games = useLiveGames();
   const learningTopics = useLiveTopics();
   const { slug } = useParams();
-  const { language, t, localizeTopic, translateText } = useLanguage();
+  const { language, t, translateTexts } = useLanguage();
   const { player } = usePlayer();
   const ageInfo = AGE_GROUPS[player?.ageGroup] || AGE_GROUPS.scholar;
+  const englishLearningApproachCopy = `Heritage Quest automatically uses your registered date of birth to choose the appropriate question level. ${ageInfo.description} Answer choices are deliberately mixed so the correct option is not always in the same position.`;
+  const englishChallengeCopy = `Your challenge is prepared for ${ageInfo.label} learners (${ageInfo.range}). Entry, medium and advanced questions use different rewards based on their difficulty.`;
   const baseTopic =
     learningTopics.find((item) => item.slug === slug) || learningTopics[0];
-  const staticTopic = localizeTopic(baseTopic);
-  const [runtimeTopic, setRuntimeTopic] = useState(null);
+  const baseRelated =
+    games.find((game) => game.chapterSlug === baseTopic.slug) || games[0];
+  const [translationState, setTranslationState] = useState({
+    language: "",
+    topic: null,
+    related: null,
+    ageLabel: ageInfo.label,
+    ageRange: ageInfo.range,
+    learningApproachCopy: englishLearningApproachCopy,
+    challengeCopy: englishChallengeCopy,
+  });
 
   useEffect(() => {
     let active = true;
-
-    setRuntimeTopic(null);
+    const learningApproachCopy = englishLearningApproachCopy;
+    const challengeCopy = englishChallengeCopy;
 
     if (language === "en") {
-      setRuntimeTopic(null);
+      setTranslationState({
+        language,
+        topic: baseTopic,
+        related: baseRelated,
+        ageLabel: ageInfo.label,
+        ageRange: ageInfo.range,
+        learningApproachCopy,
+        challengeCopy,
+      });
       return () => {
         active = false;
       };
     }
 
-    const translateTopic = async () => {
-      const hasCuratedSections =
-        ["ta", "hi"].includes(language) &&
-        staticTopic.sections !== baseTopic.sections;
+    setTranslationState((current) => ({ ...current, language: "" }));
 
-      if (hasCuratedSections) return;
-
-      const translatedSections = await Promise.all(
-        (baseTopic.sections || []).map(async (section) => ({
-          ...section,
-          title: await translateText(section.title, language),
-          body: await translateText(section.body, language),
-        })),
-      );
-
-      if (["ta", "hi"].includes(language)) {
-        if (active) {
-          setRuntimeTopic({
-            ...staticTopic,
-            sections: translatedSections,
-          });
-        }
-        return;
-      }
-
-      const translatedLearn = await Promise.all(
-        (baseTopic.learn || []).map((item) => translateText(item, language)),
-      );
-
-      const nextTopic = {
-        ...baseTopic,
-        title: await translateText(baseTopic.title, language),
-        description: await translateText(baseTopic.description, language),
-        era: await translateText(baseTopic.era || "", language),
-        tag: await translateText(baseTopic.tag || "", language),
-        learn: translatedLearn,
-        sections: translatedSections,
-      };
-
-      if (active) setRuntimeTopic(nextTopic);
+    const texts = [];
+    const addText = (value) => {
+      texts.push(String(value || ""));
+      return texts.length - 1;
     };
+    const topicPlan = {
+      title: addText(baseTopic.title),
+      description: addText(baseTopic.description),
+      era: addText(baseTopic.era),
+      tag: addText(baseTopic.tag),
+      sourceLabel: addText(baseTopic.sourceLabel),
+      learn: (baseTopic.learn || []).map(addText),
+      sections: (baseTopic.sections || []).map((section) => ({
+        section,
+        title: addText(section.title),
+        body: addText(section.body),
+      })),
+      sources: (baseTopic.sources || []).map((source) => ({
+        source,
+        title: addText(source.title),
+      })),
+    };
+    const relatedTitleIndex = addText(baseRelated?.title);
+    const relatedDescriptionIndex = addText(baseRelated?.description);
+    const ageLabelIndex = addText(ageInfo.label);
+    const ageRangeIndex = addText(ageInfo.range);
+    const learningApproachIndex = addText(learningApproachCopy);
+    const challengeCopyIndex = addText(challengeCopy);
 
-    translateTopic();
+    translateTexts(texts, language)
+      .then((translated) => {
+        if (!active) return;
+        setTranslationState({
+          language,
+          topic: {
+            ...baseTopic,
+            title: translated[topicPlan.title],
+            description: translated[topicPlan.description],
+            era: translated[topicPlan.era],
+            tag: translated[topicPlan.tag],
+            sourceLabel: translated[topicPlan.sourceLabel],
+            learn: topicPlan.learn.map((index) => translated[index]),
+            sections: topicPlan.sections.map((plan) => ({
+              ...plan.section,
+              title: translated[plan.title],
+              body: translated[plan.body],
+            })),
+            sources: topicPlan.sources.map((plan) => ({
+              ...plan.source,
+              title: translated[plan.title],
+            })),
+          },
+          related: baseRelated
+            ? {
+                ...baseRelated,
+                title: translated[relatedTitleIndex],
+                description: translated[relatedDescriptionIndex],
+              }
+            : null,
+          ageLabel: translated[ageLabelIndex],
+          ageRange: translated[ageRangeIndex],
+          learningApproachCopy: translated[learningApproachIndex],
+          challengeCopy: translated[challengeCopyIndex],
+        });
+      })
+      .catch(() => {
+        if (!active) return;
+        setTranslationState({
+          language,
+          topic: baseTopic,
+          related: baseRelated,
+          ageLabel: ageInfo.label,
+          ageRange: ageInfo.range,
+          learningApproachCopy,
+          challengeCopy,
+        });
+      });
 
     return () => {
       active = false;
     };
-  }, [baseTopic.slug, language, translateText]);
+  }, [
+    ageInfo.description,
+    ageInfo.label,
+    ageInfo.range,
+    baseRelated,
+    baseTopic,
+    englishChallengeCopy,
+    englishLearningApproachCopy,
+    language,
+    translateTexts,
+  ]);
 
-  const topic = useMemo(
-    () => runtimeTopic || staticTopic,
-    [runtimeTopic, staticTopic],
-  );
-  const sources = useMemo(() => {
+  const isTranslatingTopic =
+    language !== "en" && translationState.language !== language;
+  const topic =
+    language === "en"
+      ? baseTopic
+      : translationState.language === language
+        ? translationState.topic
+        : null;
+  const related =
+    language === "en"
+      ? baseRelated
+      : translationState.language === language
+        ? translationState.related
+        : baseRelated;
+  const localizedAge =
+    language === "en" || translationState.language !== language
+      ? ageInfo
+      : {
+          ...ageInfo,
+          label: translationState.ageLabel,
+          range: translationState.ageRange,
+        };
+  const sources = (() => {
+    if (!topic) return [];
     if (topic.sources?.length) return topic.sources;
     if (!topic.sourceUrl) return [];
     return [
@@ -103,8 +188,26 @@ export default function LearnTopic() {
         url: topic.sourceUrl,
       },
     ];
-  }, [topic.sources, topic.sourceLabel, topic.sourceUrl, t]);
-  const related = games.find((g) => g.chapterSlug === baseTopic.slug) || games[0];
+  })();
+
+  if (isTranslatingTopic || !topic) {
+    return (
+      <div className="container-app py-10 sm:py-14">
+        <Link
+          to="/learn"
+          className="focus-ring inline-flex items-center gap-2 rounded-xl px-2 py-2 text-sm font-bold text-slate-500 hover:text-heritage-green"
+        >
+          <ArrowLeft className="h-4 w-4" /> {t("backToLearn")}
+        </Link>
+        <div className="mt-4 grid min-h-[520px] place-items-center rounded-[2rem] border border-emerald-100 bg-white shadow-card">
+          <div className="text-center text-heritage-green">
+            <LoaderCircle className="mx-auto h-9 w-9 animate-spin" />
+            <p className="mt-4 font-extrabold">{t("translating")}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container-app py-10 sm:py-14">
@@ -130,7 +233,7 @@ export default function LearnTopic() {
                 <Badge tone="orange">{t("studyMaterial")}</Badge>
               ) : (
                 <Badge tone="orange">
-                  {ageInfo.label} · {ageInfo.range}
+                  {localizedAge.label} · {localizedAge.range}
                 </Badge>
               )}
             </div>
@@ -209,10 +312,8 @@ export default function LearnTopic() {
                   <Lightbulb className="h-5 w-5" /> {t("learningApproach")}
                 </div>
                 <p className="mt-2 text-sm leading-6 text-sky-900/70">
-                  Heritage Quest automatically uses your registered date of birth
-                  to choose the appropriate question level. {ageInfo.description}
-                  Answer choices are deliberately mixed so the correct option is
-                  not always in the same position.
+                  {translationState.learningApproachCopy ||
+                    englishLearningApproachCopy}
                 </p>
               </div>
             )}
@@ -246,17 +347,15 @@ export default function LearnTopic() {
             <aside className="rounded-3xl bg-heritage-forest p-6 text-white">
               <Gamepad2 className="h-8 w-8 text-heritage-gold" />
               <h2 className="mt-4 text-xl font-extrabold">
-                Ready for the chapter challenge?
+                {t("readyChallenge")}
               </h2>
               <p className="mt-2 text-sm leading-6 text-white/65">
-                Your challenge is prepared for {ageInfo.label} learners
-                ({ageInfo.range}). Entry, medium and advanced questions use
-                different rewards based on their difficulty.
+                {translationState.challengeCopy || englishChallengeCopy}
               </p>
               <div className="mt-5 overflow-hidden rounded-2xl bg-white/10">
                 <img
                   src={related.image}
-                  alt="Related game"
+                  alt={related.title}
                   className="h-28 w-full object-cover"
                 />
                 <div className="p-4">
@@ -267,14 +366,14 @@ export default function LearnTopic() {
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2 text-xs font-bold text-emerald-100">
-                <HelpCircle className="h-4 w-4" /> {ageInfo.label} · {ageInfo.range}
+                <HelpCircle className="h-4 w-4" /> {localizedAge.label} · {localizedAge.range}
               </div>
               <Button
                 as={Link}
                 to={`/play/quiz/${baseTopic.slug}`}
                 className="mt-5 w-full"
               >
-                Start Chapter <ArrowRight className="h-4 w-4" />
+                {t("startChapter")} <ArrowRight className="h-4 w-4" />
               </Button>
             </aside>
           )}
