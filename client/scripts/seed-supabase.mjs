@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { createClient } from "@supabase/supabase-js";
 import { ageQuestionBanks } from "../src/data/ageQuestionBanks.js";
 import { buildGeneratedAgeQuestions } from "../src/data/generatedAgeQuestions.js";
+import { learningTopics } from "../src/data/content.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const contentPath = path.resolve(here, "../public/data/content.json");
@@ -32,7 +33,7 @@ const gameRows = (content.games || []).map((game) => ({
   updated_at: new Date().toISOString(),
 }));
 
-const chapterRows = (content.chapters || []).map((chapter) => ({
+const chapterRows = learningTopics.map((chapter) => ({
   slug: chapter.slug,
   title: chapter.title,
   description: chapter.description || null,
@@ -83,14 +84,14 @@ for (const [chapterSlug, groups] of Object.entries(ageQuestionBanks)) {
   }
 }
 
-for (const chapter of content.chapters || []) {
+for (const chapter of learningTopics) {
   if (ageQuestionBanks[chapter.slug]) continue;
 
   for (const ageGroup of ["entry", "junior"]) {
     const generated = buildGeneratedAgeQuestions(
       chapter.slug,
       ageGroup,
-      content.chapters || [],
+      learningTopics,
     );
 
     for (const [index, question] of (generated || []).entries()) {
