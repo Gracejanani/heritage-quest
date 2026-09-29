@@ -11,7 +11,7 @@ on:
       - ".github/workflows/build-android-apk.yml"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-apk:
@@ -71,3 +71,19 @@ jobs:
           path: client/Heritage-Quest.apk
           if-no-files-found: error
           retention-days: 30
+
+      - name: Publish public APK download
+        if: github.ref == 'refs/heads/feature/android-apk'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view android-v1.0.0 --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 || \
+            gh release create android-v1.0.0 \
+              --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" \
+              --title "Heritage Quest Android v1.0" \
+              --notes "Heritage Quest Android app for mobile testing and learning." \
+              --prerelease
+          gh release upload android-v1.0.0 Heritage-Quest.apk \
+            --repo "$GITHUB_REPOSITORY" \
+            --clobber

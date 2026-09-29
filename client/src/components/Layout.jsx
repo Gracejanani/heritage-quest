@@ -13,6 +13,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import Logo from "./Logo";
+import DownloadAppButton from "./DownloadAppButton";
 import { SearchBar } from "./ui";
 import { usePlayer } from "../context/PlayerContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -108,6 +109,11 @@ export function Navbar() {
             <GraduationCap className="h-4 w-4" /> Teacher
           </Link>
         )}
+        <DownloadAppButton
+          label="Download"
+          variant="accent"
+          className="hidden xl:inline-flex"
+        />
         <Link
           to="/profile"
           className="focus-ring hidden rounded-2xl bg-heritage-green px-4 py-2.5 text-sm font-bold text-white shadow-soft hover:bg-emerald-700 sm:inline-flex"
@@ -203,6 +209,11 @@ export function Navbar() {
                   Teacher Dashboard
                 </NavLink>
               )}
+              <DownloadAppButton
+                label="Download Android App"
+                variant="accent"
+                className="mt-2 w-full"
+              />
               <NavLink
                 to="/profile"
                 className="rounded-xl px-4 py-3 font-bold text-heritage-green hover:bg-emerald-50"
@@ -268,6 +279,11 @@ export function Footer() {
           <p className="mt-5 font-display text-xl font-bold text-emerald-100">
             Our Heritage. Your Quest. A Brighter Tomorrow.
           </p>
+          <DownloadAppButton
+            label="Download Android App"
+            variant="light"
+            className="mt-6"
+          />
         </div>
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
           <div>

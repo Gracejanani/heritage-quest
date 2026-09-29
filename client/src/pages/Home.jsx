@@ -24,6 +24,7 @@ import {
 import { categories } from "../data/content";
 import { useSiteSettings } from "../lib/liveContent";
 import { Button, Modal, ProgressBar, useToast } from "../components/ui";
+import DownloadAppButton from "../components/DownloadAppButton";
 import { usePlayer } from "../context/PlayerContext";
 import { supabase } from "../lib/supabase";
 
@@ -192,6 +193,11 @@ export default function Home() {
                 <Play className="h-5 w-5 fill-heritage-forest" /> Watch
                 Introduction
               </Button>
+              <DownloadAppButton
+                label="Download App"
+                variant="accent"
+                className="min-h-[52px] px-6 text-base"
+              />
             </div>
             <div className="mt-9 grid max-w-2xl grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-5">
               {[
