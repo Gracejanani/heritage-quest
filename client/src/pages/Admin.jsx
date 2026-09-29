@@ -678,12 +678,24 @@ export default function Admin() {
 
   const openChapter = (row) => {
     const payload = row.payload || {};
+    const sources = Array.isArray(payload.sources)
+      ? payload.sources
+      : payload.sourceUrl
+        ? [
+            {
+              title: payload.sourceLabel || "Reference source",
+              url: payload.sourceUrl,
+            },
+          ]
+        : [];
     setChapterForm({
       ...row,
       image: payload.image || "",
       testVideo: payload.testVideo || "",
       learnText: textLines(payload.learn),
-      sectionsJson: JSON.stringify(payload.sections || [], null, 2),
+      sections: Array.isArray(payload.sections) ? payload.sections : [],
+      sources,
+      studyOnly: Boolean(payload.studyOnly),
       isExisting: true,
     });
   };
@@ -698,7 +710,9 @@ export default function Admin() {
       image: "",
       testVideo: "",
       learnText: "",
-      sectionsJson: "[]",
+      sections: [{ title: "", body: "" }],
+      sources: [{ title: "Wikipedia · ", url: "https://en.wikipedia.org/wiki/" }],
+      studyOnly: false,
       isExisting: false,
     });
   };
@@ -720,13 +734,41 @@ export default function Admin() {
       return;
     }
 
-    let sections = [];
-    try {
-      sections = chapterForm.sectionsJson.trim()
-        ? JSON.parse(chapterForm.sectionsJson)
-        : [];
-    } catch {
-      toast("Sections JSON is not valid.", "error");
+    const sections = (chapterForm.sections || [])
+      .map((section) => ({
+        title: String(section.title || "").trim(),
+        body: String(section.body || "").trim(),
+      }))
+      .filter((section) => section.title || section.body);
+
+    if (!sections.length || sections.some((section) => !section.title || !section.body)) {
+      toast("Add at least one lesson section with both a heading and paragraph.", "error");
+      return;
+    }
+
+    const sources = (chapterForm.sources || [])
+      .map((source) => ({
+        title: String(source.title || "").trim(),
+        url: String(source.url || "").trim(),
+      }))
+      .filter((source) => source.title || source.url);
+
+    if (sources.some((source) => !source.title || !source.url)) {
+      toast("Every reference needs both a label and a URL.", "error");
+      return;
+    }
+
+    const invalidSource = sources.find((source) => {
+      try {
+        const parsed = new URL(source.url);
+        return !["http:", "https:"].includes(parsed.protocol);
+      } catch {
+        return true;
+      }
+    });
+
+    if (invalidSource) {
+      toast(`Reference URL is not valid: ${invalidSource.url}`, "error");
       return;
     }
 
@@ -738,6 +780,10 @@ export default function Admin() {
       testVideo: chapterForm.testVideo || "",
       learn: lines(chapterForm.learnText),
       sections,
+      sources,
+      sourceLabel: sources[0]?.title || "",
+      sourceUrl: sources[0]?.url || "",
+      studyOnly: Boolean(chapterForm.studyOnly),
     };
 
     const chapterRecord = {
@@ -1585,6 +1631,14 @@ export default function Admin() {
                 </div>
                 <div className="mt-2 line-clamp-3 text-sm leading-6 text-slate-500">
                   {chapter.description}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-slate-600">
+                  <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-emerald-700">
+                    {chapter.payload?.sections?.length || 0} lesson sections
+                  </span>
+                  <span className="rounded-full bg-sky-50 px-3 py-1.5 text-sky-700">
+                    {chapter.payload?.sources?.length || (chapter.payload?.sourceUrl ? 1 : 0)} sources
+                  </span>
                 </div>
                 </div>
               </button>
@@ -2533,7 +2587,219 @@ export default function Admin() {
             </div>
 
             <label><span className={labelClass}>Learning points · one per line</span><textarea className={`${inputClass} min-h-32`} value={chapterForm.learnText} onChange={(e) => setChapterForm({ ...chapterForm, learnText: e.target.value })} /></label>
-            <label><span className={labelClass}>Sections JSON</span><textarea className={`${inputClass} min-h-48 font-mono text-xs`} value={chapterForm.sectionsJson} onChange={(e) => setChapterForm({ ...chapterForm, sectionsJson: e.target.value })} /></label>
+
+            <label className="flex items-start gap-3 rounded-2xl border border-violet-200 bg-violet-50 p-4">
+              <input
+                type="checkbox"
+                className="mt-1 h-4 w-4 accent-violet-600"
+                checked={Boolean(chapterForm.studyOnly)}
+                onChange={(e) =>
+                  setChapterForm((current) => ({
+                    ...current,
+                    studyOnly: e.target.checked,
+                  }))
+                }
+              />
+              <span>
+                <span className="block text-sm font-extrabold text-slate-900">
+                  Study material only
+                </span>
+                <span className="mt-1 block text-xs leading-5 text-slate-600">
+                  Turn this on when the chapter should contain reading material but no quiz challenge.
+                </span>
+              </span>
+            </label>
+
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-4 sm:p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="text-sm font-extrabold text-slate-950">
+                    Lesson sections
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    Add the reading content students see on the Learn page. Write original summaries instead of copying an article word for word.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setChapterForm((current) => ({
+                      ...current,
+                      sections: [
+                        ...(current.sections || []),
+                        { title: "", body: "" },
+                      ],
+                    }))
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl bg-heritage-green px-3 py-2 text-xs font-extrabold text-white hover:bg-emerald-700"
+                >
+                  <Plus className="h-4 w-4" /> Add section
+                </button>
+              </div>
+
+              <div className="mt-4 grid gap-4">
+                {(chapterForm.sections || []).map((section, index) => (
+                  <div
+                    key={index}
+                    className="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm"
+                  >
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <div className="text-xs font-extrabold uppercase tracking-wide text-emerald-700">
+                        Section {index + 1}
+                      </div>
+                      <button
+                        type="button"
+                        aria-label={`Remove lesson section ${index + 1}`}
+                        onClick={() =>
+                          setChapterForm((current) => ({
+                            ...current,
+                            sections: current.sections.filter(
+                              (_, itemIndex) => itemIndex !== index,
+                            ),
+                          }))
+                        }
+                        className="rounded-lg p-2 text-rose-500 hover:bg-rose-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <label>
+                      <span className={labelClass}>Section heading</span>
+                      <input
+                        className={inputClass}
+                        value={section.title || ""}
+                        placeholder="Example: Cities, water and careful planning"
+                        onChange={(e) =>
+                          setChapterForm((current) => ({
+                            ...current,
+                            sections: current.sections.map((item, itemIndex) =>
+                              itemIndex === index
+                                ? { ...item, title: e.target.value }
+                                : item,
+                            ),
+                          }))
+                        }
+                      />
+                    </label>
+                    <label className="mt-3 block">
+                      <span className={labelClass}>Lesson paragraph</span>
+                      <textarea
+                        className={`${inputClass} min-h-32`}
+                        value={section.body || ""}
+                        placeholder="Explain this part of the topic clearly in a few student-friendly sentences."
+                        onChange={(e) =>
+                          setChapterForm((current) => ({
+                            ...current,
+                            sections: current.sections.map((item, itemIndex) =>
+                              itemIndex === index
+                                ? { ...item, body: e.target.value }
+                                : item,
+                            ),
+                          }))
+                        }
+                      />
+                    </label>
+                  </div>
+                ))}
+
+                {!(chapterForm.sections || []).length && (
+                  <div className="rounded-2xl border-2 border-dashed border-emerald-200 bg-white p-6 text-center text-sm font-bold text-slate-500">
+                    No lesson sections yet. Select “Add section” to begin.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-sky-200 bg-sky-50/60 p-4 sm:p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="text-sm font-extrabold text-slate-950">
+                    Sources and further reading
+                  </div>
+                  <p className="mt-1 text-sm leading-6 text-slate-600">
+                    These links are shown below the lesson so students can check the full reference and citations.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setChapterForm((current) => ({
+                      ...current,
+                      sources: [
+                        ...(current.sources || []),
+                        { title: "", url: "" },
+                      ],
+                    }))
+                  }
+                  className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-3 py-2 text-xs font-extrabold text-white hover:bg-sky-700"
+                >
+                  <Plus className="h-4 w-4" /> Add source
+                </button>
+              </div>
+
+              <div className="mt-4 grid gap-3">
+                {(chapterForm.sources || []).map((source, index) => (
+                  <div
+                    key={index}
+                    className="grid gap-3 rounded-2xl border border-sky-100 bg-white p-4 sm:grid-cols-[1fr_1.35fr_auto] sm:items-end"
+                  >
+                    <label>
+                      <span className={labelClass}>Link label</span>
+                      <input
+                        className={inputClass}
+                        value={source.title || ""}
+                        placeholder="Wikipedia · Topic name"
+                        onChange={(e) =>
+                          setChapterForm((current) => ({
+                            ...current,
+                            sources: current.sources.map((item, itemIndex) =>
+                              itemIndex === index
+                                ? { ...item, title: e.target.value }
+                                : item,
+                            ),
+                          }))
+                        }
+                      />
+                    </label>
+                    <label>
+                      <span className={labelClass}>Reference URL</span>
+                      <input
+                        type="url"
+                        className={inputClass}
+                        value={source.url || ""}
+                        placeholder="https://en.wikipedia.org/wiki/..."
+                        onChange={(e) =>
+                          setChapterForm((current) => ({
+                            ...current,
+                            sources: current.sources.map((item, itemIndex) =>
+                              itemIndex === index
+                                ? { ...item, url: e.target.value }
+                                : item,
+                            ),
+                          }))
+                        }
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      aria-label={`Remove source ${index + 1}`}
+                      onClick={() =>
+                        setChapterForm((current) => ({
+                          ...current,
+                          sources: current.sources.filter(
+                            (_, itemIndex) => itemIndex !== index,
+                          ),
+                        }))
+                      }
+                      className="rounded-xl border border-rose-100 p-3 text-rose-500 hover:bg-rose-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <Button onClick={saveChapter} loading={saving}>
               {chapterForm.isExisting ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
               {chapterForm.isExisting ? "Save chapter" : "Create chapter"}

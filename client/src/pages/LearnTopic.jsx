@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
+  BookMarked,
   BookOpen,
   CheckCircle2,
   ExternalLink,
@@ -31,7 +32,9 @@ export default function LearnTopic() {
   useEffect(() => {
     let active = true;
 
-    if (["en", "ta", "hi"].includes(language)) {
+    setRuntimeTopic(null);
+
+    if (language === "en") {
       setRuntimeTopic(null);
       return () => {
         active = false;
@@ -39,9 +42,11 @@ export default function LearnTopic() {
     }
 
     const translateTopic = async () => {
-      const translatedLearn = await Promise.all(
-        (baseTopic.learn || []).map((item) => translateText(item, language)),
-      );
+      const hasCuratedSections =
+        ["ta", "hi"].includes(language) &&
+        staticTopic.sections !== baseTopic.sections;
+
+      if (hasCuratedSections) return;
 
       const translatedSections = await Promise.all(
         (baseTopic.sections || []).map(async (section) => ({
@@ -49,6 +54,20 @@ export default function LearnTopic() {
           title: await translateText(section.title, language),
           body: await translateText(section.body, language),
         })),
+      );
+
+      if (["ta", "hi"].includes(language)) {
+        if (active) {
+          setRuntimeTopic({
+            ...staticTopic,
+            sections: translatedSections,
+          });
+        }
+        return;
+      }
+
+      const translatedLearn = await Promise.all(
+        (baseTopic.learn || []).map((item) => translateText(item, language)),
       );
 
       const nextTopic = {
@@ -75,6 +94,16 @@ export default function LearnTopic() {
     () => runtimeTopic || staticTopic,
     [runtimeTopic, staticTopic],
   );
+  const sources = useMemo(() => {
+    if (topic.sources?.length) return topic.sources;
+    if (!topic.sourceUrl) return [];
+    return [
+      {
+        title: topic.sourceLabel || t("wikipediaReference"),
+        url: topic.sourceUrl,
+      },
+    ];
+  }, [topic.sources, topic.sourceLabel, topic.sourceUrl, t]);
   const related = games.find((g) => g.chapterSlug === baseTopic.slug) || games[0];
 
   return (
@@ -121,7 +150,7 @@ export default function LearnTopic() {
             </div>
 
             <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              {topic.learn.map((point) => (
+              {(topic.learn || []).map((point) => (
                 <div
                   key={point}
                   className="flex items-start gap-3 rounded-2xl bg-heritage-cream p-4 text-sm font-semibold text-slate-700"
@@ -133,23 +162,44 @@ export default function LearnTopic() {
             </div>
 
             {topic.sections?.length > 0 && (
-              <div className="mt-8 grid gap-5">
-                {topic.sections.map((section, index) => (
-                  <section
-                    key={section.title}
-                    className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-                  >
-                    <div className="text-xs font-extrabold tracking-[.14em] text-heritage-saffron">
-                      {String(index + 1).padStart(2, "0")}
-                    </div>
-                    <h2 className="mt-2 text-xl font-extrabold text-slate-950">
-                      {section.title}
+              <div className="mt-10">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-11 w-11 place-items-center rounded-2xl bg-orange-100 text-heritage-saffron">
+                    <BookMarked className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-slate-950">
+                      {t("chapterLesson")}
                     </h2>
-                    <p className="mt-3 text-sm leading-7 text-slate-600">
-                      {section.body}
+                    <p className="mt-0.5 text-sm text-slate-500">
+                      {t("lessonIntro")}
                     </p>
-                  </section>
-                ))}
+                  </div>
+                </div>
+
+                <div className="mt-5 grid gap-5">
+                  {topic.sections.map((section, index) => (
+                    <section
+                      key={`${section.title}-${index}`}
+                      className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm sm:p-7"
+                    >
+                      <div className="text-xs font-extrabold tracking-[.14em] text-heritage-saffron">
+                        {String(index + 1).padStart(2, "0")}
+                      </div>
+                      <h3 className="mt-2 text-xl font-extrabold text-slate-950">
+                        {section.title}
+                      </h3>
+                      <div className="mt-3 space-y-3 text-[15px] leading-7 text-slate-600">
+                        {String(section.body || "")
+                          .split(/\n\s*\n/)
+                          .filter(Boolean)
+                          .map((paragraph, paragraphIndex) => (
+                            <p key={paragraphIndex}>{paragraph}</p>
+                          ))}
+                      </div>
+                    </section>
+                  ))}
+                </div>
               </div>
             )}
 
@@ -167,24 +217,27 @@ export default function LearnTopic() {
               </div>
             )}
 
-            {topic.studyOnly && topic.sourceUrl && (
+            {sources.length > 0 && (
               <div className="mt-8 rounded-3xl border border-emerald-100 bg-emerald-50 p-6">
                 <div className="text-sm font-extrabold text-emerald-950">
-                  {t("source")}
+                  {t("referenceSources")}
                 </div>
                 <p className="mt-2 text-sm leading-6 text-emerald-900/70">
-                  This prototype study note is a concise educational summary.
-                  Use the linked reference for the fuller source article and its
-                  citations.
+                  {t("referenceNote")}
                 </p>
-                <a
-                  href={topic.sourceUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="focus-ring mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-extrabold text-heritage-green shadow-sm"
-                >
-                  {t("wikipediaReference")} <ExternalLink className="h-4 w-4" />
-                </a>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {sources.map((source) => (
+                    <a
+                      key={source.url}
+                      href={source.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="focus-ring inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-extrabold text-heritage-green shadow-sm hover:text-emerald-800"
+                    >
+                      {source.title} <ExternalLink className="h-4 w-4 shrink-0" />
+                    </a>
+                  ))}
+                </div>
               </div>
             )}
           </div>

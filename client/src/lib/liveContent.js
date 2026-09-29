@@ -49,9 +49,20 @@ function mergeGame(row) {
 function mergeTopic(row) {
   const fallback =
     fallbackTopics.find((item) => item.slug === row.slug) || {};
+  const payload = { ...(row.payload || {}) };
+
+  // Older live rows were seeded with empty arrays. Keep the complete bundled
+  // lesson visible until an administrator publishes a replacement.
+  if (!payload.sections?.length && fallback.sections?.length) {
+    payload.sections = fallback.sections;
+  }
+  if (!payload.sources?.length && fallback.sources?.length) {
+    payload.sources = fallback.sources;
+  }
+
   return {
     ...fallback,
-    ...(row.payload || {}),
+    ...payload,
     slug: row.slug,
     title: row.title,
     description: row.description || fallback.description || "",
