@@ -1,3 +1,5 @@
+import { lessonContentBySlug } from "./lessonContent.js";
+
 export const categories = [
   {
     name: "Monuments",
@@ -281,7 +283,7 @@ export const games = [
   },
 ];
 
-export const learningTopics = [
+const baseLearningTopics = [
   {
     slug: "ancient-india",
     title: "Ancient India",
@@ -563,6 +565,11 @@ export const learningTopics = [
     ],
   },
 ];
+
+export const learningTopics = baseLearningTopics.map((topic) => ({
+  ...topic,
+  ...(lessonContentBySlug[topic.slug] || {}),
+}));
 
 export const achievements = [
   {
